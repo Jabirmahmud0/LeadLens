@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, ArrowRight, Settings, MessageSquare, FileText, CheckCircle2 } from 'lucide-react';
+import { Loader2, Settings, MessageSquare, FileText, CheckCircle2 } from 'lucide-react';
 import { saveOutputPreferences } from '../actions';
 
 const preferencesSchema = z.object({
@@ -24,7 +24,7 @@ export default function PreferencesStep() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<PreferencesFormValues>({
+  const { register, handleSubmit } = useForm<PreferencesFormValues>({
     resolver: zodResolver(preferencesSchema),
     defaultValues: {
       brandVoice: 'Professional & Direct',
