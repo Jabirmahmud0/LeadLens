@@ -9,27 +9,30 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - login
-     * - register
-     * - reset-password
-     * - forgot-password
      */
-    '/((?!api/auth|_next/static|_next/image|favicon.ico|login|register|reset-password|forgot-password).*)',
+    '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
   ],
 };
 
 export function middleware(request: NextRequest) {
   const sessionToken = request.cookies.get('leadlens_session')?.value;
 
-  // Protect dashboard and api routes (except api/auth)
   const isApiRoute = request.nextUrl.pathname.startsWith('/api/');
+  const isAuthRoute = ['/login', '/register', '/reset-password', '/forgot-password'].includes(request.nextUrl.pathname);
   
   if (!sessionToken) {
     if (isApiRoute) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    // Redirect to login if accessing a protected page
-    return NextResponse.redirect(new URL('/login', request.url));
+    if (!isAuthRoute) {
+      // Redirect to login if accessing a protected page
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  } else {
+    // Redirect authenticated users away from auth routes
+    if (isAuthRoute) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
   }
 
   // Security: Prevent CSRF on state-mutating requests by checking Origin for API routes
