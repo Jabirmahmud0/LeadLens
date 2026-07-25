@@ -85,7 +85,7 @@ export default function RegisterPage() {
       <div className="w-full md:w-1/2 p-8 sm:p-12 border-b md:border-b-0 md:border-r border-neutral-800/50">
         <div className="mb-8">
           <h2 className="text-3xl font-light tracking-tight text-white">Create account</h2>
-          <p className="mt-2 text-sm text-neutral-400">Join LeadLens to scale your agency's client acquisition.</p>
+          <p className="mt-2 text-sm text-neutral-400">Join LeadLens to scale your agency&apos;s client acquisition.</p>
         </div>
 
         <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
@@ -177,7 +177,7 @@ export default function RegisterPage() {
       <div className="w-full md:w-1/2 p-8 sm:p-12 flex flex-col justify-between relative bg-black/20 overflow-hidden">
         {/* Background abstract gradient matching the active insight */}
         <div className="absolute inset-0 opacity-20 transition-colors duration-1000 ease-in-out" 
-             style={{ background: \`radial-gradient(circle at 70% 30%, \${activeInsight === 0 ? 'rgba(59,130,246,0.4)' : activeInsight === 1 ? 'rgba(16,185,129,0.4)' : 'rgba(139,92,246,0.4)'}, transparent 50%)\` }} />
+             style={{ background: `radial-gradient(circle at 70% 30%, \${activeInsight === 0 ? 'rgba(59,130,246,0.4)' : activeInsight === 1 ? 'rgba(16,185,129,0.4)' : 'rgba(139,92,246,0.4)'}, transparent 50%)` }} />
         
         <div className="relative z-10">
           <div className="inline-flex items-center rounded-full border border-neutral-800 bg-neutral-900/50 px-3 py-1 text-xs font-medium text-neutral-300 backdrop-blur-sm">
@@ -192,7 +192,7 @@ export default function RegisterPage() {
               return (
                 <div 
                   key={idx}
-                  className={\`absolute inset-0 transition-all duration-700 ease-in-out \${activeInsight === idx ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}\`}
+                  className={`absolute inset-0 transition-all duration-700 ease-in-out \${activeInsight === idx ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
                 >
                   <div className="w-12 h-12 rounded-2xl bg-neutral-800/50 border border-neutral-700/50 flex items-center justify-center mb-6">
                     <Icon className="w-6 h-6 text-white" />
@@ -210,8 +210,8 @@ export default function RegisterPage() {
               <button 
                 key={idx}
                 onClick={() => setActiveInsight(idx)}
-                className={\`h-1.5 rounded-full transition-all duration-500 \${activeInsight === idx ? 'w-8 bg-white' : 'w-2 bg-neutral-700 hover:bg-neutral-600'}\`}
-                aria-label={\`Go to slide \${idx + 1}\`}
+                className={`h-1.5 rounded-full transition-all duration-500 \${activeInsight === idx ? 'w-8 bg-white' : 'w-2 bg-neutral-700 hover:bg-neutral-600'}`}
+                aria-label={`Go to slide \${idx + 1}`}
               />
             ))}
           </div>
@@ -219,7 +219,7 @@ export default function RegisterPage() {
 
         <div className="relative z-10 border-t border-neutral-800/50 pt-8 mt-4">
           <blockquote className="text-sm text-neutral-400 italic">
-            "We closed three enterprise deals in our first month using the audit reports."
+            &quot;We closed three enterprise deals in our first month using the audit reports.&quot;
           </blockquote>
           <div className="mt-3 flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700" />

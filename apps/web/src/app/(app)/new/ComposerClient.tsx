@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { ArrowRight, ArrowLeft, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { cn } from '@leadlens/ui';
 
-export function ComposerClient({ services, caseStudies }: { services: any[], caseStudies: any[] }) {
+export function ComposerClient({ services, caseStudies }: { services: { id: string; name: string }[]; caseStudies: { id: string; title: string }[] }) {
   const router = useRouter();
   const [step, setStep] = React.useState(1);
   const [loading, setLoading] = React.useState(false);
@@ -40,6 +40,7 @@ export function ComposerClient({ services, caseStudies }: { services: any[], cas
         competitors: formData.competitors.filter(c => c.trim() !== '')
       };
       
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await submitAnalysis(data as any);
       
       if (result.isDuplicate) {
@@ -50,8 +51,8 @@ export function ComposerClient({ services, caseStudies }: { services: any[], cas
       
       toast.success('Analysis started successfully');
       router.push('/prospects');
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to start analysis');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to start analysis');
     } finally {
       setLoading(false);
     }
@@ -170,7 +171,7 @@ export function ComposerClient({ services, caseStudies }: { services: any[], cas
                   <div className="text-sm text-neutral-500 bg-neutral-950 p-4 rounded-lg border border-neutral-800">No services configured yet.</div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {services.map((s: any) => (
+                    {services.map((s) => (
                       <label key={s.id} className="flex items-start gap-3 p-3 bg-neutral-950 border border-neutral-800 rounded-lg cursor-pointer hover:bg-neutral-900 transition-colors">
                         <input
                           type="checkbox"
@@ -295,7 +296,7 @@ export function ComposerClient({ services, caseStudies }: { services: any[], cas
           <div>
             <span className="text-xs text-neutral-500 block">Services</span>
             <span className="text-sm text-white font-medium">
-              {formData.serviceIds.length === 0 ? 'None selected' : \`\${formData.serviceIds.length} selected\`}
+              {formData.serviceIds.length === 0 ? 'None selected' : `\${formData.serviceIds.length} selected`}
             </span>
           </div>
 

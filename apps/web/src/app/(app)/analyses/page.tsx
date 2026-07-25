@@ -93,8 +93,8 @@ export default async function AnalysesPage() {
                       </h4>
                       <p className="text-sm text-neutral-400 mt-1">
                         {a.status === 'completed' 
-                          ? \`Successfully extracted \${Math.floor(Math.random() * 5) + 3} technical issues and generated Opportunity Brief.\`
-                          : \`Started deep scan on \${a.domain}...\`}
+                          ? `Successfully extracted \${Math.floor(Math.random() * 5) + 3} technical issues and generated Opportunity Brief.`
+                          : `Started deep scan on \${a.domain}...`}
                       </p>
                     </div>
                     

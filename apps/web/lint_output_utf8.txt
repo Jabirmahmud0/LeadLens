@@ -1,0 +1,144 @@
+﻿
+> web@0.1.0 lint D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web
+> eslint
+
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\(app)\analyses\page.tsx
+  68:31  warning  'i' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\(app)\dashboard\page.tsx
+  218:67  error  Parsing error: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\(app)\new\ComposerClient.tsx
+   10:44  warning  'caseStudies' is defined but never used   @typescript-eslint/no-unused-vars
+   10:71  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   10:91  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   43:51  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   53:19  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  173:39  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\(app)\new\actions.ts
+  69:12  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\(app)\onboarding\actions.ts
+   39:7  warning  'serviceSchema' is assigned a value but only used as a type      @typescript-eslint/no-unused-vars
+   65:7  warning  'icpSchema' is assigned a value but only used as a type          @typescript-eslint/no-unused-vars
+   89:7  warning  'caseStudySchema' is assigned a value but only used as a type    @typescript-eslint/no-unused-vars
+  114:7  warning  'preferencesSchema' is assigned a value but only used as a type  @typescript-eslint/no-unused-vars
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\(app)\onboarding\case-studies\page.tsx
+    4:34  warning  'Controller' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+    7:75  warning  'GripVertical' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+    7:89  warning  'CheckCircle2' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+   34:51  warning  'setValue' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+   61:19  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-explicit-any
+  162:28  error    'Lightbulb' is not defined                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    react/jsx-no-undef
+  244:17  warning  Compilation Skipped: Use of incompatible library
+
+This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\(app)\onboarding\case-studies\page.tsx:244:17
+  242 |              
+  243 |              <h4 className="text-white font-medium leading-tight mb-2">
+> 244 |                {watch('caseStudies.0.title') || 'SaaS organic traffic +300%'}
+      |                 ^^^^^ React Hook Form's `useForm()` API returns a `watch()` function which cannot be memoized safely.
+  245 |              </h4>
+  246 |              
+  247 |              <p className="text-sm text-neutral-400 mb-4 line-clamp-3">  react-hooks/incompatible-library
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\(app)\onboarding\icp\page.tsx
+  24:141  error    Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+  61:57   warning  'errors' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  81:19   error    Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\(app)\onboarding\identity\page.tsx
+  39:22  warning  Compilation Skipped: Use of incompatible library
+
+This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\(app)\onboarding\identity\page.tsx:39:22
+  37 |   });
+  38 |
+> 39 |   const formValues = watch();
+     |                      ^^^^^ React Hook Form's `useForm()` API returns a `watch()` function which cannot be memoized safely.
+  40 |
+  41 |   const onSubmit = async (data: IdentityFormValues) => {
+  42 |     setIsSubmitting(true);  react-hooks/incompatible-library
+  46:19  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-explicit-any
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\(app)\onboarding\layout.tsx
+  4:8  warning  'Link' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\(app)\onboarding\preferences\page.tsx
+   7:19  warning  'ArrowRight' is defined but never used       @typescript-eslint/no-unused-vars
+  27:48  warning  'errors' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\(app)\onboarding\services\page.tsx
+   7:70  warning  'CheckCircle2' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+  53:35  warning  'move' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+  63:19  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-explicit-any
+  69:28  warning  'index' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+  70:27  warning  Compilation Skipped: Use of incompatible library
+
+This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\(app)\onboarding\services\page.tsx:70:27
+  68 |
+  69 |   const handleDuplicate = (index: number) => {
+> 70 |     const currentValues = watch(`services.\${index}`);
+     |                           ^^^^^ React Hook Form's `useForm()` API returns a `watch()` function which cannot be memoized safely.
+  71 |     append({ ...currentValues, name: `\${currentValues.name} (Copy)` });
+  72 |   };
+  73 |  react-hooks/incompatible-library
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\(auth)\forgot-password\page.tsx
+  44:14  warning  'err' is defined but never used                                  @typescript-eslint/no-unused-vars
+  57:50  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  79:42  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\(auth)\login\page.tsx
+   47:14  warning  'err' is defined but never used                                  @typescript-eslint/no-unused-vars
+  146:14  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\(auth)\register\page.tsx
+   74:14  warning  'err' is defined but never used                                  @typescript-eslint/no-unused-vars
+   79:9   warning  'InsightIcon' is assigned a value but never used                 @typescript-eslint/no-unused-vars
+   88:90  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  222:13  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  222:90  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\(auth)\reset-password\page.tsx
+  69:14  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\(auth)\verify-email\page.tsx
+   5:16  warning  'ArrowRight' is defined but never used                           @typescript-eslint/no-unused-vars
+   9:9   warning  'router' is assigned a value but never used                      @typescript-eslint/no-unused-vars
+  48:14  warning  'err' is defined but never used                                  @typescript-eslint/no-unused-vars
+  92:13  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\api\auth\logout-all\route.ts
+  2:10  warning  'db' is defined but never used      @typescript-eslint/no-unused-vars
+  2:14  warning  'schema' is defined but never used  @typescript-eslint/no-unused-vars
+  3:10  warning  'eq' is defined but never used      @typescript-eslint/no-unused-vars
+  7:28  warning  'req' is defined but never used     @typescript-eslint/no-unused-vars
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\api\auth\logout\route.ts
+  7:28  warning  'req' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\api\auth\register\route.ts
+  76:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\api\auth\verify-email\route.ts
+  45:12  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\app\api\worker\route.ts
+   2:14  warning  'schema' is defined but never used               @typescript-eslint/no-unused-vars
+  21:11  warning  'twoMinsAgo' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  87:19  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+
+D:\X\PieceOfShit\Projects\AI\LeadLens\leadlens\apps\web\src\middleware.ts
+  50:16  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+Γ£û 59 problems (21 errors, 38 warnings)
+
+ΓÇëELIFECYCLEΓÇë Command failed with exit code 1.

@@ -43,8 +43,8 @@ export default function PreferencesStep() {
     setError(null);
     try {
       await saveOutputPreferences(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to save');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to save');
       setIsSubmitting(false);
     }
   };
@@ -58,7 +58,7 @@ export default function PreferencesStep() {
           </div>
           <h1 className="text-3xl font-light text-white">Output Preferences</h1>
           <p className="mt-4 text-neutral-400 max-w-xl mx-auto leading-relaxed">
-            Configure how LeadLens writes reports and emails on your behalf. We'll mirror your agency's brand voice and style.
+            Configure how LeadLens writes reports and emails on your behalf. We&apos;ll mirror your agency&apos;s brand voice and style.
           </p>
         </div>
 

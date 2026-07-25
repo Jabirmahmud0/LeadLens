@@ -38,8 +38,8 @@ export async function submitAnalysis(data: z.infer<typeof ComposerSchema>) {
   let normalizedUrl: string;
   try {
     normalizedUrl = await validateAndNormalizeUrl(url);
-  } catch (err: any) {
-    throw new Error(err.message || 'Invalid URL');
+  } catch (err: unknown) {
+    throw new Error(err instanceof Error ? err.message : 'Invalid URL');
   }
 
   // 2. Duplicate Check

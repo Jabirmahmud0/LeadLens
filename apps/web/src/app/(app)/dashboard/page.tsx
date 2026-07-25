@@ -1,4 +1,4 @@
-import * as React from 'react';
+﻿import * as React from 'react';
 import { getSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { db, schema } from '@leadlens/database';
@@ -61,7 +61,7 @@ export default async function DashboardPage() {
       <div className="flex flex-col lg:flex-row gap-6 items-start justify-between">
         <div className="flex-1">
           <h1 className="text-3xl font-light text-white tracking-tight">{greeting}, <span className="font-medium">{name}</span></h1>
-          <p className="text-neutral-400 mt-2">Here is what's happening with your prospects today.</p>
+          <p className="text-neutral-400 mt-2">Here is what&apos;s happening with your prospects today.</p>
           
           <div className="mt-8 relative max-w-xl group">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -105,7 +105,7 @@ export default async function DashboardPage() {
               <div className="h-2 w-full bg-neutral-950 rounded-full overflow-hidden border border-neutral-800">
                 <div 
                   className="h-full bg-white transition-all duration-1000 w-0 group-hover:bg-neutral-200" 
-                  style={{ width: \`\${completeness}%\` }}
+                  style={{ width: `\${completeness}%` }}
                 />
               </div>
               <p className="text-xs text-neutral-500 mt-3 flex items-center gap-1.5">
@@ -215,7 +215,7 @@ export default async function DashboardPage() {
                   </div>
                   <div>
                     <div className="flex justify-between text-xs mb-1">
-                      <span className="text-neutral-300">Slow LCP (>2.5s)</span>
+                      <span className="text-neutral-300">Slow LCP (&gt;2.5s)</span>
                       <span className="text-neutral-500">30%</span>
                     </div>
                     <div className="h-1.5 w-full bg-neutral-950 rounded-full overflow-hidden">

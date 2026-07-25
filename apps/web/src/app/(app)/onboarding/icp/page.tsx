@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState, ComponentType } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -21,7 +21,7 @@ const icpSchema = z.object({
 
 type ICPFormValues = z.infer<typeof icpSchema>;
 
-function MultiSelect({ value, onChange, options, icon: Icon }: { value: string[], onChange: (v: string[]) => void, options: string[], icon: any }) {
+function MultiSelect({ value, onChange, options, icon: Icon }: { value: string[], onChange: (v: string[]) => void, options: string[], icon: ComponentType<{ className?: string }> }) {
   const toggle = (opt: string) => {
     if (value.includes(opt)) {
       onChange(value.filter(v => v !== opt));
@@ -39,11 +39,11 @@ function MultiSelect({ value, onChange, options, icon: Icon }: { value: string[]
             key={opt}
             type="button"
             onClick={() => toggle(opt)}
-            className={\`px-3 py-1.5 rounded-lg text-sm transition-colors border flex items-center gap-2 \${
+            className={`px-3 py-1.5 rounded-lg text-sm transition-colors border flex items-center gap-2 \${
               isSelected 
                 ? 'bg-white text-black border-white' 
                 : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:border-neutral-600'
-            }\`}
+            }`}
           >
             {isSelected && <Icon className="w-3.5 h-3.5" />}
             {opt}
@@ -78,8 +78,8 @@ export default function ICPStep() {
     setError(null);
     try {
       await saveAgencyICP(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to save');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err) || 'Failed to save');
       setIsSubmitting(false);
     }
   };

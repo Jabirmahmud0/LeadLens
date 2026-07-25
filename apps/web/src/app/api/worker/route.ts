@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'; // Prevent caching
 export async function GET(req: Request) {
   // Simple auth for cron
   const authHeader = req.headers.get('authorization');
-  if (authHeader !== \`Bearer \${process.env.CRON_SECRET || 'dev-secret'}\` && process.env.NODE_ENV === 'production') {
+  if (authHeader !== `Bearer \${process.env.CRON_SECRET || 'dev-secret'}` && process.env.NODE_ENV === 'production') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -19,16 +19,16 @@ export async function GET(req: Request) {
   try {
     // 1. Reset stale jobs (no heartbeat for > 2 mins)
     const twoMinsAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
-    await db.execute(sql\`
+    await db.execute(sql`
       UPDATE \${schema.analysisJobs}
       SET status = 'queued', worker_id = NULL
       WHERE status = 'processing' AND updated_at < \${twoMinsAgo}::timestamp
-    \`);
+    `);
 
     // 2. Claim a job using SELECT FOR UPDATE SKIP LOCKED
     // Since we are using Neon HTTP, interactive transactions are not supported.
     // We must do this in a single query block using a CTE.
-    const result = await db.execute(sql\`
+    const result = await db.execute(sql`
       WITH claimed_job AS (
         SELECT id
         FROM \${schema.analysisJobs}
@@ -46,7 +46,7 @@ export async function GET(req: Request) {
       FROM claimed_job
       WHERE \${schema.analysisJobs}.id = claimed_job.id
       RETURNING \${schema.analysisJobs}.*;
-    \`);
+    `);
 
     const claimedJob = result.rows[0];
 
@@ -60,7 +60,7 @@ export async function GET(req: Request) {
     // For now, we immediately mark it as completed to test the queue.
     await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate work
 
-    await db.execute(sql\`
+    await db.execute(sql`
       UPDATE \${schema.analysisJobs}
       SET 
         status = 'completed',
@@ -68,14 +68,14 @@ export async function GET(req: Request) {
         completed_at = NOW(),
         updated_at = NOW()
       WHERE id = \${claimedJob.id}
-    \`);
+    `);
 
     // Update the prospect status as well
-    await db.execute(sql\`
+    await db.execute(sql`
       UPDATE \${schema.prospects}
       SET status = 'completed'
       WHERE id = \${claimedJob.prospect_id}
-    \`);
+    `);
 
     return NextResponse.json({ 
       message: 'Job processed successfully', 
@@ -84,8 +84,8 @@ export async function GET(req: Request) {
       processed: processedCount
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Worker error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

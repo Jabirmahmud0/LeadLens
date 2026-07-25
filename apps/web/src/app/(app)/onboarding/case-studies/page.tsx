@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useFieldArray, useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, ArrowRight, Plus, Trash2, BookOpen, Target, TrendingUp, GripVertical, CheckCircle2 } from 'lucide-react';
+import { Loader2, ArrowRight, Plus, Trash2, BookOpen, Target, TrendingUp, Lightbulb, CheckCircle2 } from 'lucide-react';
 import { saveAgencyCaseStudies } from '../actions';
 
 const caseStudySchema = z.object({
@@ -58,8 +58,8 @@ export default function CaseStudiesStep() {
     setError(null);
     try {
       await saveAgencyCaseStudies(data.caseStudies);
-    } catch (err: any) {
-      setError(err.message || 'Failed to save');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err) || 'Failed to save');
       setIsSubmitting(false);
     }
   };
@@ -125,7 +125,7 @@ export default function CaseStudiesStep() {
                           type="text"
                           placeholder="e.g. Scaling Acme Corp SEO"
                           className="block w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-2.5 text-white focus:border-white transition-colors"
-                          {...register(\`caseStudies.\${index}.title\` as const)}
+                          {...register(`caseStudies.\${index}.title` as const)}
                         />
                         {errors.caseStudies?.[index]?.title && <p className="text-xs text-red-400 mt-1">{errors.caseStudies[index].title?.message}</p>}
                       </div>
@@ -135,7 +135,7 @@ export default function CaseStudiesStep() {
                           type="text"
                           placeholder="e.g. Fintech"
                           className="block w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-2.5 text-white focus:border-white transition-colors"
-                          {...register(\`caseStudies.\${index}.clientIndustry\` as const)}
+                          {...register(`caseStudies.\${index}.clientIndustry` as const)}
                         />
                       </div>
                     </div>
@@ -152,7 +152,7 @@ export default function CaseStudiesStep() {
                           rows={2}
                           placeholder="What challenge was the client facing?"
                           className="block w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-2.5 text-white focus:border-white transition-colors resize-none"
-                          {...register(\`caseStudies.\${index}.problem\` as const)}
+                          {...register(`caseStudies.\${index}.problem` as const)}
                         />
                       </div>
 
@@ -166,7 +166,7 @@ export default function CaseStudiesStep() {
                           rows={2}
                           placeholder="How did you fix it?"
                           className="block w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-2.5 text-white focus:border-white transition-colors resize-none"
-                          {...register(\`caseStudies.\${index}.solution\` as const)}
+                          {...register(`caseStudies.\${index}.solution` as const)}
                         />
                       </div>
 
@@ -180,7 +180,7 @@ export default function CaseStudiesStep() {
                           rows={2}
                           placeholder="What was the business impact?"
                           className="block w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-2.5 text-white focus:border-white transition-colors resize-none"
-                          {...register(\`caseStudies.\${index}.results\` as const)}
+                          {...register(`caseStudies.\${index}.results` as const)}
                         />
                       </div>
 
