@@ -20,12 +20,12 @@ export interface PageSpeedResult {
 }
 
 export async function runPageSpeed(url: string, strategy: 'mobile' | 'desktop' = 'mobile'): Promise<PageSpeedResult> {
-  const apiUrl = \`https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=\${encodeURIComponent(url)}&category=performance&category=accessibility&category=seo&category=best-practices&strategy=\${strategy}\`;
+  const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&category=performance&category=accessibility&category=seo&category=best-practices&strategy=${strategy}`;
   
   try {
     const res = await fetch(apiUrl);
     if (!res.ok) {
-      throw new Error(\`PageSpeed API error: \${res.statusText}\`);
+      throw new Error(`PageSpeed API error: ${res.statusText}`);
     }
 
     const data = await res.json();
@@ -66,11 +66,10 @@ export async function runPageSpeed(url: string, strategy: 'mobile' | 'desktop' =
         tbt: audits['total-blocking-time']?.displayValue || null,
         speedIndex: audits['speed-index']?.displayValue || null,
       },
-      opportunities: opportunities.sort((a, b) => b.savingsMs - a.savingsMs).slice(0, 5) // top 5
+      opportunities: opportunities.sort((a, b) => b.savingsMs - a.savingsMs).slice(0, 5)
     };
   } catch (error) {
     console.error('PageSpeed API Error:', error);
-    // Graceful degradation
     return {
       scores: { performance: null, accessibility: null, seo: null, bestPractices: null },
       metrics: { fcp: null, lcp: null, cls: null, tbt: null, speedIndex: null },
