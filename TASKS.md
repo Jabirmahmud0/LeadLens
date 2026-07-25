@@ -222,10 +222,10 @@
 ---
 
 ### 2.4 Rate limiting & CSRF
-- [ ] Login rate limit: 10 attempts per 15 min per IP (use `auth_attempts` table)
-- [ ] Registration rate limit: 5 per hour per IP
-- [ ] Password reset rate limit: 3 per hour per email
-- [ ] CSRF: Double-submit cookie pattern or `SameSite=Lax` + origin check for state-mutating routes
+- [x] Login rate limit: 10 attempts per 15 min per IP (use `auth_attempts` table)
+- [x] Registration rate limit: 5 per hour per IP
+- [x] Password reset rate limit: 3 per hour per email
+- [x] CSRF: Double-submit cookie pattern or `SameSite=Lax` + origin check for state-mutating routes
 
 > 📌 **Commit:** `feat(auth): rate limiting for login, register, and password reset`
 
