@@ -3,6 +3,7 @@ import { sql, eq, and } from 'drizzle-orm';
 import { analysisJobs, analysisJobSteps } from '@leadlens/database/src/schema/analysis';
 import { sourcePages, technicalChecks, pagespeedResults } from '@leadlens/database/src/schema/sources';
 import { prospects } from '@leadlens/database/src/schema/prospect';
+import { agencyProfiles, agencyServices, idealCustomerProfiles, caseStudies } from '@leadlens/database/src/schema/agency';
 import { 
   validateAndNormalizeUrl, 
   discoverPages, 
@@ -17,7 +18,13 @@ import {
   runStage1FactExtraction,
   runStage2BusinessClassification,
   runStage3IssueClassification,
-  runStage4OpportunityHypothesis
+  runStage4OpportunityHypothesis,
+  runStage5AgencyServiceMatching,
+  runStage6FitScoring,
+  runStage7OutreachGeneration,
+  runStage8DiscoveryPrep,
+  runStage9ProposalAngle,
+  runStage10SourceVerification
 } from '@leadlens/ai';
 
 export type StepKey =
@@ -139,6 +146,21 @@ export async function runOrchestration(job: any) {
     throw new Error('Prospect or website URL not found');
   }
 
+  // Fetch Agency Data for AI Stages
+  const orgId = job.organization_id;
+  const agencyProfile = await db.query.agencyProfiles.findFirst({
+    where: (a, { eq }) => eq(a.organizationId, orgId)
+  });
+  const services = await db.query.agencyServices.findMany({
+    where: (s, { eq }) => eq(s.organizationId, orgId)
+  });
+  const icp = await db.query.idealCustomerProfiles.findFirst({
+    where: (i, { eq, and }) => and(eq(i.organizationId, orgId), eq(i.isDefault, true))
+  });
+  const caseStudiesList = await db.query.caseStudies.findMany({
+    where: (c, { eq, and }) => and(eq(c.organizationId, orgId), eq(c.isActive, true))
+  });
+
   let normalizedUrl = prospect.websiteUrl;
   let discoveredUrls: string[] = [];
   let primaryHtml = '';
@@ -153,6 +175,12 @@ export async function runOrchestration(job: any) {
   let stage2Business: any = null;
   let stage3Issues: any = null;
   let stage4Hypotheses: any = null;
+  let stage5Match: any = null;
+  let stage6Fit: any = null;
+  let stage7Outreach: any = null;
+  let stage8Call: any = null;
+  let stage9Proposal: any = null;
+  let stage10Verify: any = null;
 
   // Provider setup
   const primaryProvider = new GeminiProvider(process.env.GEMINI_API_KEY);
@@ -289,10 +317,77 @@ export async function runOrchestration(job: any) {
             hypotheses: stage4Hypotheses?.hypotheses?.length || 0
           };
 
+        case 'ai_service_match':
+          if (!stage4Hypotheses) return { skipped: true };
+          stage5Match = await runStage5AgencyServiceMatching(
+            stage4Hypotheses,
+            agencyProfile || {},
+            services,
+            icp || {},
+            aiOptions
+          );
+          return stage5Match;
+
+        case 'ai_fit_score':
+          if (!stage5Match || !stage2Business || !stage3Issues) return { skipped: true };
+          stage6Fit = await runStage6FitScoring(
+            stage5Match,
+            stage2Business,
+            stage3Issues,
+            icp || {},
+            aiOptions
+          );
+          return stage6Fit;
+
+        case 'ai_outreach':
+          if (!stage4Hypotheses || !stage5Match || !stage6Fit) return { skipped: true };
+          stage7Outreach = await runStage7OutreachGeneration(
+            stage4Hypotheses,
+            stage5Match,
+            stage6Fit,
+            agencyProfile || {},
+            aiOptions
+          );
+          return stage7Outreach;
+
+        case 'ai_call_prep':
+          if (!stage4Hypotheses) return { skipped: true };
+          stage8Call = await runStage8DiscoveryPrep(
+            { business: stage2Business, issues: stage3Issues },
+            stage4Hypotheses,
+            aiOptions
+          );
+          return stage8Call;
+
+        case 'ai_proposal':
+          if (!stage5Match || !stage4Hypotheses) return { skipped: true };
+          stage9Proposal = await runStage9ProposalAngle(
+            stage5Match,
+            stage4Hypotheses,
+            caseStudiesList,
+            aiOptions
+          );
+          return stage9Proposal;
+
+        case 'ai_verify':
+          if (!stage3Issues) return { skipped: true };
+          // For now, we only verify the stage 3 issues. Later we can pass all extracted facts.
+          const sourcePagesList = await db.query.sourcePages.findMany({
+            where: (sp, { eq }) => eq(sp.analysisJobId, job.id)
+          });
+          stage10Verify = await runStage10SourceVerification(
+            stage3Issues.findings,
+            sourcePagesList,
+            aiOptions
+          );
+          return stage10Verify;
+
+        case 'save_report':
+          // Phase 9.4 Report Persistence logic goes here
+          return { message: 'Reports will be persisted here in Phase 9.4' };
+
         default:
-          // Stub for remaining AI steps
-          await new Promise(resolve => setTimeout(resolve, 500));
-          return { message: `Stubbed step ${stepKey} completed` };
+          return { message: `Step ${stepKey} not recognized` };
       }
     });
 
