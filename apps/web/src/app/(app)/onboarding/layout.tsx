@@ -8,7 +8,7 @@ const STEPS = [
   { id: 'services', label: 'Services', path: '/onboarding/services' },
   { id: 'icp', label: 'Ideal Client', path: '/onboarding/icp' },
   { id: 'case-studies', label: 'Case Studies', path: '/onboarding/case-studies' },
-  { id: 'first-analysis', label: 'First Audit', path: '/onboarding/first-analysis' },
+  { id: 'preferences', label: 'Preferences', path: '/onboarding/preferences' },
 ];
 
 export default function OnboardingLayout({ children }: { children: React.ReactNode }) {

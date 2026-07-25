@@ -315,28 +315,28 @@
 ---
 
 ### 3.5 Step 4 — Case studies (§11.2 Step 4, §15.11)
-- [ ] **Case-study story builder** — visual flow: Problem → Solution → Result
-- [ ] Live "proof card" preview showing what AI may retrieve
-- [ ] Fields: title, client industry, client type, problem, solution, deliverables, results, metrics, service tags, case-study URL, public/private status
-- [ ] Empty state: guided example with option to skip
-- [ ] Save to `case_studies` + `case_study_services`
+- [x] **Case-study story builder** — visual flow: Problem → Solution → Result
+- [x] Live "proof card" preview showing what AI may retrieve
+- [x] Fields: title, client industry, client type, problem, solution, deliverables, results, metrics, service tags, case-study URL, public/private status
+- [x] Empty state: guided example with option to skip
+- [x] Save to `case_studies` + `case_study_services`
 
 > 📌 **Commit:** `feat(onboarding): case study story builder with proof card preview`
 
 ---
 
 ### 3.6 Step 5 — Output preferences (§11.2 Step 5)
-- [ ] Fields: brand voice (dropdown + custom), outreach tone, preferred outreach channel, report depth, technical detail level, proposal style, avoided phrases, CTA preference
-- [ ] Save to `agency_profiles`
+- [x] Fields: brand voice (dropdown + custom), outreach tone, preferred outreach channel, report depth, technical detail level, proposal style, avoided phrases, CTA preference
+- [x] Save to `agency_profiles`
 
 > 📌 **Commit:** `feat(onboarding): output preferences step`
 
 ---
 
 ### 3.7 Setup completeness
-- [ ] Calculate `setupCompleteness` percentage (agency name + 1 service = minimum; case study, ICP, preferences add more)
-- [ ] Display on dashboard and agency profile page
-- [ ] Show warning on first report if agency context is too sparse
+- [x] Calculate `setupCompleteness` percentage (agency name + 1 service = minimum; case study, ICP, preferences add more)
+- [x] Display on dashboard and agency profile page
+- [x] Show warning on first report if agency context is too sparse
 
 > 📌 **Commit:** `feat(agency): setup completeness calculation and display`
 
