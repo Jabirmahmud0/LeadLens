@@ -1,2 +1,2 @@
 export * from './client';
-// Schema exports will go here
+export * as schema from './schema';

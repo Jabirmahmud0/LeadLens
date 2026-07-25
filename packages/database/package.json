@@ -8,9 +8,13 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.ts\""
   },
-  "dependencies": {},
+  "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
+    "drizzle-orm": "^0.45.2"
+  },
   "devDependencies": {
     "@leadlens/config": "workspace:*",
+    "drizzle-kit": "^0.31.10",
     "typescript": "^5.0.0"
   }
 }
