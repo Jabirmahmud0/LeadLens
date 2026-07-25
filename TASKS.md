@@ -232,14 +232,14 @@
 ---
 
 ### 2.5 Auth API routes (`apps/web/app/api/auth/`)
-- [ ] `POST /api/auth/register` — validate with Zod, hash password, create user + org + session
-- [ ] `POST /api/auth/login` — validate, verify password, create session, set cookie
-- [ ] `POST /api/auth/logout` — revoke current session, clear cookie
-- [ ] `POST /api/auth/logout-all` — revoke all sessions
-- [ ] `POST /api/auth/verify-email` — validate token, mark verified
-- [ ] `POST /api/auth/resend-verification`
-- [ ] `POST /api/auth/forgot-password`
-- [ ] `POST /api/auth/reset-password`
+- [x] `POST /api/auth/register` — validate with Zod, hash password, create user + org + session
+- [x] `POST /api/auth/login` — validate, verify password, create session, set cookie
+- [x] `POST /api/auth/logout` — revoke current session, clear cookie
+- [x] `POST /api/auth/logout-all` — revoke all sessions
+- [x] `POST /api/auth/verify-email` — validate token, mark verified
+- [x] `POST /api/auth/resend-verification`
+- [x] `POST /api/auth/forgot-password`
+- [x] `POST /api/auth/reset-password`
 
 > 📌 **Commit:** `feat(auth): all auth API routes with Zod validation and secure responses`
 
