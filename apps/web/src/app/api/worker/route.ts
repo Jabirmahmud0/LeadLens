@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db, schema } from '@leadlens/database';
 import { sql } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
+import { runOrchestration } from '@/lib/worker/orchestrator';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -53,24 +54,8 @@ export async function GET(req: Request) {
 
     processedCount++;
 
-    // Stub: simulate work (Phase 9 will replace this with real analysis)
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    await db.execute(sql`
-      UPDATE ${schema.analysisJobs}
-      SET 
-        status = 'completed',
-        progress_percent = 100,
-        completed_at = NOW(),
-        updated_at = NOW()
-      WHERE id = ${claimedJob.id}
-    `);
-
-    await db.execute(sql`
-      UPDATE ${schema.prospects}
-      SET status = 'completed'
-      WHERE id = ${claimedJob.prospect_id}
-    `);
+    // 3. Process the job via Orchestrator
+    await runOrchestration(claimedJob);
 
     return NextResponse.json({ 
       message: 'Job processed successfully', 

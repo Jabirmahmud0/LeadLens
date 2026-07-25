@@ -549,19 +549,19 @@
 ---
 
 ### 8.2 Step orchestration
-- [ ] Each step writes to `analysis_job_steps` (key, status, started_at, completed_at, error)
-- [ ] Step keys: `discover_pages`, `fetch_pages`, `technical_checks`, `pagespeed`, `technology_detection`, `ai_extraction`, `ai_classification`, `ai_service_match`, `ai_fit_score`, `ai_outreach`, `ai_call_prep`, `ai_proposal`, `ai_verify`, `save_report`
-- [ ] A failed step does not abort subsequent independent steps unless required — partial reports are valid
-- [ ] Step-level retry: exponential backoff, max 3 retries per step
+- [x] Each step writes to `analysis_job_steps` (key, status, started_at, completed_at, error)
+- [x] Step keys: `discover_pages`, `fetch_pages`, `technical_checks`, `pagespeed`, `technology_detection`, `ai_extraction`, `ai_classification`, `ai_service_match`, `ai_fit_score`, `ai_outreach`, `ai_call_prep`, `ai_proposal`, `ai_verify`, `save_report`
+- [x] A failed step does not abort subsequent independent steps unless required — partial reports are valid
+- [x] Step-level retry: exponential backoff, max 3 retries per step
 
 > 📌 **Commit:** `feat(worker): step-level orchestration with partial success and retries`
 
 ---
 
 ### 8.3 Progress reporting
-- [ ] Worker POSTs to `/internal/jobs/:id/progress` with `{ currentStep, progressPercent }` after each step
-- [ ] Vercel route handler writes to `analysis_jobs` and broadcasts (or stores for polling)
-- [ ] Frontend polls `GET /api/analyses/:id` every 3–5s while status is `processing`
+- [x] Worker POSTs to `/internal/jobs/:id/progress` with `{ currentStep, progressPercent }` after each step
+- [x] Vercel route handler writes to `analysis_jobs` and broadcasts (or stores for polling)
+- [x] Frontend polls `GET /api/analyses/:id` every 3–5s while status is `processing`
 
 > 📌 **Commit:** `feat(worker): progress reporting via internal API`
 
