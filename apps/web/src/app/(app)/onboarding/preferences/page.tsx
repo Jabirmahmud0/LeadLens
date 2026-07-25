@@ -14,7 +14,7 @@ const preferencesSchema = z.object({
   reportDepth: z.string().min(1),
   technicalDetailLevel: z.string().min(1),
   proposalStyle: z.string().min(1),
-  avoidedPhrases: z.array(z.string()).default([]),
+  avoidedPhrases: z.array(z.string()),
   ctaPreference: z.string().min(1),
 });
 
