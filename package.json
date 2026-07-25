@@ -11,5 +11,12 @@
   },
   "devDependencies": {
     "typescript": "^5.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "argon2",
+      "esbuild",
+      "sharp"
+    ]
   }
 }

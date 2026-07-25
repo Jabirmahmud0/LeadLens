@@ -203,19 +203,19 @@
 ---
 
 ### 2.2 Email verification
-- [ ] `createVerificationToken(userId)` — stores hashed token, 24h expiry
-- [ ] `verifyEmailToken(token)` — validates, marks `users.email_verified_at`, invalidates token
-- [ ] Nodemailer + Brevo SMTP setup in `packages/auth` (env-controlled)
-- [ ] Email template: verification link
+- [x] `createVerificationToken(userId)` — stores hashed token, 24h expiry
+- [x] `verifyEmailToken(token)` — validates, marks `users.email_verified_at`, invalidates token
+- [x] Nodemailer + Brevo SMTP setup in `packages/auth` (env-controlled)
+- [x] Email template: verification link
 
 > 📌 **Commit:** `feat(auth): email verification token generation and email sending`
 
 ---
 
 ### 2.3 Password reset
-- [ ] `createPasswordResetToken(email)` — never reveal if email exists in response
-- [ ] `resetPassword(token, newPassword)` — validates token, hashes new password, invalidates all sessions
-- [ ] Email template: reset link with 1h expiry
+- [x] `createPasswordResetToken(email)` — never reveal if email exists in response
+- [x] `resetPassword(token, newPassword)` — validates token, hashes new password, invalidates all sessions
+- [x] Email template: reset link with 1h expiry
 
 > 📌 **Commit:** `feat(auth): password reset with hashed tokens and user enumeration protection`
 

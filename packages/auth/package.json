@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@leadlens/database": "workspace:*",
-    "argon2": "^0.45.1"
+    "@types/nodemailer": "^8.0.1",
+    "argon2": "^0.45.1",
+    "nodemailer": "^9.0.3"
   },
   "devDependencies": {
     "@leadlens/config": "workspace:*",
