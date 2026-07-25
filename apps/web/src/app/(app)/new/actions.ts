@@ -71,13 +71,21 @@ export async function submitAnalysis(data: z.infer<typeof ComposerSchema>) {
   }
 
   // 3. Insert Prospect
-  // In a real app, this would trigger a background job to run the analysis
   const [prospect] = await db.insert(schema.prospects).values({
     organizationId: session.organization.id,
     domain: new URL(normalizedUrl).hostname,
     companyName: rest.companyName || new URL(normalizedUrl).hostname,
-    status: 'processing', // Mark as processing since we would queue it
+    status: 'queued', // Mark as queued to wait for worker
   }).returning();
+
+  // 4. Create Analysis Job
+  await db.insert(schema.analysisJobs).values({
+    organizationId: session.organization.id,
+    prospectId: prospect.id,
+    createdBy: session.user.id,
+    status: 'queued',
+    requestedOptions: rest,
+  });
 
   // Return success
   return { success: true, prospectId: prospect.id };

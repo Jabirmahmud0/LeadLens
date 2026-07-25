@@ -453,79 +453,79 @@
 > **Goal:** Worker can crawl a public website, extract structured data, and run technical checks.
 
 ### 7.1 Page discovery (§11.4)
-- [ ] Fetch submitted URL → follow redirect chain (max 5)
-- [ ] Parse `robots.txt` — respect `Disallow` rules
-- [ ] Parse `sitemap.xml` — collect up to `MAX_PAGES` URLs
-- [ ] Extract navigation links from homepage HTML
-- [ ] Add likely page slugs: `/about`, `/services`, `/contact`, `/pricing`, `/case-studies`, etc.
-- [ ] Deduplicate, normalize, keep same-domain only
-- [ ] Default limit: 8 pages. Configurable via env.
+- [x] Fetch submitted URL → follow redirect chain (max 5)
+- [x] Parse `robots.txt` — respect `Disallow` rules
+- [x] Parse `sitemap.xml` — collect up to `MAX_PAGES` URLs
+- [x] Extract navigation links from homepage HTML
+- [x] Add likely page slugs: `/about`, `/services`, `/contact`, `/pricing`, `/case-studies`, etc.
+- [x] Deduplicate, normalize, keep same-domain only
+- [x] Default limit: 8 pages. Configurable via env.
 
 > 📌 **Commit:** `feat(analysis): page discovery — robots.txt, sitemap, nav links, likely pages`
 
 ---
 
 ### 7.2 Page fetching & Cheerio extraction (§11.4)
-- [ ] Fetch each discovered page with native `fetch` + request timeout + size limit
-- [ ] Parse HTML with Cheerio — extract:
-  - Page title, meta description, canonical URL
-  - H1–H6 structure
-  - Main body text (remove nav, footer, scripts, styles — see content quality controls)
-  - Navigation labels and CTAs
-  - Forms (presence, field count)
-  - Email addresses and phone numbers
-  - Social links
-  - Schema.org JSON-LD
-  - Image count and missing-alt count
-  - Internal and external link counts
-  - Copyright year
-  - Language attribute
-  - Response status + redirect chain
-  - Security headers (`X-Frame-Options`, `CSP`, `HSTS`, etc.)
-- [ ] Detect near-duplicate pages (content hash comparison)
-- [ ] Truncate body text safely; preserve source-to-text mapping for citations
-- [ ] Save each page to `source_pages`
+- [x] Fetch each discovered page with native `fetch` + request timeout + size limit
+- [x] Parse HTML with Cheerio — extract:
+  - [x] Page title, meta description, canonical URL
+  - [x] H1–H6 structure
+  - [x] Main body text (remove nav, footer, scripts, styles — see content quality controls)
+  - [x] Navigation labels and CTAs
+  - [x] Forms (presence, field count)
+  - [x] Email addresses and phone numbers
+  - [x] Social links
+  - [x] Schema.org JSON-LD
+  - [x] Image count and missing-alt count
+  - [x] Internal and external link counts
+  - [x] Copyright year
+  - [x] Language attribute
+  - [x] Response status + redirect chain
+  - [x] Security headers (`X-Frame-Options`, `CSP`, `HSTS`, etc.)
+- [x] Detect near-duplicate pages (content hash comparison)
+- [x] Truncate body text safely; preserve source-to-text mapping for citations
+- [x] Save each page to `source_pages`
 
 > 📌 **Commit:** `feat(analysis): Cheerio extraction — content, meta, CTAs, forms, social, schema`
 
 ---
 
 ### 7.3 Technical checks (§11.5)
-- [ ] HTTP status and final URL
-- [ ] HTTPS availability check
-- [ ] Response time measurement
-- [ ] Compression header check (`Content-Encoding`)
-- [ ] Cache headers (`Cache-Control`, `ETag`, `Expires`)
-- [ ] Security headers check (CSP, HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy)
-- [ ] Mixed-content hints (http:// references inside https site)
-- [ ] Viewport meta tag presence
-- [ ] Robots meta tag
-- [ ] Missing title / missing meta description detection
-- [ ] Missing heading structure detection
-- [ ] Missing image alt text count
-- [ ] Sitemap and robots.txt presence
-- [ ] Copyright year freshness
-- [ ] Save all checks to `technical_checks`
+- [x] HTTP status and final URL
+- [x] HTTPS availability check
+- [x] Response time measurement
+- [x] Compression header check (`Content-Encoding`)
+- [x] Cache headers (`Cache-Control`, `ETag`, `Expires`)
+- [x] Security headers check (CSP, HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy)
+- [x] Mixed-content hints (http:// references inside https site)
+- [x] Viewport meta tag presence
+- [x] Robots meta tag
+- [x] Missing title / missing meta description detection
+- [x] Missing heading structure detection
+- [x] Missing image alt text count
+- [x] Sitemap and robots.txt presence
+- [x] Copyright year freshness
+- [x] Save all checks to `technical_checks`
 
 > 📌 **Commit:** `feat(analysis): technical checks — headers, security, SEO basics, content quality`
 
 ---
 
 ### 7.4 Technology detection (§11.5)
-- [ ] Detect from: HTML signatures, script URLs, meta-generator tags, response headers, asset paths, public JS variables, known CMS markers
-- [ ] Output per detection: `{ name, confidence: 'confirmed' | 'likely' | 'unknown', category }`
-- [ ] Common targets: WordPress, Shopify, Wix, Squarespace, Webflow, Next.js, React, jQuery, Bootstrap, GTM, GA, HubSpot, Intercom
+- [x] Detect from: HTML signatures, script URLs, meta-generator tags, response headers, asset paths, public JS variables, known CMS markers
+- [x] Output per detection: `{ name, confidence: 'confirmed' | 'likely' | 'unknown', category }`
+- [x] Common targets: WordPress, Shopify, Wix, Squarespace, Webflow, Next.js, React, jQuery, Bootstrap, GTM, GA, HubSpot, Intercom
 
 > 📌 **Commit:** `feat(analysis): lightweight technology detection with confidence levels`
 
 ---
 
 ### 7.5 PageSpeed Insights integration (§11.5)
-- [ ] `GET https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=...&strategy=mobile`
-- [ ] Extract: performance, accessibility, SEO, best-practices scores; FCP, LCP, CLS, TBT, Speed Index; opportunity list
-- [ ] Run mobile by default; run desktop if quota permits
-- [ ] Handle API unavailability gracefully — mark step as partial
-- [ ] Save to `pagespeed_results`
+- [x] `GET https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=...&strategy=mobile`
+- [x] Extract: performance, accessibility, SEO, best-practices scores; FCP, LCP, CLS, TBT, Speed Index; opportunity list
+- [x] Run mobile by default; run desktop if quota permits
+- [x] Handle API unavailability gracefully — mark step as partial
+- [x] Save to `pagespeed_results`
 
 > 📌 **Commit:** `feat(analysis): PageSpeed Insights API integration with graceful failure`
 
@@ -536,11 +536,11 @@
 > **Goal:** Analysis jobs run reliably, survive browser closure, are retryable, and report progress.
 
 ### 8.1 Job queue (PostgreSQL-based polling)
-- [ ] `analysis_jobs.status` state machine: `queued → processing → completed | partial | failed | cancelled`
-- [ ] Worker polls DB every N seconds for `status = 'queued'` jobs — SELECT FOR UPDATE SKIP LOCKED to prevent duplicate claims
-- [ ] Worker sets `status = 'processing'`, `worker_id`, `started_at`
-- [ ] Heartbeat: worker updates `updated_at` every 30s; a job is considered stale if no heartbeat for >2m (allows reassignment)
-- [ ] On worker restart: reset stale `processing` jobs to `queued`
+- [x] `analysis_jobs.status` state machine: `queued → processing → completed | partial | failed | cancelled`
+- [x] Worker polls DB every N seconds for `status = 'queued'` jobs — SELECT FOR UPDATE SKIP LOCKED to prevent duplicate claims
+- [x] Worker sets `status = 'processing'`, `worker_id`, `started_at`
+- [x] Heartbeat: worker updates `updated_at` every 30s; a job is considered stale if no heartbeat for >2m (allows reassignment)
+- [x] On worker restart: reset stale `processing` jobs to `queued`
 
 > **Implementation note:** `SELECT FOR UPDATE SKIP LOCKED` is the key pattern here. It ensures no two workers pick the same job even under concurrent polling. Use it in the `claim` query.
 
