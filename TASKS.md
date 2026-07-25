@@ -396,31 +396,31 @@
 ## Phase 5 — Dashboard & Navigation
 
 ### 5.1 Main dashboard (§15.13)
-- [ ] **Asymmetric command center layout** — NOT an equal-size card grid
-- [ ] Top zone: greeting, large quick-analysis URL input, usage status, setup completeness
-- [ ] Main left column: high-potential prospects (score ≥ 80), recent reports, processing jobs
-- [ ] Right rail: score distribution histogram, most common detected problems, setup improvement suggestions, recent activity
-- [ ] Skeleton states for all async data
-- [ ] Mobile layout: quick analysis → processing jobs → prospects → compact metric summaries
+- [x] **Asymmetric command center layout** — NOT an equal-size card grid
+- [x] Top zone: greeting, large quick-analysis URL input, usage status, setup completeness
+- [x] Main left column: high-potential prospects (score ≥ 80), recent reports, processing jobs
+- [x] Right rail: score distribution histogram, most common detected problems, setup improvement suggestions, recent activity
+- [x] Skeleton states for all async data
+- [x] Mobile layout: quick analysis → processing jobs → prospects → compact metric summaries
 
 > 📌 **Commit:** `feat(web): main dashboard with asymmetric layout and real data`
 
 ---
 
 ### 5.2 Prospects list page (§15.16)
-- [ ] View toggle: **Insight cards** (default) / **Compact table**
-- [ ] Card fields: company, domain, fit score (ring), main opportunity, best service match, last analyzed, status, pinned indicator
-- [ ] Filters: score range, service, status, date range, industry, confidence, archived, has outreach, has feedback
-- [ ] Pagination
-- [ ] On mobile: card mode only, filter bottom sheet
+- [x] View toggle: **Insight cards** (default) / **Compact table**
+- [x] Card fields: company, domain, fit score (ring), main opportunity, best service match, last analyzed, status, pinned indicator
+- [x] Filters: score range, service, status, date range, industry, confidence, archived, has outreach, has feedback
+- [x] Pagination
+- [x] On mobile: card mode only, filter bottom sheet
 
 > 📌 **Commit:** `feat(web): prospects list with insight cards, table view, and filters`
 
 ---
 
 ### 5.3 Activity page (§15.27)
-- [ ] Chronological **analysis journal** with event types: report created, analysis completed, section regenerated, finding marked inaccurate, service updated, export generated, login security event
-- [ ] Filterable by event type and date range
+- [x] Chronological **analysis journal** with event types: report created, analysis completed, section regenerated, finding marked inaccurate, service updated, export generated, login security event
+- [x] Filterable by event type and date range
 
 > 📌 **Commit:** `feat(web): activity journal page`
 
