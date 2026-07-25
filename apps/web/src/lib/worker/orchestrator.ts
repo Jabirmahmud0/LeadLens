@@ -225,12 +225,12 @@ export async function runOrchestration(job: any) {
           await db.insert(pagespeedResults).values({
             analysisJobId: job.id,
             strategy: 'mobile',
-            performanceScore: ps.categories.performance?.score,
-            accessibilityScore: ps.categories.accessibility?.score,
-            seoScore: ps.categories.seo?.score,
-            bestPracticesScore: ps.categories['best-practices']?.score,
+            performanceScore: ps.scores.performance?.toString(),
+            accessibilityScore: ps.scores.accessibility?.toString(),
+            seoScore: ps.scores.seo?.toString(),
+            bestPracticesScore: ps.scores.bestPractices?.toString(),
           });
-          return { performanceScore: ps.categories.performance?.score };
+          return { performanceScore: ps.scores.performance };
 
         default:
           // Stub for AI steps
