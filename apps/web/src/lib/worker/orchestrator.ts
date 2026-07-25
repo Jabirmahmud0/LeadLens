@@ -5,6 +5,11 @@ import { sourcePages, technicalChecks, pagespeedResults } from '@leadlens/databa
 import { prospects } from '@leadlens/database/src/schema/prospect';
 import { agencyProfiles, agencyServices, idealCustomerProfiles, caseStudies } from '@leadlens/database/src/schema/agency';
 import { 
+  reports, reportScores, reportFindings, findingSources, 
+  serviceRecommendations, reportOutreach, reportCallQuestions, 
+  reportObjections, proposalStarters 
+} from '@leadlens/database/src/schema/report';
+import { 
   validateAndNormalizeUrl, 
   discoverPages, 
   fetchAndExtract, 
@@ -383,8 +388,160 @@ export async function runOrchestration(job: any) {
           return stage10Verify;
 
         case 'save_report':
-          // Phase 9.4 Report Persistence logic goes here
-          return { message: 'Reports will be persisted here in Phase 9.4' };
+          if (!stage4Hypotheses || !stage6Fit) return { skipped: true };
+
+          // 1. Create Report
+          const [report] = await db.insert(reports).values({
+            organizationId: job.organization_id,
+            prospectId: job.prospect_id,
+            analysisJobId: job.id,
+            title: `Intelligence Report: ${stage1Facts?.companyName || prospect.websiteUrl}`,
+            executiveSummary: stage6Fit.positiveFactors.join('. '),
+            opportunityThesis: stage4Hypotheses.hypotheses[0]?.thesis || '',
+            overallScore: stage6Fit.overallScore,
+            scoreLabel: stage6Fit.scoreLabel,
+            confidence: stage6Fit.confidence.toString(),
+            primaryServiceId: stage5Match?.primaryServiceId || null,
+            secondaryServiceId: stage5Match?.secondaryServiceId || null,
+            recommendedAction: stage9Proposal?.nextStep || '',
+            limitations: stage10Verify?.limitations?.join(', ') || '',
+            generatedAt: new Date()
+          }).returning();
+
+          // 2. Insert Scores
+          if (stage6Fit.scoreBreakdown) {
+            const scores = [
+              { category: 'agencyServiceFit', score: stage6Fit.scoreBreakdown.agencyServiceFit },
+              { category: 'problemSeverity', score: stage6Fit.scoreBreakdown.problemSeverity },
+              { category: 'businessMaturity', score: stage6Fit.scoreBreakdown.businessMaturity },
+              { category: 'likelyProjectValue', score: stage6Fit.scoreBreakdown.likelyProjectValue },
+              { category: 'evidenceQuality', score: stage6Fit.scoreBreakdown.evidenceQuality },
+              { category: 'outreachReadiness', score: stage6Fit.scoreBreakdown.outreachReadiness },
+            ];
+            await db.insert(reportScores).values(
+              scores.map(s => ({
+                reportId: report.id,
+                category: s.category,
+                score: s.score
+              }))
+            );
+          }
+
+          // 3. Insert Findings & Sources
+          if (stage10Verify?.verifiedFindings) {
+            for (let i = 0; i < stage10Verify.verifiedFindings.length; i++) {
+              const vf = stage10Verify.verifiedFindings[i];
+              // Try to find the original finding from stage3
+              const originalFinding = stage3Issues?.findings?.find((f: any) => f.title === vf.findingId || f.observation.includes(vf.findingId));
+              
+              const [dbFinding] = await db.insert(reportFindings).values({
+                reportId: report.id,
+                category: originalFinding?.category || 'General',
+                title: originalFinding?.title || vf.findingId,
+                observation: originalFinding?.observation || '',
+                businessImpact: originalFinding?.businessImpact || '',
+                recommendation: originalFinding?.recommendation || '',
+                severity: originalFinding?.severity || 'medium',
+                confidence: vf.confidence.toString(),
+                evidenceType: vf.isFactOrInference,
+                sortOrder: i
+              }).returning();
+
+              // Insert sources for this finding
+              if (vf.sourceUrls && vf.sourceUrls.length > 0) {
+                // Find matching source page IDs
+                const sourcePagesList = await db.query.sourcePages.findMany({
+                  where: (sp, { eq }) => eq(sp.analysisJobId, job.id)
+                });
+                
+                for (const url of vf.sourceUrls) {
+                  const sp = sourcePagesList.find((s) => s.url === url);
+                  if (sp) {
+                    await db.insert(findingSources).values({
+                      findingId: dbFinding.id,
+                      sourcePageId: sp.id,
+                      supportStrength: 'high'
+                    });
+                  }
+                }
+              }
+            }
+          }
+
+          // 4. Insert Service Recommendations
+          if (stage5Match?.serviceMatches) {
+            await db.insert(serviceRecommendations).values(
+              stage5Match.serviceMatches.map((sm: any, idx: number) => ({
+                reportId: report.id,
+                serviceId: sm.serviceId,
+                rank: idx + 1,
+                matchScore: sm.matchScore,
+                rationale: sm.rationale,
+                suggestedScope: sm.suggestedScope ? JSON.parse(JSON.stringify({ text: sm.suggestedScope })) : null,
+                risks: sm.risks ? JSON.parse(JSON.stringify(sm.risks)) : null
+              }))
+            );
+          }
+
+          // 5. Insert Outreach
+          if (stage7Outreach) {
+            await db.insert(reportOutreach).values({
+              reportId: report.id,
+              channel: 'email',
+              tone: 'professional',
+              subjectLines: JSON.parse(JSON.stringify(stage7Outreach.subjectLines)),
+              opener: stage7Outreach.emailOpener,
+              body: stage7Outreach.emailBody,
+              followUp: stage7Outreach.followUpMessage,
+              callToAction: stage7Outreach.callToAction
+            });
+          }
+
+          // 6. Insert Call Questions & Objections
+          if (stage8Call) {
+            const qs = [
+              ...(stage8Call.priorityQuestions || []).map((q: string) => ({ category: 'priority', question: q, priority: 1 })),
+              ...(stage8Call.technicalQuestions || []).map((q: string) => ({ category: 'technical', question: q, priority: 2 })),
+              ...(stage8Call.businessQuestions || []).map((q: string) => ({ category: 'business', question: q, priority: 2 }))
+            ];
+            if (qs.length > 0) {
+              await db.insert(reportCallQuestions).values(
+                qs.map(q => ({
+                  reportId: report.id,
+                  category: q.category,
+                  question: q.question,
+                  priority: q.priority
+                }))
+              );
+            }
+            
+            if (stage8Call.objections && stage8Call.objections.length > 0) {
+              await db.insert(reportObjections).values(
+                stage8Call.objections.map((o: any, idx: number) => ({
+                  reportId: report.id,
+                  objection: o.objection,
+                  suggestedResponse: o.suggestedResponse,
+                  sortOrder: idx
+                }))
+              );
+            }
+          }
+
+          // 7. Insert Proposal Starter
+          if (stage9Proposal) {
+            await db.insert(proposalStarters).values({
+              reportId: report.id,
+              problemStatement: stage9Proposal.problemStatement,
+              objectives: stage9Proposal.objectives?.join('\n') || '',
+              scope: stage9Proposal.proposedScope,
+              phases: stage9Proposal.phases?.join('\n') || '',
+              successMetrics: stage9Proposal.successMetrics?.join('\n') || '',
+              assumptions: stage9Proposal.assumptions?.join('\n') || '',
+              nextStep: stage9Proposal.nextStep
+            });
+          }
+
+          return { reportId: report.id };
 
         default:
           return { message: `Step ${stepKey} not recognized` };
