@@ -256,13 +256,13 @@
 ---
 
 ### 2.7 Auth UI pages (§15.5, §15.6, §15.7)
-- [ ] **Sign-up page** (`/register`) — editorial split screen: form left, rotating insight examples right
-- [ ] **Login page** (`/login`) — calm single-panel with animated "lens scan" visual (SVG/CSS animation)
-- [ ] **Email verification page** (`/verify-email`) — mail-path visualization: sent → inbox → verify → continue
+- [x] **Sign-up page** (`/register`) — editorial split screen: form left, rotating insight examples right
+- [x] **Login page** (`/login`) — calm single-panel with animated "lens scan" visual (SVG/CSS animation)
+- [x] **Email verification page** (`/verify-email`) — mail-path visualization: sent → inbox → verify → continue
   - Masked email display, resend timer (60s countdown), change-email link
-- [ ] **Forgot password page** (`/forgot-password`)
-- [ ] **Reset password page** (`/reset-password?token=...`)
-- [ ] All forms: React Hook Form + Zod, inline validation, loading states, error states from §15.5
+- [x] **Forgot password page** (`/forgot-password`)
+- [x] **Reset password page** (`/reset-password?token=...`)
+- [x] All forms: React Hook Form + Zod, inline validation, loading states, error states from §15.5
 
 > 📌 **Commit:** `feat(web): auth pages — register, login, verify-email, password-reset with premium UI`
 
