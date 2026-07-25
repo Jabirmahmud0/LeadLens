@@ -246,8 +246,8 @@
 ---
 
 ### 2.6 Middleware & session context
-- [ ] `middleware.ts` — reads session cookie, validates session, attaches user to request context (or redirects)
-- [ ] `lib/auth/session.ts` — `getSession()` helper for server components and route handlers
+- [x] `middleware.ts` — reads session cookie, validates session, attaches user to request context (or redirects)
+- [x] `lib/auth/session.ts` — `getSession()` helper for server components and route handlers
 - [ ] Protect all `(app)/` routes: redirect unauthenticated users to `/login`
 - [ ] Redirect authenticated users away from `/login` and `/register`
 
