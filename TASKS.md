@@ -273,20 +273,20 @@
 > **Goal:** New user can set up their full agency profile as described in §11.2.
 
 ### 3.1 Onboarding shell
-- [ ] Route group `(app)/onboarding/` with step routing: `/onboarding/identity`, `/services`, `/icp`, `/case-studies`, `/first-analysis`
-- [ ] Progress indicator at top (completion %)
-- [ ] Skip button for optional steps
-- [ ] Preserve progress when navigating backward
+- [x] Route group `(app)/onboarding/` with step routing: `/onboarding/identity`, `/services`, `/icp`, `/case-studies`, `/first-analysis`
+- [x] Progress indicator at top (completion %)
+- [x] Skip button for optional steps
+- [x] Preserve progress when navigating backward
 
 > 📌 **Commit:** `feat(onboarding): multi-step onboarding shell with progress tracking`
 
 ---
 
 ### 3.2 Step 1 — Agency identity (§11.2 Step 1, §15.8)
-- [ ] Form fields: agency name, website, country, timezone, short description, logo URL or initials, team size, primary service category
-- [ ] Live **agency brand preview** on the right (shows how agency appears inside reports)
-- [ ] On mobile: preview collapses to expandable section, sticky Continue button
-- [ ] Save to `agency_profiles`
+- [x] Form fields: agency name, website, country, timezone, short description, logo URL or initials, team size, primary service category
+- [x] Live **agency brand preview** on the right (shows how agency appears inside reports)
+- [x] On mobile: preview collapses to expandable section, sticky Continue button
+- [x] Save to `agency_profiles`
 
 > 📌 **Commit:** `feat(onboarding): agency identity step with live brand preview`
 
