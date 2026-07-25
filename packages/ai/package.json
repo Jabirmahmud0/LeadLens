@@ -8,9 +8,16 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.ts\""
   },
-  "dependencies": {},
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@leadlens/database": "workspace:*",
+    "groq-sdk": "^1.4.0",
+    "zod": "^4.4.3",
+    "zod-to-json-schema": "^3.25.2"
+  },
   "devDependencies": {
     "@leadlens/config": "workspace:*",
+    "@types/node": "^26.1.1",
     "typescript": "^5.0.0"
   }
 }

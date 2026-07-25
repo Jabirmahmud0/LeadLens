@@ -11,6 +11,14 @@ import {
   detectTechnologies, 
   runPageSpeed 
 } from '@leadlens/analysis';
+import { 
+  GeminiProvider, 
+  GroqProvider,
+  runStage1FactExtraction,
+  runStage2BusinessClassification,
+  runStage3IssueClassification,
+  runStage4OpportunityHypothesis
+} from '@leadlens/ai';
 
 export type StepKey =
   | 'discover_pages'
@@ -136,6 +144,27 @@ export async function runOrchestration(job: any) {
   let primaryHtml = '';
   let primaryHeaders = new Headers();
   let primaryExtractedData: any = null;
+  let technicalChecksResults: any = null;
+  let pagespeedResult: any = null;
+  let techDetectionResult: any = null;
+
+  // AI state
+  let stage1Facts: any = null;
+  let stage2Business: any = null;
+  let stage3Issues: any = null;
+  let stage4Hypotheses: any = null;
+
+  // Provider setup
+  const primaryProvider = new GeminiProvider(process.env.GEMINI_API_KEY);
+  const fallbackProvider = process.env.GROQ_API_KEY ? new GroqProvider(process.env.GROQ_API_KEY) : undefined;
+  
+  const aiOptions = {
+    jobId: job.id,
+    prospectId: prospect.id,
+    organizationId: job.organization_id,
+    primaryProvider,
+    fallbackProvider
+  };
 
   let hasFailures = false;
   let completedSteps = 0;
@@ -215,11 +244,6 @@ export async function runOrchestration(job: any) {
           }
           return { checksRun: Object.keys(checks).length };
 
-        case 'technology_detection':
-          if (!primaryHtml) return { skipped: true };
-          const techs = detectTechnologies(primaryHtml, primaryHeaders);
-          return { detected: techs };
-
         case 'pagespeed':
           const ps = await runPageSpeed(normalizedUrl, 'mobile');
           await db.insert(pagespeedResults).values({
@@ -230,10 +254,43 @@ export async function runOrchestration(job: any) {
             seoScore: ps.scores.seo?.toString(),
             bestPracticesScore: ps.scores.bestPractices?.toString(),
           });
+          pagespeedResult = ps;
           return { performanceScore: ps.scores.performance };
 
+        case 'technology_detection':
+          if (!primaryHtml) return { skipped: true };
+          const techs = detectTechnologies(primaryHtml, primaryHeaders);
+          techDetectionResult = techs;
+          return { detected: techs };
+
+        case 'ai_extraction':
+          if (!primaryExtractedData) return { skipped: true };
+          stage1Facts = await runStage1FactExtraction(
+            primaryExtractedData.text,
+            techDetectionResult || [],
+            aiOptions
+          );
+          return stage1Facts;
+
+        case 'ai_classification':
+          if (!stage1Facts) return { skipped: true };
+          
+          stage2Business = await runStage2BusinessClassification(stage1Facts, aiOptions);
+          
+          if (technicalChecksResults && pagespeedResult) {
+            stage3Issues = await runStage3IssueClassification(technicalChecksResults, pagespeedResult, aiOptions);
+            
+            stage4Hypotheses = await runStage4OpportunityHypothesis(stage2Business, stage3Issues, aiOptions);
+          }
+          
+          return { 
+            business: stage2Business, 
+            issuesFound: stage3Issues?.findings?.length || 0,
+            hypotheses: stage4Hypotheses?.hypotheses?.length || 0
+          };
+
         default:
-          // Stub for AI steps
+          // Stub for remaining AI steps
           await new Promise(resolve => setTimeout(resolve, 500));
           return { message: `Stubbed step ${stepKey} completed` };
       }

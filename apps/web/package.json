@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.3",
+    "@leadlens/ai": "workspace:*",
     "@leadlens/analysis": "workspace:*",
     "@leadlens/auth": "workspace:*",
     "@leadlens/database": "workspace:*",
