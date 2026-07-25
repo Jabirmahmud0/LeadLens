@@ -306,9 +306,9 @@
 ---
 
 ### 3.4 Step 3 — Ideal customer profile (§11.2 Step 3, §15.10)
-- [ ] **Fit spectrum** UI — for each dimension (company size, industry, budget, geography, website condition, urgency) user sets: Best fit / Acceptable / Poor fit
-- [ ] Fields: company size ranges, target industries, locations, preferred website maturity, min project budget, common problems, buying signals, disqualifying factors, preferred decision-maker roles
-- [ ] Save to `ideal_customer_profiles`
+- [x] **Fit spectrum** UI — for each dimension (company size, industry, budget, geography, website condition, urgency) user sets: Best fit / Acceptable / Poor fit
+- [x] Fields: company size ranges, target industries, locations, preferred website maturity, min project budget, common problems, buying signals, disqualifying factors, preferred decision-maker roles
+- [x] Save to `ideal_customer_profiles`
 
 > 📌 **Commit:** `feat(onboarding): ICP fit spectrum with dimension-based configuration`
 

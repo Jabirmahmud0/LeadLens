@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-// ... existing identity schemas ...
+// ... existing actions ...
 const identitySchema = z.object({
   name: z.string().min(2),
   website: z.string().url().or(z.literal('')),
@@ -29,7 +29,6 @@ export async function saveAgencyIdentity(data: z.infer<typeof identitySchema>) {
     throw new Error('Invalid data');
   }
 
-  // Find existing profile or create one
   const existingProfile = await db.select().from(schema.agencyProfiles).where(eq(schema.agencyProfiles.organizationId, session.organization.id));
 
   if (existingProfile.length > 0) {
@@ -90,7 +89,6 @@ export async function saveAgencyServices(data: z.infer<typeof servicesSchema>) {
 
   const orgId = session.organization.id;
 
-  // For MVP, just delete existing and insert new (simple sync)
   await db.delete(schema.agencyServices).where(eq(schema.agencyServices.organizationId, orgId));
 
   if (parsed.data.length > 0) {
@@ -101,7 +99,7 @@ export async function saveAgencyServices(data: z.infer<typeof servicesSchema>) {
         description: svc.description,
         problemSolved: svc.problemSolved,
         deliverables: svc.deliverables || [],
-        priceMin: svc.priceMin ? svc.priceMin.toString() : null, // numeric mapping
+        priceMin: svc.priceMin ? svc.priceMin.toString() : null,
         priceMax: svc.priceMax ? svc.priceMax.toString() : null,
         preferredIndustries: svc.preferredIndustries || [],
         disqualifiers: svc.disqualifiers || [],
@@ -113,4 +111,62 @@ export async function saveAgencyServices(data: z.infer<typeof servicesSchema>) {
   
   revalidatePath('/onboarding');
   redirect('/onboarding/icp');
+}
+
+const icpSchema = z.object({
+  companySizeRange: z.array(z.string()),
+  targetIndustries: z.array(z.string()),
+  targetLocations: z.array(z.string()),
+  minBudget: z.number().optional(),
+  preferredWebsiteCondition: z.array(z.string()),
+  decisionMakers: z.array(z.string()),
+  buyingSignals: z.array(z.string()),
+  disqualifyingFactors: z.array(z.string()),
+  commonProblems: z.array(z.string()),
+});
+
+export async function saveAgencyICP(data: z.infer<typeof icpSchema>) {
+  const session = await getSession();
+  if (!session || !session.organization) {
+    throw new Error('Unauthorized');
+  }
+
+  const parsed = icpSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error('Invalid data');
+  }
+
+  const orgId = session.organization.id;
+
+  const existing = await db.select().from(schema.idealCustomerProfiles).where(eq(schema.idealCustomerProfiles.organizationId, orgId));
+
+  if (existing.length > 0) {
+    await db.update(schema.idealCustomerProfiles).set({
+      companySizeRange: parsed.data.companySizeRange,
+      targetIndustries: parsed.data.targetIndustries,
+      targetLocations: parsed.data.targetLocations,
+      minBudget: parsed.data.minBudget ? parsed.data.minBudget.toString() : null,
+      preferredWebsiteCondition: parsed.data.preferredWebsiteCondition,
+      decisionMakers: parsed.data.decisionMakers,
+      buyingSignals: parsed.data.buyingSignals,
+      disqualifyingFactors: parsed.data.disqualifyingFactors,
+      commonProblems: parsed.data.commonProblems,
+    }).where(eq(schema.idealCustomerProfiles.organizationId, orgId));
+  } else {
+    await db.insert(schema.idealCustomerProfiles).values({
+      organizationId: orgId,
+      companySizeRange: parsed.data.companySizeRange,
+      targetIndustries: parsed.data.targetIndustries,
+      targetLocations: parsed.data.targetLocations,
+      minBudget: parsed.data.minBudget ? parsed.data.minBudget.toString() : null,
+      preferredWebsiteCondition: parsed.data.preferredWebsiteCondition,
+      decisionMakers: parsed.data.decisionMakers,
+      buyingSignals: parsed.data.buyingSignals,
+      disqualifyingFactors: parsed.data.disqualifyingFactors,
+      commonProblems: parsed.data.commonProblems,
+    });
+  }
+
+  revalidatePath('/onboarding');
+  redirect('/onboarding/case-studies');
 }
