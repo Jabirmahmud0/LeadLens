@@ -1,0 +1,16 @@
+{
+  "name": "@leadlens/analysis",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "license": "MIT",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"src/**/*.ts\""
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@leadlens/config": "workspace:*",
+    "typescript": "^5.0.0"
+  }
+}
