@@ -190,13 +190,13 @@
 > - Rate limit per IP and per email using a leaky-bucket counter in `auth_attempts` or Redis (pg-based is fine for MVP)
 
 ### 2.1 Core auth services (`packages/auth`)
-- [ ] `hashPassword(password: string): Promise<string>` — argon2id
-- [ ] `verifyPassword(password: string, hash: string): Promise<boolean>`
-- [ ] `generateToken(): string` — crypto random hex
-- [ ] `hashToken(token: string): string` — SHA-256 hex
-- [ ] `createSession(userId, ip, userAgent): Promise<{ token, session }>` — inserts session, returns raw token for cookie
-- [ ] `validateSession(token: string): Promise<Session & { user, organization } | null>` — reads hashed token, checks expiry
-- [ ] `revokeSession(sessionId)` and `revokeAllSessions(userId)`
+- [x] `hashPassword(password: string): Promise<string>` — argon2id
+- [x] `verifyPassword(password: string, hash: string): Promise<boolean>`
+- [x] `generateToken(): string` — crypto random hex
+- [x] `hashToken(token: string): string` — SHA-256 hex
+- [x] `createSession(userId, ip, userAgent): Promise<{ token, session }>` — inserts session, returns raw token for cookie
+- [x] `validateSession(token: string): Promise<Session & { user, organization } | null>` — reads hashed token, checks expiry
+- [x] `revokeSession(sessionId)` and `revokeAllSessions(userId)`
 
 > 📌 **Commit:** `feat(auth): core password hashing, session creation, and validation`
 

@@ -8,7 +8,10 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.ts\""
   },
-  "dependencies": {},
+  "dependencies": {
+    "@leadlens/database": "workspace:*",
+    "argon2": "^0.45.1"
+  },
   "devDependencies": {
     "@leadlens/config": "workspace:*",
     "typescript": "^5.0.0"
