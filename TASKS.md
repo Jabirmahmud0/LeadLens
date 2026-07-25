@@ -347,27 +347,27 @@
 > **Goal:** Every app page uses a consistent, premium design system.
 
 ### 4.1 Design tokens
-- [ ] CSS custom properties for all color tokens from §13.3 (light + dark)
-- [ ] Typography scale: Display, H1–H3, Body, Small (§13.3)
-- [ ] Spacing scale: 4px base (4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96)
-- [ ] Border-radius: 8px small, 12px card, 16px panel, 20–28px hero
-- [ ] Motion timing variables from §13.4
+- [x] CSS custom properties for all color tokens from §13.3 (light + dark)
+- [x] Typography scale: Display, H1–H3, Body, Small (§13.3)
+- [x] Spacing scale: 4px base (4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96)
+- [x] Border-radius: 8px small, 12px card, 16px panel, 20–28px hero
+- [x] Motion timing variables from §13.4
 
 > 📌 **Commit:** `style(web): implement design token system — colors, typography, spacing, motion`
 
 ---
 
 ### 4.2 Core component library (`packages/ui`)
-- [ ] **App shell** — responsive sidebar + main content area
-- [ ] **Sidebar** — persistent on desktop, drawer on mobile/tablet (§14.2)
-- [ ] **Score ring** — animated SVG circle showing 0–100 score with label (see §11.7)
-- [ ] **Confidence badge** — Low/Medium/High pill
-- [ ] **Severity badge** — color-coded pill (critical, warning, info)
-- [ ] **Source chip** — URL + accessed time + confidence
-- [ ] **Finding card** — left severity rail + expandable evidence section (§15.18)
-- [ ] **Toast** — entrance animation, accessible (§16.1)
-- [ ] **Skeleton loader** — subtle shimmer, not overdone
-- [ ] **Empty state** — reason + value + action + optional example (§15.30)
+- [x] **App shell** — responsive sidebar + main content area
+- [x] **Sidebar** — persistent on desktop, drawer on mobile/tablet (§14.2)
+- [x] **Score ring** — animated SVG circle showing 0–100 score with label (see §11.7)
+- [x] **Confidence badge** — Low/Medium/High pill
+- [x] **Severity badge** — color-coded pill (critical, warning, info)
+- [x] **Source chip** — URL + accessed time + confidence
+- [x] **Finding card** — left severity rail + expandable evidence section (§15.18)
+- [x] **Toast** — entrance animation, accessible (§16.1)
+- [x] **Skeleton loader** — subtle shimmer, not overdone
+- [x] **Empty state** — reason + value + action + optional example (§15.30)
 - [ ] **Error panel** — explains what failed, what succeeded, retry option (§15.31)
 - [ ] **Confirmation dialog** — required for destructive actions (§16.2)
 - [ ] **Bottom sheet** — mobile filter/action drawer
