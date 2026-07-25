@@ -8,7 +8,9 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.ts\""
   },
-  "dependencies": {},
+  "dependencies": {
+    "ipaddr.js": "^2.4.0"
+  },
   "devDependencies": {
     "@leadlens/config": "workspace:*",
     "typescript": "^5.0.0"

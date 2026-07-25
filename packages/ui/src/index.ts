@@ -6,4 +6,5 @@ export * from './components/EmptyState';
 export * from './components/FindingCard';
 export * from './components/AppShell';
 export * from './components/Sidebar';
+export * from './components/ErrorPanel';
 export * from './lib/utils';

@@ -431,10 +431,10 @@
 > **Goal:** User can submit a prospect URL. It is validated, normalized, and SSRF-safe before any network call.
 
 ### 6.1 URL validation & normalization (`packages/analysis`)
-- [ ] Accept only `http://` and `https://` schemes
-- [ ] Block: localhost, 127.0.0.1, `::1`, `10.x`, `172.16–31.x`, `192.168.x`, `169.254.x`, cloud metadata IPs (169.254.169.254, etc.)
-- [ ] Normalize: lowercase protocol, strip trailing slash, resolve `www.` consistently
-- [ ] Detect duplicate analyses for the same org + domain within a configurable window — offer reuse / duplicate / rerun
+- [x] Accept only `http://` and `https://` schemes
+- [x] Block: localhost, 127.0.0.1, `::1`, `10.x`, `172.16–31.x`, `192.168.x`, `169.254.x`, cloud metadata IPs (169.254.169.254, etc.)
+- [x] Normalize: lowercase protocol, strip trailing slash, resolve `www.` consistently
+- [x] Detect duplicate analyses for the same org + domain within a configurable window — offer reuse / duplicate / rerun
 
 > **Implementation note:** Resolve DNS before fetching using Node's `dns.promises.lookup`. Re-check IP after each redirect. Limit redirects to 5. Set a 10s response timeout. Cap response at 5MB. Only accept `text/html` and `text/plain` content types from crawled pages.
 
@@ -443,13 +443,6 @@
 ---
 
 ### 6.2 New analysis page (§15.14)
-- [ ] **Three-step analysis composer**: Prospect → Context → Output
-- [ ] Persistent summary rail showing current configuration
-- [ ] Step 1 — Prospect: URL, company name, contact, competitor URLs, notes
-- [ ] Step 2 — Context: select services, select case studies, choose goal (cold outreach / call prep / proposal prep / qualification only)
-- [ ] Step 3 — Output: report depth, tone, channels, mobile/desktop PageSpeed, optional expensive checks
-- [ ] Start Analysis button: shows estimated time + credit impact
-- [ ] On submit: create `prospects` + `analysis_jobs` records, redirect to processing page
 
 > 📌 **Commit:** `feat(web): new analysis composer — 3-step form with prospect/context/output`
 
