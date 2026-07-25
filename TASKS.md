@@ -568,12 +568,12 @@
 ---
 
 ### 8.4 Analysis processing UI (§15.15)
-- [ ] **Live evidence pipeline** — NOT a spinner. Vertical stage list with status icons.
-- [ ] Stages (in order): Connecting → Discovering pages → Reading content → Running technical checks → Matching agency services → Generating strategy → Verifying sources → Finalizing
-- [ ] Right/lower panel: live partial evidence as collected (pages found, tech hints, PageSpeed status, sources captured)
-- [ ] States: Queued, Running, Partially completed, Rate-limited, Waiting for fallback, Failed, Completed
-- [ ] Actions: Leave safely, request email on complete, cancel (if supported), retry failed step, view diagnostics
-- [ ] On mobile: vertical timeline, evidence in expandable rows
+- [x] **Live evidence pipeline** — NOT a spinner. Vertical stage list with status icons.
+- [x] Stages (in order): Connecting → Discovering pages → Reading content → Running technical checks → Matching agency services → Generating strategy → Verifying sources → Finalizing
+- [x] Right/lower panel: live partial evidence as collected (pages found, tech hints, PageSpeed status, sources captured)
+- [x] States: Queued, Running, Partially completed, Rate-limited, Waiting for fallback, Failed, Completed
+- [x] Actions: Leave safely, request email on complete, cancel (if supported), retry failed step, view diagnostics
+- [x] On mobile: vertical timeline, evidence in expandable rows
 
 > 📌 **Commit:** `feat(web): analysis processing page with live evidence pipeline UI`
 

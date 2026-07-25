@@ -1,6 +1,16 @@
 import { db, schema } from '@leadlens/database';
 import { sql, eq, and } from 'drizzle-orm';
 import { analysisJobs, analysisJobSteps } from '@leadlens/database/src/schema/analysis';
+import { sourcePages, technicalChecks, pagespeedResults } from '@leadlens/database/src/schema/sources';
+import { prospects } from '@leadlens/database/src/schema/prospect';
+import { 
+  validateAndNormalizeUrl, 
+  discoverPages, 
+  fetchAndExtract, 
+  runTechnicalChecks, 
+  detectTechnologies, 
+  runPageSpeed 
+} from '@leadlens/analysis';
 
 export type StepKey =
   | 'discover_pages'
@@ -112,6 +122,21 @@ export async function runOrchestration(job: any) {
     organizationId: job.organization_id,
   };
 
+  // 1. Fetch prospect to get website URL
+  const prospect = await db.query.prospects.findFirst({
+    where: (p, { eq }) => eq(p.id, job.prospect_id),
+  });
+
+  if (!prospect || !prospect.websiteUrl) {
+    throw new Error('Prospect or website URL not found');
+  }
+
+  let normalizedUrl = prospect.websiteUrl;
+  let discoveredUrls: string[] = [];
+  let primaryHtml = '';
+  let primaryHeaders = new Headers();
+  let primaryExtractedData: any = null;
+
   let hasFailures = false;
   let completedSteps = 0;
   const totalSteps = JOB_STEPS.length;
@@ -127,20 +152,97 @@ export async function runOrchestration(job: any) {
       WHERE id = ${job.id}
     `);
 
-    // Execute step (currently a stub)
+    // Execute step
     const success = await executeStep(ctx, stepKey, async () => {
-      // Stub: simulate work for the step
-      await new Promise(resolve => setTimeout(resolve, 500));
-      return { message: `Stubbed step ${stepKey} completed` };
+      switch (stepKey) {
+        case 'discover_pages':
+          normalizedUrl = await validateAndNormalizeUrl(prospect.websiteUrl);
+          discoveredUrls = await discoverPages(normalizedUrl);
+          return { urls: discoveredUrls };
+
+        case 'fetch_pages':
+          // We need discovered urls. If resumed, we could fetch from DB, but for now we rely on in-memory or fallback to normalizedUrl
+          if (discoveredUrls.length === 0) discoveredUrls = [normalizedUrl];
+          
+          let fetchedCount = 0;
+          for (const url of discoveredUrls) {
+            try {
+              const data = await fetchAndExtract(url);
+              // Save to source_pages
+              await db.insert(sourcePages).values({
+                analysisJobId: job.id,
+                prospectId: prospect.id,
+                url,
+                title: data.title,
+                metaDescription: data.metaDescription,
+                isPrimary: url === discoveredUrls[0],
+                extractedText: data.text,
+                extractedData: data
+              });
+              
+              if (url === discoveredUrls[0]) {
+                primaryExtractedData = data;
+                // We don't have the raw HTML returned from fetchAndExtract, so we will fetch it again for tech detection later, or rely on what we can.
+                // For MVP, we will let detectTechnologies just run on the text or we can just fetch it here.
+                const rawRes = await fetch(url);
+                primaryHtml = await rawRes.text();
+                primaryHeaders = rawRes.headers;
+              }
+              
+              fetchedCount++;
+            } catch (err: any) {
+              console.warn(`Failed to fetch ${url}:`, err);
+            }
+          }
+          return { fetchedCount };
+
+        case 'technical_checks':
+          if (!primaryExtractedData) return { skipped: true };
+          const checks = runTechnicalChecks(primaryExtractedData, primaryHtml, primaryHeaders);
+          
+          // Save to technical_checks table
+          for (const [key, value] of Object.entries(checks)) {
+            if (typeof value === 'object' && value !== null) {
+               await db.insert(technicalChecks).values({
+                 analysisJobId: job.id,
+                 prospectId: prospect.id,
+                 checkKey: key,
+                 status: (value as any).status || 'unknown',
+                 value: value,
+                 sourceUrl: normalizedUrl
+               });
+            }
+          }
+          return { checksRun: Object.keys(checks).length };
+
+        case 'technology_detection':
+          if (!primaryHtml) return { skipped: true };
+          const techs = detectTechnologies(primaryHtml, primaryHeaders);
+          return { detected: techs };
+
+        case 'pagespeed':
+          const ps = await runPageSpeed(normalizedUrl, 'mobile');
+          await db.insert(pagespeedResults).values({
+            analysisJobId: job.id,
+            strategy: 'mobile',
+            performanceScore: ps.categories.performance?.score,
+            accessibilityScore: ps.categories.accessibility?.score,
+            seoScore: ps.categories.seo?.score,
+            bestPracticesScore: ps.categories['best-practices']?.score,
+          });
+          return { performanceScore: ps.categories.performance?.score };
+
+        default:
+          // Stub for AI steps
+          await new Promise(resolve => setTimeout(resolve, 500));
+          return { message: `Stubbed step ${stepKey} completed` };
+      }
     });
 
     if (success) {
       completedSteps++;
     } else {
       hasFailures = true;
-      // Depending on step, we might want to break, but tasks say:
-      // "A failed step does not abort subsequent independent steps unless required — partial reports are valid"
-      // For now, continue to next step.
     }
   }
 
@@ -160,7 +262,7 @@ export async function runOrchestration(job: any) {
   `);
 
   await db.execute(sql`
-    UPDATE ${schema.prospects}
+    UPDATE ${prospects}
     SET status = ${finalStatus}
     WHERE id = ${job.prospect_id}
   `);
