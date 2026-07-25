@@ -293,11 +293,11 @@
 ---
 
 ### 3.3 Step 2 — Services (§11.2 Step 2, §15.9)
-- [ ] **Service architecture board** — each service is a structured block (not a plain repeating form)
-- [ ] Fields per service: name, description, problem solved, deliverables, price min/max, preferred industries, disqualifiers, priority, active toggle
-- [ ] Add, duplicate, reorder (drag or up/down), deactivate services
-- [ ] On mobile: each service is an expandable accordion
-- [ ] Save to `agency_services`
+- [x] **Service architecture board** — each service is a structured block (not a plain repeating form)
+- [x] Fields per service: name, description, problem solved, deliverables, price min/max, preferred industries, disqualifiers, priority, active toggle
+- [x] Add, duplicate, reorder (drag or up/down), deactivate services
+- [x] On mobile: each service is an expandable accordion
+- [x] Save to `agency_services`
 
 > **Implementation note:** Use `@dnd-kit/core` for drag-to-reorder. Price stored in cents in DB, displayed as formatted currency in UI.
 
