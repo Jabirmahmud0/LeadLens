@@ -30,6 +30,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       items: [
         { label: 'Agency Profile', href: '/settings', icon: Settings },
       ]
+    },
+    {
+      label: 'Account',
+      items: [
+        { label: 'My Account', href: '/account', icon: User },
+      ]
     }
   ];
 
