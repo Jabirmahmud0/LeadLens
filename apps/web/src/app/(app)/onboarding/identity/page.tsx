@@ -77,7 +77,7 @@ export default function IdentityStep() {
                   className="block w-full rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3 text-white placeholder-neutral-600 focus:border-white focus:ring-1 focus:ring-white transition-colors"
                   {...register('name')}
                 />
-                {errors.name && <p className="text-xs text-red-400">{errors.name instanceof Error ? e.message : String(e)}</p>}
+                {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
               </div>
 
               <div className="space-y-2">
@@ -89,7 +89,7 @@ export default function IdentityStep() {
                   className="block w-full rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3 text-white placeholder-neutral-600 focus:border-white focus:ring-1 focus:ring-white transition-colors"
                   {...register('website')}
                 />
-                {errors.website && <p className="text-xs text-red-400">{errors.website instanceof Error ? e.message : String(e)}</p>}
+                {errors.website && <p className="text-xs text-red-400">{errors.website.message}</p>}
               </div>
             </div>
 
