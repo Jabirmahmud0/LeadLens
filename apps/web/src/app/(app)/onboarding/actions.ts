@@ -102,7 +102,7 @@ export async function saveAgencyICP(data: z.infer<typeof icpSchema>) {
 const caseStudySchema = z.object({
   title: z.string().min(2), clientIndustry: z.string().optional(), clientType: z.string().optional(),
   problem: z.string().optional(), solution: z.string().optional(), deliverables: z.array(z.string()).optional(),
-  results: z.string().optional(), metrics: z.record(z.string()).optional(), serviceTags: z.array(z.string()).optional(),
+  results: z.string().optional(), metrics: z.record(z.string(), z.any()).optional(), serviceTags: z.array(z.string()).optional(),
   caseStudyUrl: z.string().url().optional().or(z.literal('')), isPublic: z.boolean().default(true),
 });
 
