@@ -18,18 +18,27 @@ export async function saveAgencyIdentity(data: z.infer<typeof identitySchema>) {
   if (!session || !session.organization) throw new Error('Unauthorized');
   const parsed = identitySchema.safeParse(data);
   if (!parsed.success) throw new Error('Invalid data');
+  await db.update(schema.organizations).set({
+    name: parsed.data.name, 
+    websiteUrl: parsed.data.website || null, 
+    countryCode: parsed.data.country || null, 
+    timezone: parsed.data.timezone || null
+  }).where(eq(schema.organizations.id, session.organization.id));
+
   const existingProfile = await db.select().from(schema.agencyProfiles).where(eq(schema.agencyProfiles.organizationId, session.organization.id));
+  
   if (existingProfile.length > 0) {
     await db.update(schema.agencyProfiles).set({
-      name: parsed.data.name, websiteUrl: parsed.data.website, country: parsed.data.country,
-      timezone: parsed.data.timezone, description: parsed.data.description, teamSize: parsed.data.teamSize,
-      primaryServiceCategory: parsed.data.primaryCategory,
+      shortDescription: parsed.data.description, 
+      teamSizeRange: parsed.data.teamSize, 
+      primaryCategory: parsed.data.primaryCategory,
     }).where(eq(schema.agencyProfiles.organizationId, session.organization.id));
   } else {
     await db.insert(schema.agencyProfiles).values({
-      organizationId: session.organization.id, name: parsed.data.name, websiteUrl: parsed.data.website,
-      country: parsed.data.country, timezone: parsed.data.timezone, description: parsed.data.description,
-      teamSize: parsed.data.teamSize, primaryServiceCategory: parsed.data.primaryCategory, status: 'active',
+      organizationId: session.organization.id, 
+      shortDescription: parsed.data.description,
+      teamSizeRange: parsed.data.teamSize, 
+      primaryCategory: parsed.data.primaryCategory,
     });
   }
   revalidatePath('/onboarding');
@@ -51,9 +60,9 @@ export async function saveAgencyServices(data: z.array<z.infer<typeof serviceSch
   if (data.length > 0) {
     await db.insert(schema.agencyServices).values(
       data.map(svc => ({
-        organizationId: orgId, name: svc.name, description: svc.description, problemSolved: svc.problemSolved,
-        deliverables: svc.deliverables || [], priceMin: svc.priceMin ? svc.priceMin.toString() : null,
-        priceMax: svc.priceMax ? svc.priceMax.toString() : null, preferredIndustries: svc.preferredIndustries || [],
+        organizationId: orgId, name: svc.name, slug: svc.name.toLowerCase().replace(/\s+/g, '-'), summary: svc.description, problemSolved: svc.problemSolved,
+        deliverables: svc.deliverables || [], priceMinCents: svc.priceMin ? svc.priceMin * 100 : null,
+        priceMaxCents: svc.priceMax ? svc.priceMax * 100 : null, industries: svc.preferredIndustries || [],
         disqualifiers: svc.disqualifiers || [], priority: svc.priority, isActive: svc.isActive,
       }))
     );
@@ -75,11 +84,15 @@ export async function saveAgencyICP(data: z.infer<typeof icpSchema>) {
   const existing = await db.select().from(schema.idealCustomerProfiles).where(eq(schema.idealCustomerProfiles.organizationId, orgId));
   if (existing.length > 0) {
     await db.update(schema.idealCustomerProfiles).set({
-      ...data, minBudget: data.minBudget ? data.minBudget.toString() : null,
+      companySizeRanges: data.companySizeRange, industries: data.targetIndustries, locations: data.targetLocations,
+      budgetMinCents: data.minBudget ? data.minBudget * 100 : null, preferredSignals: data.buyingSignals,
+      disqualifyingSignals: data.disqualifyingFactors, commonProblems: data.commonProblems, decisionMakerRoles: data.decisionMakers
     }).where(eq(schema.idealCustomerProfiles.organizationId, orgId));
   } else {
     await db.insert(schema.idealCustomerProfiles).values({
-      organizationId: orgId, ...data, minBudget: data.minBudget ? data.minBudget.toString() : null,
+      organizationId: orgId, companySizeRanges: data.companySizeRange, industries: data.targetIndustries, locations: data.targetLocations,
+      budgetMinCents: data.minBudget ? data.minBudget * 100 : null, preferredSignals: data.buyingSignals,
+      disqualifyingSignals: data.disqualifyingFactors, commonProblems: data.commonProblems, decisionMakerRoles: data.decisionMakers
     });
   }
   revalidatePath('/onboarding');
@@ -97,13 +110,13 @@ export async function saveAgencyCaseStudies(data: z.array<z.infer<typeof caseStu
   const session = await getSession();
   if (!session || !session.organization) throw new Error('Unauthorized');
   const orgId = session.organization.id;
-  await db.delete(schema.agencyCaseStudies).where(eq(schema.agencyCaseStudies.organizationId, orgId));
+  await db.delete(schema.caseStudies).where(eq(schema.caseStudies.organizationId, orgId));
   if (data.length > 0) {
-    await db.insert(schema.agencyCaseStudies).values(
+    await db.insert(schema.caseStudies).values(
       data.map(cs => ({
         organizationId: orgId, title: cs.title, clientIndustry: cs.clientIndustry, clientType: cs.clientType,
         problem: cs.problem, solution: cs.solution, deliverables: cs.deliverables || [], results: cs.results,
-        metrics: cs.metrics || {}, serviceTags: cs.serviceTags || [], caseStudyUrl: cs.caseStudyUrl, isPublic: cs.isPublic,
+        metrics: cs.metrics || {}, publicUrl: cs.caseStudyUrl, isActive: cs.isPublic,
       }))
     );
   }
@@ -130,13 +143,11 @@ export async function saveOutputPreferences(data: z.infer<typeof preferencesSche
   await db.update(schema.agencyProfiles).set({
     brandVoice: data.brandVoice,
     outreachTone: data.outreachTone,
-    preferredOutreachChannel: data.preferredOutreachChannel,
+    preferredChannels: [data.preferredOutreachChannel],
     reportDepth: data.reportDepth,
     technicalDetailLevel: data.technicalDetailLevel,
-    proposalStyle: data.proposalStyle,
     avoidedPhrases: data.avoidedPhrases || [],
-    ctaPreference: data.ctaPreference,
-    onboardingCompletedAt: new Date(),
+    setupCompletedAt: new Date(),
   }).where(eq(schema.agencyProfiles.organizationId, orgId));
 
   revalidatePath('/dashboard');
