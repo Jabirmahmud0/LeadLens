@@ -52,7 +52,7 @@ const serviceSchema = z.object({
   priority: z.number().default(0), isActive: z.boolean().default(true),
 });
 
-export async function saveAgencyServices(data: z.array<z.infer<typeof serviceSchema>>) {
+export async function saveAgencyServices(data: Array<z.infer<typeof serviceSchema>>) {
   const session = await getSession();
   if (!session || !session.organization) throw new Error('Unauthorized');
   const orgId = session.organization.id;
@@ -106,7 +106,7 @@ const caseStudySchema = z.object({
   caseStudyUrl: z.string().url().optional().or(z.literal('')), isPublic: z.boolean().default(true),
 });
 
-export async function saveAgencyCaseStudies(data: z.array<z.infer<typeof caseStudySchema>>) {
+export async function saveAgencyCaseStudies(data: Array<z.infer<typeof caseStudySchema>>) {
   const session = await getSession();
   if (!session || !session.organization) throw new Error('Unauthorized');
   const orgId = session.organization.id;
