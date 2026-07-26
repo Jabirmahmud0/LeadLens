@@ -3,7 +3,7 @@ import { getSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { db, schema } from '@leadlens/database';
 import { eq, desc } from 'drizzle-orm';
-import { ScoreRing, Badge, SkeletonCard, EmptyState, FindingCard } from '@leadlens/ui';
+import { ScoreRing, Badge, SkeletonCard, EmptyState, FindingCard, cn } from '@leadlens/ui';
 import { ArrowRight, Search, Zap, Activity, AlertTriangle, FileText, CheckCircle2, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 
@@ -24,8 +24,8 @@ async function getDashboardData(orgId: string) {
     where: eq(schema.idealCustomerProfiles.organizationId, orgId)
   });
 
-  const caseStudies = await db.query.agencyCaseStudies.findMany({
-    where: eq(schema.agencyCaseStudies.organizationId, orgId)
+  const caseStudies = await db.query.caseStudies.findMany({
+    where: eq(schema.caseStudies.organizationId, orgId)
   });
 
   const prospects = await db.query.prospects.findMany({
@@ -57,12 +57,12 @@ export default async function DashboardPage() {
   const session = await getSession();
   if (!session || !session.organization) redirect('/login');
 
-  const { profile, completeness, prospects, services } = await getDashboardData(session.organization.id);
+  const { profile, completeness, prospects, services, jobs, icp, caseStudies } = await getDashboardData(session.organization.id);
 
   // Greeting logic
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
-  const name = profile?.name || session.user?.email?.split('@')[0] || 'Agency';
+  const name = session.organization.name || session.user?.email?.split('@')[0] || 'Agency';
 
   return (
     <div className="p-6 sm:p-8 max-w-7xl mx-auto space-y-8">

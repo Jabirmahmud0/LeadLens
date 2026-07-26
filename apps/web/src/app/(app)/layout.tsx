@@ -14,14 +14,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect('/login');
   }
 
-  // Get agency profile
-  const profiles = await db
-    .select({ name: schema.agencyProfiles.name })
-    .from(schema.agencyProfiles)
-    .where(eq(schema.agencyProfiles.organizationId, session.organization.id))
-    .limit(1);
-    
-  const agencyName = profiles.length > 0 ? profiles[0].name : 'Your Agency';
+  const agencyName = session.organization.name || 'Your Agency';
 
   const navGroups = [
     {
