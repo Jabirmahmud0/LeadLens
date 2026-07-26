@@ -8,15 +8,15 @@ import { Loader2, ArrowRight, Target, AlertTriangle, Lightbulb, Users, DollarSig
 import { saveAgencyICP } from '../actions';
 
 const icpSchema = z.object({
-  companySizeRange: z.array(z.string()).default([]),
-  targetIndustries: z.array(z.string()).default([]),
-  targetLocations: z.array(z.string()).default([]),
+  companySizeRange: z.array(z.string()).optional(),
+  targetIndustries: z.array(z.string()).optional(),
+  targetLocations: z.array(z.string()).optional(),
   minBudget: z.number().min(0).optional(),
-  preferredWebsiteCondition: z.array(z.string()).default([]),
-  decisionMakers: z.array(z.string()).default([]),
-  buyingSignals: z.array(z.string()).default([]),
-  disqualifyingFactors: z.array(z.string()).default([]),
-  commonProblems: z.array(z.string()).default([]),
+  preferredWebsiteCondition: z.array(z.string()).optional(),
+  decisionMakers: z.array(z.string()).optional(),
+  buyingSignals: z.array(z.string()).optional(),
+  disqualifyingFactors: z.array(z.string()).optional(),
+  commonProblems: z.array(z.string()).optional(),
 });
 
 type ICPFormValues = z.infer<typeof icpSchema>;
@@ -77,7 +77,17 @@ export default function ICPStep() {
     setIsSubmitting(true);
     setError(null);
     try {
-      await saveAgencyICP(data);
+      await saveAgencyICP({
+        ...data,
+        companySizeRange: data.companySizeRange ?? [],
+        targetIndustries: data.targetIndustries ?? [],
+        targetLocations: data.targetLocations ?? [],
+        preferredWebsiteCondition: data.preferredWebsiteCondition ?? [],
+        decisionMakers: data.decisionMakers ?? [],
+        buyingSignals: data.buyingSignals ?? [],
+        disqualifyingFactors: data.disqualifyingFactors ?? [],
+        commonProblems: data.commonProblems ?? [],
+      });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : String(err) || 'Failed to save');
       setIsSubmitting(false);

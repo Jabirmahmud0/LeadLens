@@ -11,13 +11,13 @@ const serviceSchema = z.object({
   name: z.string().min(2, 'Name is required'),
   description: z.string().min(10, 'Description must be at least 10 chars'),
   problemSolved: z.string().optional(),
-  deliverables: z.array(z.string()).default([]),
+  deliverables: z.array(z.string()).optional(),
   priceMin: z.number().min(0).optional(),
   priceMax: z.number().min(0).optional(),
-  preferredIndustries: z.array(z.string()).default([]),
-  disqualifiers: z.array(z.string()).default([]),
-  priority: z.number().default(0),
-  isActive: z.boolean().default(true),
+  preferredIndustries: z.array(z.string()).optional(),
+  disqualifiers: z.array(z.string()).optional(),
+  priority: z.number().optional(),
+  isActive: z.boolean().optional(),
 });
 
 const servicesSchema = z.object({
@@ -59,7 +59,14 @@ export default function ServicesStep() {
     setIsSubmitting(true);
     setError(null);
     try {
-      await saveAgencyServices(data.services);
+      await saveAgencyServices(data.services.map(svc => ({
+        ...svc,
+        deliverables: svc.deliverables ?? [],
+        preferredIndustries: svc.preferredIndustries ?? [],
+        disqualifiers: svc.disqualifiers ?? [],
+        priority: svc.priority ?? 0,
+        isActive: svc.isActive ?? true,
+      })));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : String(err) || 'Failed to save');
       setIsSubmitting(false);
