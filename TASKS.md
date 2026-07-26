@@ -976,14 +976,14 @@ Output schema: `{ verifiedFindings: [{ findingId, sourceUrls, confidence, isFact
 ## Phase 17 — Testing
 
 ### 17.1 Unit tests (§29.1)
-- [ ] URL normalization edge cases
-- [ ] SSRF IP validation (all private ranges, cloud metadata IPs)
-- [ ] Opportunity score calculation
-- [ ] Auth token hashing (hashToken is deterministic)
-- [ ] Session expiry check
-- [ ] Zod schema validation for all AI responses
-- [ ] Technology detection signatures
-- [ ] Source mapping accuracy
+  - [x] URL normalization edge cases
+  - [x] SSRF IP validation (all private ranges, cloud metadata IPs)
+  - [x] Opportunity score calculation
+  - [x] Auth token hashing (hashToken is deterministic)
+  - [x] Session expiry check
+  - [x] Zod schema validation for all AI responses
+  - [x] Technology detection signatures
+  - [x] Source mapping accuracy
 
 > 📌 **Commit:** `test(unit): URL normalization, SSRF, scoring, auth, AI schema, tech detection`
 

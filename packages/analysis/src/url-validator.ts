@@ -49,7 +49,7 @@ export async function validateAndNormalizeUrl(urlString: string): Promise<string
   let url: URL;
   
   let toParse = urlString.trim();
-  if (!/^https?:\/\//i.test(toParse)) {
+  if (!/^[a-zA-Z]+:\/\//.test(toParse)) {
     toParse = 'https://' + toParse;
   }
 
