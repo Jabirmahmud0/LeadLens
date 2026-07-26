@@ -74,8 +74,8 @@ export default function ServicesStep() {
   };
 
   const handleDuplicate = (index: number) => {
-    const currentValues = watch(`services.\${index}`);
-    append({ ...currentValues, name: `\${currentValues.name} (Copy)` });
+    const currentValues = watch(`services.${index}` as const);
+    append({ ...currentValues, name: `${currentValues.name} (Copy)` });
   };
 
   return (
@@ -141,7 +141,7 @@ export default function ServicesStep() {
                         type="text"
                         placeholder="e.g. Technical SEO Audit"
                         className="block w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-2.5 text-white focus:border-white focus:ring-1 focus:ring-white transition-colors"
-                        {...register(`services.\${index}.name` as const)}
+                        {...register(`services.${index}.name` as const)}
                       />
                       {errors.services?.[index]?.name && <p className="text-xs text-red-400 mt-1">{errors.services[index].name?.message}</p>}
                     </div>
@@ -152,7 +152,7 @@ export default function ServicesStep() {
                         rows={3}
                         placeholder="Describe what this service entails..."
                         className="block w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-2.5 text-white focus:border-white focus:ring-1 focus:ring-white transition-colors resize-none"
-                        {...register(`services.\${index}.description` as const)}
+                        {...register(`services.${index}.description` as const)}
                       />
                       {errors.services?.[index]?.description && <p className="text-xs text-red-400 mt-1">{errors.services[index].description?.message}</p>}
                     </div>
@@ -163,7 +163,7 @@ export default function ServicesStep() {
                         type="text"
                         placeholder="e.g. Low conversion rate"
                         className="block w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-2.5 text-white focus:border-white focus:ring-1 focus:ring-white transition-colors"
-                        {...register(`services.\${index}.problemSolved` as const)}
+                        {...register(`services.${index}.problemSolved` as const)}
                       />
                     </div>
                   </div>
@@ -177,7 +177,7 @@ export default function ServicesStep() {
                           type="number"
                           placeholder="2500"
                           className="block w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-2.5 text-white focus:border-white focus:ring-1 focus:ring-white transition-colors"
-                          {...register(`services.\${index}.priceMin` as const, { valueAsNumber: true })}
+                          {...register(`services.${index}.priceMin` as const, { valueAsNumber: true })}
                         />
                       </div>
                       <div>
@@ -186,7 +186,7 @@ export default function ServicesStep() {
                           type="number"
                           placeholder="5000"
                           className="block w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-2.5 text-white focus:border-white focus:ring-1 focus:ring-white transition-colors"
-                          {...register(`services.\${index}.priceMax` as const, { valueAsNumber: true })}
+                          {...register(`services.${index}.priceMax` as const, { valueAsNumber: true })}
                         />
                       </div>
                     </div>
@@ -199,15 +199,15 @@ export default function ServicesStep() {
                         className="block w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-2.5 text-white focus:border-white focus:ring-1 focus:ring-white transition-colors"
                         onChange={(e) => {
                           const val = e.target.value;
-                          setValue(`services.\${index}.deliverables`, val.split(',').map(s => s.trim()).filter(Boolean));
+                          setValue(`services.${index}.deliverables`, val.split(',').map(s => s.trim()).filter(Boolean));
                         }}
-                        defaultValue={watch(`services.\${index}.deliverables`)?.join(', ')}
+                        defaultValue={watch(`services.${index}.deliverables` as const)?.join(', ')}
                       />
                     </div>
 
                     <div className="flex items-center justify-between pt-4">
                       <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" className="w-4 h-4 rounded border-neutral-700 bg-neutral-900 text-white focus:ring-white focus:ring-offset-neutral-950" {...register(`services.\${index}.isActive` as const)} />
+                        <input type="checkbox" className="w-4 h-4 rounded border-neutral-700 bg-neutral-900 text-white focus:ring-white focus:ring-offset-neutral-950" {...register(`services.${index}.isActive` as const)} />
                         <span className="text-sm font-medium text-neutral-300">Active Service</span>
                       </label>
                       
