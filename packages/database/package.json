@@ -16,6 +16,7 @@
   "devDependencies": {
     "@leadlens/config": "workspace:*",
     "@types/node": "^26.1.1",
+    "@types/ws": "^8.5.14",
     "drizzle-kit": "^0.31.10",
     "typescript": "^5.0.0"
   }
