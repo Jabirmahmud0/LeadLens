@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { useFieldArray, useForm, Controller } from 'react-hook-form';
@@ -42,6 +42,7 @@ export default function CaseStudiesStep() {
           solution: 'Implemented programmatic technical SEO fixes and consolidated duplicated tags.',
           results: 'Increased non-branded organic traffic by 300% in 4 months.',
           deliverables: ['Technical SEO', 'Indexation Fixes'],
+          serviceTags: [],
           isPublic: true,
         }
       ]
