@@ -58,7 +58,12 @@ export default function CaseStudiesStep() {
     setIsSubmitting(true);
     setError(null);
     try {
-      await saveAgencyCaseStudies(data.caseStudies);
+      await saveAgencyCaseStudies(data.caseStudies.map(cs => ({
+        ...cs,
+        isPublic: cs.isPublic ?? true,
+        deliverables: cs.deliverables ?? [],
+        serviceTags: cs.serviceTags ?? [],
+      })));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : String(err) || 'Failed to save');
       setIsSubmitting(false);
