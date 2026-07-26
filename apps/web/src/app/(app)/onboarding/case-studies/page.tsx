@@ -22,7 +22,7 @@ const caseStudySchema = z.object({
 });
 
 const formSchema = z.object({
-  caseStudies: z.array(caseStudySchema).default([]),
+  caseStudies: z.array(caseStudySchema),
 });
 
 type FormValues = z.infer<typeof formSchema>;
