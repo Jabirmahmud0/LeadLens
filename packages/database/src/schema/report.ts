@@ -177,6 +177,17 @@ export const reportFindingsRelations = relations(reportFindings, ({ one, many })
   sources: many(findingSources),
 }));
 
+export const serviceRecommendationsRelations = relations(serviceRecommendations, ({ one }) => ({
+  report: one(reports, {
+    fields: [serviceRecommendations.reportId],
+    references: [reports.id],
+  }),
+  service: one(agencyServices, {
+    fields: [serviceRecommendations.serviceId],
+    references: [agencyServices.id],
+  }),
+}));
+
 export const findingSourcesRelations = relations(findingSources, ({ one }) => ({
   finding: one(reportFindings, {
     fields: [findingSources.findingId],
