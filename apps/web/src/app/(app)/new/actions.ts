@@ -51,7 +51,7 @@ export async function submitAnalysis(data: z.infer<typeof ComposerSchema>) {
     const recentProspects = await db.query.prospects.findMany({
       where: and(
         eq(schema.prospects.organizationId, session.organization.id),
-        eq(schema.prospects.domain, domain)
+        eq(schema.prospects.normalizedDomain, domain)
       ),
       orderBy: (p, { desc }) => [desc(p.createdAt)],
       limit: 1
@@ -73,7 +73,7 @@ export async function submitAnalysis(data: z.infer<typeof ComposerSchema>) {
   // 3. Insert Prospect
   const [prospect] = await db.insert(schema.prospects).values({
     organizationId: session.organization.id,
-    domain: new URL(normalizedUrl).hostname,
+    normalizedDomain: new URL(normalizedUrl).hostname,
     companyName: rest.companyName || new URL(normalizedUrl).hostname,
     status: 'queued', // Mark as queued to wait for worker
   }).returning();

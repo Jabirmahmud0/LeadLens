@@ -14,6 +14,7 @@
     "@leadlens/analysis": "workspace:*",
     "@leadlens/auth": "workspace:*",
     "@leadlens/database": "workspace:*",
+    "@leadlens/shared": "workspace:*",
     "@leadlens/ui": "workspace:*",
     "@sentry/nextjs": "^10.68.0",
     "clsx": "^2.1.1",
