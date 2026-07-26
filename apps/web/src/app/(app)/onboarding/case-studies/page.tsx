@@ -14,11 +14,11 @@ const caseStudySchema = z.object({
   problem: z.string().min(10, 'Describe the problem'),
   solution: z.string().min(10, 'Describe the solution'),
   results: z.string().min(10, 'Describe the result'),
-  deliverables: z.array(z.string()).default([]),
+  deliverables: z.array(z.string()).optional(),
   metrics: z.record(z.string(), z.string()).optional(),
-  serviceTags: z.array(z.string()).default([]),
+  serviceTags: z.array(z.string()).optional(),
   caseStudyUrl: z.string().url('Must be a valid URL').or(z.literal('')).optional(),
-  isPublic: z.boolean().default(true),
+  isPublic: z.boolean().optional(),
 });
 
 const formSchema = z.object({
