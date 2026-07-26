@@ -73,6 +73,8 @@ export async function submitAnalysis(data: z.infer<typeof ComposerSchema>) {
   // 3. Insert Prospect
   const [prospect] = await db.insert(schema.prospects).values({
     organizationId: session.organization.id,
+    createdBy: session.user.id,
+    websiteUrl: normalizedUrl,
     normalizedDomain: new URL(normalizedUrl).hostname,
     companyName: rest.companyName || new URL(normalizedUrl).hostname,
     status: 'queued', // Mark as queued to wait for worker
