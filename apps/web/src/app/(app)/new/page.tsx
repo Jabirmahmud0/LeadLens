@@ -16,8 +16,8 @@ export default async function NewAnalysisPage() {
     where: eq(schema.agencyServices.organizationId, session.organization.id)
   });
 
-  const caseStudies = await db.query.agencyCaseStudies.findMany({
-    where: eq(schema.agencyCaseStudies.organizationId, session.organization.id)
+  const caseStudies = await db.query.caseStudies.findMany({
+    where: eq(schema.caseStudies.organizationId, session.organization.id)
   });
 
   return (
