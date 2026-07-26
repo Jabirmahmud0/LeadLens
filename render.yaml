@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: leadlens-worker
+    env: node
+    buildCommand: pnpm install && pnpm run build --filter worker
+    startCommand: pnpm --filter worker start
+    healthCheckPath: /health
+    autoDeploy: false
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false # Must be set in Render dashboard
+      - key: WORKER_SECRET
+        sync: false # Must be set in Render dashboard
+      - key: SENTRY_DSN
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: POSTHOG_KEY
+        sync: false

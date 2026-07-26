@@ -6,6 +6,10 @@ import { nodeProfilingIntegration } from "@sentry/profiling-node";
 
 dotenv.config();
 
+import { validateEnv } from '@leadlens/shared';
+// Validate required environment variables on startup
+validateEnv();
+
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
   integrations: [

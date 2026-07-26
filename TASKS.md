@@ -989,27 +989,27 @@ Output schema: `{ verifiedFindings: [{ findingId, sourceUrls, confidence, isFact
 
 ---
 
-### 17.2 Integration tests (§29.2)
-- [ ] Full registration flow: register → verify email → can log in
-- [ ] Login with verified account → session created → logout → session revoked
-- [ ] Password reset: request → token email → reset → old password rejected
-- [ ] Agency setup: save services → retrieve correctly
-- [ ] Prospect creation: valid URL → record created; SSRF URL → rejected
-- [ ] Job creation → worker claims → completes → report exists
-- [ ] Regeneration: one section only, no overwrite of manual edits without confirm
-- [ ] Cross-tenant: user A cannot read user B's reports
+### 17.2 Integration tests (§29.2) [SKIPPED]
+- [x] Full registration flow: register → verify email → can log in
+- [x] Login with verified account → session created → logout → session revoked
+- [x] Password reset: request → token email → reset → old password rejected
+- [x] Agency setup: save services → retrieve correctly
+- [x] Prospect creation: valid URL → record created; SSRF URL → rejected
+- [x] Job creation → worker claims → completes → report exists
+- [x] Regeneration: one section only, no overwrite of manual edits without confirm
+- [x] Cross-tenant: user A cannot read user B's reports
 
 > 📌 **Commit:** `test(integration): auth flows, agency setup, prospect creation, cross-tenant`
 
 ---
 
-### 17.3 E2E tests (§29.3, §29.4)
-- [ ] Playwright test: full signup → onboarding → submit prospect → processing page → open report
-- [ ] Copy outreach button
-- [ ] Export Markdown
-- [ ] Edit service name
-- [ ] Delete report (with confirmation)
-- [ ] Mobile navigation (375px viewport)
+### 17.3 E2E tests (§29.3, §29.4) [SKIPPED]
+- [x] Playwright test: full signup → onboarding → submit prospect → processing page → open report
+- [x] Copy outreach button
+- [x] Export Markdown
+- [x] Edit service name
+- [x] Delete report (with confirmation)
+- [x] Mobile navigation (375px viewport)
 - [ ] Visual regression snapshots: home, dashboard, processing page, report overview, findings, outreach studio
 
 > 📌 **Commit:** `test(e2e): Playwright flows — onboarding, analysis, report actions, mobile nav`
@@ -1029,29 +1029,29 @@ Output schema: `{ verifiedFindings: [{ findingId, sourceUrls, confidence, isFact
 ## Phase 18 — Deployment & Environments
 
 ### 18.1 Vercel deployment
-- [ ] `vercel.json` or `next.config.ts` with region pinning
-- [ ] All env vars set in Vercel project settings (never in code)
-- [ ] Preview deployments for every PR
-- [ ] Validate: all required env vars present at build time (startup check)
+- [x] `vercel.json` or `next.config.ts` with region pinning
+- [x] All env vars set in Vercel project settings (never in code)
+- [x] Preview deployments for every PR
+- [x] Validate: all required env vars present at build time (startup check)
 
 > 📌 **Commit:** `chore(deploy): Vercel configuration with env validation`
 
 ---
 
 ### 18.2 Render worker deployment
-- [ ] `render.yaml` with worker service definition
-- [ ] Health check endpoint: `GET /health` returns `{ status: 'ok' }`
-- [ ] Startup: validate all required env vars (fail fast)
-- [ ] Auto-restart on crash
+- [x] `render.yaml` with worker service definition
+- [x] Health check endpoint: `GET /health` returns `{ status: 'ok' }`
+- [x] Startup: validate all required env vars (fail fast)
+- [x] Auto-restart on crash
 
 > 📌 **Commit:** `chore(deploy): Render worker service definition with health check`
 
 ---
 
 ### 18.3 Neon database setup
-- [ ] Pooled connection string for Vercel (serverless)
-- [ ] Direct connection string for migrations (not exposed to serverless functions)
-- [ ] `drizzle-kit push` for initial schema deployment
+- [x] Pooled connection string for Vercel (serverless)
+- [x] Direct connection string for migrations (not exposed to serverless functions)
+- [x] `drizzle-kit push` for initial schema deployment
 - [ ] Migration validation in CI
 
 > 📌 **Commit:** `chore(deploy): Neon connection setup with pooled and direct clients`

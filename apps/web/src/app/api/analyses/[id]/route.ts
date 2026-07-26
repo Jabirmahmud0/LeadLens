@@ -6,7 +6,7 @@ import { validateSession } from '@leadlens/auth';
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const token = await getSessionCookie();
   if (!token) {
@@ -21,7 +21,7 @@ export async function GET(
   }
 
   try {
-    const analysisId = params.id;
+    const { id: analysisId } = await params;
     
     // Fetch the job
     const job = await db.query.analysisJobs.findFirst({

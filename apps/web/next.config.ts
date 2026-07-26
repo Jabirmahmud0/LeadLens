@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from '@sentry/nextjs';
+import { validateEnv } from '@leadlens/shared';
+
+// Validate environment variables at build and startup time
+validateEnv();
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@leadlens/ui"],
