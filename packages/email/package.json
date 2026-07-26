@@ -1,0 +1,19 @@
+{
+  "name": "@leadlens/email",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "lint": "eslint \"src/**/*.ts*\"",
+    "clean": "rm -rf .turbo node_modules"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.13"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "@types/nodemailer": "^6.4.14",
+    "@leadlens/config": "workspace:*",
+    "typescript": "^5.4.5"
+  }
+}
