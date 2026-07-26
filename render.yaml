@@ -2,7 +2,7 @@ services:
   - type: web
     name: leadlens-worker
     env: node
-    buildCommand: pnpm install && pnpm run build --filter worker
+    buildCommand: pnpm install --frozen-lockfile
     startCommand: pnpm --filter worker start
     healthCheckPath: /health
     autoDeploy: false
@@ -35,10 +35,15 @@ services:
         sync: false
       - key: SMTP_FROM
         sync: false
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: WORKER_POLL_INTERVAL_MS
+        value: 5000
+      - key: WORKER_HEARTBEAT_INTERVAL_MS
+        value: 30000
       - key: CRAWL_MAX_PAGES
         value: 8
       - key: CRAWL_FETCH_TIMEOUT_MS
         value: 10000
       - key: CRAWL_MAX_DURATION_MS
         value: 60000
-        sync: false
