@@ -7,9 +7,9 @@ import { Badge } from '@leadlens/ui';
 export default async function ReportOutreachPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params;
+  const { id } = await params;
 
   // Fetch Report with Relations
   const report = await db.query.reports.findFirst({

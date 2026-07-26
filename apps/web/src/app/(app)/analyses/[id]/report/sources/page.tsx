@@ -7,9 +7,9 @@ import Link from 'next/link';
 export default async function ReportSourcesPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params;
+  const { id } = await params;
 
   // 1. Fetch Report (just to verify it exists and get the organization ID if needed)
   const report = await db.query.reports.findFirst({

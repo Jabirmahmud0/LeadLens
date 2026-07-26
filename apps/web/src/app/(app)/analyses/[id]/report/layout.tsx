@@ -7,9 +7,9 @@ export default async function ReportLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params;
+  const { id } = await params;
 
   // 1. Fetch Job
   const job = await db.query.analysisJobs.findFirst({

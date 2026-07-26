@@ -6,9 +6,9 @@ import { Target, CheckCircle2, AlertTriangle, Lightbulb } from 'lucide-react';
 export default async function ReportOpportunitiesPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params;
+  const { id } = await params;
 
   // Fetch Report with Relations
   const report = await db.query.reports.findFirst({
