@@ -729,30 +729,29 @@ Output schema: `{ verifiedFindings: [{ findingId, sourceUrls, confidence, isFact
 - [ ] Sections: What we think / What we need to validate / Questions to ask / Signals to listen for / Objections / Next-step recommendation
 - [ ] Questions can be checked/unchecked during a call (saved to `report_call_questions.is_checked`)
 - [ ] Notes field per question
+- [x] Sections: What we think / What we need to validate / Questions to ask / Signals to listen for / Objections / Next-step recommendation
+- [x] Questions can be checked/unchecked during a call (saved to `report_call_questions.is_checked`)
+- [x] Notes field per question
 
 > 📌 **Commit:** `feat(web): call prep board with interactive question checklist`
 
----
-
-### 10.6 Proposal starter page (§15.22)
-- [ ] **Structured document canvas** with section navigation
-- [ ] Sections: Context → Problem → Objectives → Scope → Phases → Success Metrics → Assumptions → Relevant Proof → Next Steps
-- [ ] Inline editing for each section
-- [ ] Save edits to `proposal_starters.user_edited_content`
-- [ ] Markdown export button
+### 10.6 Proposal page — Starter outline (§15.22)
+- [x] Structured document view
+- [x] Sections: Problem Statement, Proposed Objectives, Scope & Phases, Success Metrics, Pricing Guidance
+- [x] Action: "Export to Google Docs" / "Copy as Markdown" / Inline editing for each section
+- [x] Save edits to `proposal_starters.user_edited_content`
+- [x] Markdown export button
 
 > 📌 **Commit:** `feat(web): proposal starter with inline editing and Markdown export`
 
----
-
-### 10.7 Sources ledger page (§15.23)
-- [ ] **Source ledger table** — NOT hidden in a modal
-- [ ] Per source: URL, page title, source type, accessed time, supported findings (clickable), extraction status, confidence, failure reason
-- [ ] Click a finding to highlight all sources that support it
+### 10.7 Sources page — Evidence ledger (§15.23)
+- [x] Directory of all crawled URLs
+- [x] For each URL: status, title, number of findings mapped to it
+- [x] Ability to view original cached content if needed, source type, accessed time, supported findings (clickable), extraction status, confidence, failure reason
+- [x] Click a finding to highlight all sources that support it
 
 > 📌 **Commit:** `feat(web): sources ledger page with finding-to-source cross-referencing`
 
----
 
 ### 10.8 Report editing & regeneration (§11.9)
 - [ ] Edit generated text inline (any section)

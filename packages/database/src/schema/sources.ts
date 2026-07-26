@@ -50,3 +50,10 @@ export const pagespeedResults = pgTable('pagespeed_results', {
   rawSummary: jsonb('raw_summary'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
+
+import { relations } from 'drizzle-orm';
+import { findingSources } from './report';
+
+export const sourcePagesRelations = relations(sourcePages, ({ many }) => ({
+  findings: many(findingSources),
+}));
