@@ -125,7 +125,7 @@ export default function ICPStep() {
                 name="companySizeRange"
                 render={({ field }) => (
                   <MultiSelect 
-                    value={field.value} 
+                    value={field.value ?? []} 
                     onChange={field.onChange} 
                     icon={Target}
                     options={['1-10', '10-50', '50-200', '200-500', '500-1000', '1000+']} 
@@ -141,7 +141,7 @@ export default function ICPStep() {
                 name="targetIndustries"
                 render={({ field }) => (
                   <MultiSelect 
-                    value={field.value} 
+                    value={field.value ?? []} 
                     onChange={field.onChange} 
                     icon={Target}
                     options={['B2B SaaS', 'E-commerce', 'Healthcare', 'Finance', 'Real Estate', 'Local Services', 'Manufacturing', 'Legal']} 
@@ -166,7 +166,7 @@ export default function ICPStep() {
                 name="preferredWebsiteCondition"
                 render={({ field }) => (
                   <MultiSelect 
-                    value={field.value} 
+                    value={field.value ?? []} 
                     onChange={field.onChange} 
                     icon={Target}
                     options={['Outdated Design', 'Slow Performance', 'No SSL', 'Poor Mobile Score', 'Missing Core Web Vitals', 'Thin Content', 'No Schema Markup']} 
@@ -182,7 +182,7 @@ export default function ICPStep() {
                 name="commonProblems"
                 render={({ field }) => (
                   <MultiSelect 
-                    value={field.value} 
+                    value={field.value ?? []} 
                     onChange={field.onChange} 
                     icon={Target}
                     options={['Low Traffic', 'Poor Conversion Rate', 'High Bounce Rate', 'Stagnant Growth', 'Lost Rankings', 'Technical Debt']} 
@@ -222,7 +222,7 @@ export default function ICPStep() {
                 name="disqualifyingFactors"
                 render={({ field }) => (
                   <MultiSelect 
-                    value={field.value} 
+                    value={field.value ?? []} 
                     onChange={field.onChange} 
                     icon={AlertTriangle}
                     options={['B2C E-commerce', 'No Budget', 'Do-it-yourself mentality', 'Pre-revenue Startups', 'Non-profits', 'Adult/Gambling']} 
