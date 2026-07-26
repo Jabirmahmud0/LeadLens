@@ -71,7 +71,7 @@ export default async function AnalysesPage() {
           </div>
         ) : (
           <div className="space-y-6 relative before:absolute before:inset-y-0 before:left-6 before:w-px before:bg-neutral-800">
-            {analyses.map((a, i) => (
+            {analyses.map(a => (
               <div key={a.id} className="relative pl-16 pr-4">
                 {/* Timeline Icon */}
                 <div className="absolute left-2.5 top-1.5 w-7 h-7 rounded-full bg-neutral-950 border border-neutral-800 flex items-center justify-center shadow-sm">
