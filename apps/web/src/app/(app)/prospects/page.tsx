@@ -74,7 +74,7 @@ export default async function ProspectsPage() {
                 <div className="flex items-start justify-between mb-4">
                   <div className="min-w-0 flex-1 pr-4">
                     <h3 className="text-lg font-semibold text-white truncate">{p.companyName}</h3>
-                    <p className="text-sm text-neutral-400 truncate">{p.domain}</p>
+                    <p className="text-sm text-neutral-400 truncate">{p.websiteUrl}</p>
                   </div>
                   <ScoreRing score={p.overallScore || 0} size={56} strokeWidth={5} className="shrink-0" />
                 </div>
