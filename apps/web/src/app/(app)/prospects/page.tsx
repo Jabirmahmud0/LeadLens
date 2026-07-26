@@ -76,7 +76,7 @@ export default async function ProspectsPage() {
                     <h3 className="text-lg font-semibold text-white truncate">{p.companyName}</h3>
                     <p className="text-sm text-neutral-400 truncate">{p.websiteUrl}</p>
                   </div>
-                  <ScoreRing score={p.overallScore || 0} size={56} strokeWidth={5} className="shrink-0" />
+                  <ScoreRing score={0} size={56} strokeWidth={5} className="shrink-0" />
                 </div>
                 
                 <div className="mt-2 space-y-3 flex-1">
