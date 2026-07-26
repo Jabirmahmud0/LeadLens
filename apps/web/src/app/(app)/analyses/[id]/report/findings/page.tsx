@@ -1,8 +1,11 @@
-import { db } from '@leadlens/database';
+import { db, schema } from '@leadlens/database';
+import { and, eq } from 'drizzle-orm';
+import { requireSession } from '@/lib/auth/session';
 import { notFound } from 'next/navigation';
 import { Badge, FindingCard, SourceChip } from '@leadlens/ui';
 import { ExternalLink, ShieldAlert, BarChart3, TrendingUp, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
+import { FindingControls } from './FindingControls';
 
 export default async function ReportFindingsPage({
   params,
@@ -10,10 +13,12 @@ export default async function ReportFindingsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const session = await requireSession();
+  if (!session.organization) notFound();
 
   // Fetch Report with Relations
   const report = await db.query.reports.findFirst({
-    where: (r, { eq }) => eq(r.analysisJobId, id),
+    where: and(eq(schema.reports.analysisJobId, id), eq(schema.reports.organizationId, session.organization.id)),
     with: {
       findings: {
         with: {
@@ -34,7 +39,7 @@ export default async function ReportFindingsPage({
 
   // Group findings by category
   const groupedFindings: Record<string, typeof report.findings> = {};
-  report.findings.forEach(finding => {
+  report.findings.filter((finding) => !finding.isHidden).forEach(finding => {
     const cat = finding.category || 'General';
     if (!groupedFindings[cat]) {
       groupedFindings[cat] = [];
@@ -127,6 +132,7 @@ export default async function ReportFindingsPage({
                             </div>
                           )}
                         </div>
+                        <FindingControls finding={finding} />
                       </div>
                     }
                   />

@@ -1,0 +1,3 @@
+import { LegalPage } from '@/components/LegalPage';
+export const metadata = { title: 'Acceptable Use | LeadLens' };
+export default function AcceptableUsePage() { return <LegalPage title="Acceptable Use Policy"><section><h2>Permitted use</h2><p>Use LeadLens for legitimate research of public business websites and human-reviewed pre-sales preparation.</p></section><section><h2>Prohibited use</h2><ul><li>Accessing private systems, bypassing authentication, or exploiting vulnerabilities.</li><li>Mass unsolicited messaging, harassment, impersonation, or discriminatory profiling.</li><li>Submitting secrets, passwords, private tokens, or unlawfully obtained personal data.</li><li>Attempting to evade limits or interfere with the service.</li></ul></section></LegalPage>; }

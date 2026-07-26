@@ -1,0 +1,14 @@
+.page { font-family:"Segoe UI Variable Text","Aptos","Segoe UI",Arial,sans-serif; font-style:normal; }
+.display { font-family:"Segoe UI Variable Display","Aptos Display","Segoe UI",Arial,sans-serif; font-style:normal; }
+.hero { isolation:isolate; }
+.hero::before { content:""; position:absolute; inset:0; z-index:-1; background:radial-gradient(circle at 72% 45%,rgba(187,247,208,.58),transparent 27rem); }
+.reveal { opacity:0; animation:reveal .9s cubic-bezier(.22,1,.36,1) forwards; }
+.delay { animation-delay:120ms; }
+.pulse { display:inline-block; width:.42rem; height:.42rem; border-radius:99px; background:#16a34a; box-shadow:0 0 0 0 rgba(22,163,74,.42); animation:pulse 2.3s ease-out infinite; }
+.recommendation { animation:recommendIn .45s cubic-bezier(.22,1,.36,1); }
+.planCard { transition:transform 300ms ease,border-color 300ms ease,box-shadow 300ms ease; }
+.planCard:hover { transform:translateY(-4px); border-color:#a7d8b5; box-shadow:0 26px 58px -42px rgba(20,83,45,.48); }
+@keyframes reveal { from { opacity:0; transform:translateY(24px); filter:blur(5px); } to { opacity:1; transform:translateY(0); filter:blur(0); } }
+@keyframes pulse { 70% { box-shadow:0 0 0 8px rgba(22,163,74,0); } 100% { box-shadow:0 0 0 0 rgba(22,163,74,0); } }
+@keyframes recommendIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+@media (prefers-reduced-motion:reduce) { .reveal { opacity:1; } .reveal,.pulse,.recommendation { animation:none; } .planCard { transition:none; } }

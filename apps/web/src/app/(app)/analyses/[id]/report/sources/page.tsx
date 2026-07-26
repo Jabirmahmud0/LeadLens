@@ -1,4 +1,6 @@
-import { db } from '@leadlens/database';
+import { db, schema } from '@leadlens/database';
+import { and, eq } from 'drizzle-orm';
+import { requireSession } from '@/lib/auth/session';
 import { notFound } from 'next/navigation';
 import { Badge } from '@leadlens/ui';
 import { ExternalLink, Search, FileText, Code2, AlertTriangle, LayoutTemplate } from 'lucide-react';
@@ -10,10 +12,12 @@ export default async function ReportSourcesPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const session = await requireSession();
+  if (!session.organization) notFound();
 
   // 1. Fetch Report (just to verify it exists and get the organization ID if needed)
   const report = await db.query.reports.findFirst({
-    where: (r, { eq }) => eq(r.analysisJobId, id),
+    where: and(eq(schema.reports.analysisJobId, id), eq(schema.reports.organizationId, session.organization.id)),
   });
 
   if (!report) {
@@ -64,7 +68,8 @@ export default async function ReportSourcesPage({
               const isError = source.statusCode && source.statusCode >= 400;
 
               return (
-                <div key={source.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-neutral-800/30 transition-colors">
+                <details key={source.id} className="group p-4 hover:bg-neutral-800/30 transition-colors">
+                <summary className="grid grid-cols-12 gap-4 items-center cursor-pointer list-none">
                   
                   {/* Page Details */}
                   <div className="col-span-8 md:col-span-9 flex items-start gap-3">
@@ -103,7 +108,12 @@ export default async function ReportSourcesPage({
                     }
                   </div>
 
+                </summary>
+                <div className="ml-8 mt-4 rounded-xl border border-neutral-800 bg-neutral-950 p-4 text-sm text-neutral-400">
+                  <div className="mb-2 flex flex-wrap gap-4 text-xs"><span>Fetched {source.fetchedAt ? new Date(source.fetchedAt).toLocaleString() : 'not available'}</span><span>{source.contentType || 'unknown type'}</span><span>{source.fetchDurationMs ? `${source.fetchDurationMs} ms` : 'duration unavailable'}</span></div>
+                  {source.errorMessage ? <p className="text-red-300">{source.errorMessage}</p> : <p className="max-h-48 overflow-y-auto whitespace-pre-wrap">{source.extractedText?.slice(0, 2000) || source.metaDescription || 'No extracted preview is available.'}</p>}
                 </div>
+                </details>
               );
             })}
 

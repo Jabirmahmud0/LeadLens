@@ -1,0 +1,3 @@
+import { LegalPage } from '@/components/LegalPage';
+export const metadata = { title: 'Cookie Notice | LeadLens' };
+export default function CookiesPage() { return <LegalPage title="Cookie Notice"><section><h2>Essential cookies</h2><p>LeadLens uses an HTTP-only session cookie to keep users signed in and protect authenticated requests.</p></section><section><h2>Analytics</h2><p>Privacy-conscious analytics may record page and product events when configured. Autocapture is disabled to reduce accidental collection of sensitive content.</p></section><section><h2>Controls</h2><p>You can block nonessential analytics through browser controls. Blocking the essential session cookie prevents authenticated use.</p></section></LegalPage>; }

@@ -1,126 +1,40 @@
-import * as React from 'react';
-import { getSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
-import { Shield, Key, MonitorSmartphone, Trash2, LogOut } from 'lucide-react';
-import { Badge } from '@leadlens/ui';
+import { desc, eq } from 'drizzle-orm';
+import { Key, MonitorSmartphone, Shield } from 'lucide-react';
+import { db, schema } from '@leadlens/database';
+import { getSession } from '@/lib/auth/session';
+import { changePassword, logoutOtherSessions, revokeSessionAction } from './actions';
+import { DangerActions } from './DangerActions';
 
-export const metadata = {
-  title: 'Security | Account | LeadLens',
-};
+export const metadata = { title: 'Security | Account | LeadLens' };
 
 export default async function SecurityPage() {
   const session = await getSession();
-  if (!session || !session.user) redirect('/login');
+  if (!session?.user) redirect('/login');
+  const sessions = await db.query.sessions.findMany({
+    where: eq(schema.sessions.userId, session.user.id),
+    orderBy: [desc(schema.sessions.lastSeenAt)],
+  });
+  const activeSessions = sessions.filter((item) => !item.revokedAt && item.expiresAt > new Date());
 
-  return (
-    <div className="space-y-8">
-      
-      {/* Password Management */}
-      <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 sm:p-8 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-neutral-800 flex items-center justify-center shrink-0">
-            <Key className="w-5 h-5 text-neutral-400" />
-          </div>
-          <div>
-            <h2 className="text-xl font-medium text-white">Password</h2>
-            <p className="text-sm text-neutral-400">Update your password to keep your account secure.</p>
-          </div>
-        </div>
-        
-        <div className="space-y-4 max-w-md">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-neutral-300">Current Password</label>
-            <input
-              type="password"
-              className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-neutral-300">New Password</label>
-            <input
-              type="password"
-              className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-            />
-          </div>
-          <button className="bg-neutral-800 hover:bg-neutral-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors mt-2">
-            Update Password
-          </button>
-        </div>
-      </div>
+  return <div className="space-y-8">
+    <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 sm:p-8">
+      <div className="mb-6 flex items-center gap-3"><Key className="h-5 w-5 text-neutral-400" /><div><h2 className="text-xl text-white">Password</h2><p className="text-sm text-neutral-400">Changing it signs out every other device.</p></div></div>
+      <form action={changePassword} className="max-w-md space-y-4">
+        <label className="block text-sm text-neutral-300">Current password<input name="currentPassword" type="password" autoComplete="current-password" required className="mt-2 w-full rounded-lg border border-neutral-800 bg-neutral-950 px-4 py-2.5 text-white" /></label>
+        <label className="block text-sm text-neutral-300">New password<input name="newPassword" type="password" autoComplete="new-password" minLength={12} required className="mt-2 w-full rounded-lg border border-neutral-800 bg-neutral-950 px-4 py-2.5 text-white" /></label>
+        <button className="rounded-lg bg-white px-5 py-2.5 text-sm font-medium text-black">Update password</button>
+      </form>
+    </section>
 
-      {/* Active Sessions */}
-      <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 sm:p-8 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-neutral-800 flex items-center justify-center shrink-0">
-              <MonitorSmartphone className="w-5 h-5 text-neutral-400" />
-            </div>
-            <div>
-              <h2 className="text-xl font-medium text-white">Active Sessions</h2>
-              <p className="text-sm text-neutral-400">Manage devices currently logged into your account.</p>
-            </div>
-          </div>
-          <button className="text-sm font-medium text-red-400 hover:text-red-300 flex items-center gap-2">
-            <LogOut className="w-4 h-4" />
-            Log out all other devices
-          </button>
-        </div>
+    <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 sm:p-8">
+      <div className="mb-6 flex items-center justify-between gap-4"><div className="flex items-center gap-3"><MonitorSmartphone className="h-5 w-5 text-neutral-400" /><div><h2 className="text-xl text-white">Active sessions</h2><p className="text-sm text-neutral-400">Device details come from the recorded user agent; IP values are stored only as hashes.</p></div></div><form action={logoutOtherSessions}><button className="text-sm text-red-300">Log out other devices</button></form></div>
+      <div className="space-y-3">{activeSessions.map((item) => <div key={item.id} className="flex items-center justify-between gap-4 rounded-xl border border-neutral-800 bg-neutral-950 p-4"><div><p className="max-w-xl truncate text-sm text-white">{item.userAgent || 'Unknown device'} {item.id === session.session.id && <span className="text-green-400">· Current</span>}</p><p className="mt-1 text-xs text-neutral-500">Last active {item.lastSeenAt.toLocaleString()} · Created {item.createdAt.toLocaleDateString()}</p></div>{item.id !== session.session.id && <form action={revokeSessionAction}><input type="hidden" name="sessionId" value={item.id} /><button className="text-xs text-neutral-300 hover:text-white">Revoke</button></form>}</div>)}</div>
+    </section>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-neutral-950 border border-neutral-800 rounded-xl">
-            <div className="flex items-center gap-4">
-              <MonitorSmartphone className="w-6 h-6 text-neutral-500" />
-              <div>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium text-white">Mac OS • Chrome</p>
-                  <Badge variant="success">Current</Badge>
-                </div>
-                <p className="text-xs text-neutral-500 mt-0.5">San Francisco, USA • 192.168.1.1</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-between p-4 bg-neutral-950 border border-neutral-800 rounded-xl">
-            <div className="flex items-center gap-4">
-              <MonitorSmartphone className="w-6 h-6 text-neutral-500" />
-              <div>
-                <p className="text-sm font-medium text-white">Windows • Firefox</p>
-                <p className="text-xs text-neutral-500 mt-0.5">New York, USA • 10.0.0.1 • Last active 2 days ago</p>
-              </div>
-            </div>
-            <button className="text-sm font-medium text-neutral-400 hover:text-white transition-colors">
-              Revoke
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Danger Zone */}
-      <div className="bg-neutral-900 border border-red-900/30 rounded-2xl p-6 sm:p-8 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
-            <Shield className="w-5 h-5 text-red-500" />
-          </div>
-          <div>
-            <h2 className="text-xl font-medium text-white">Danger Zone</h2>
-            <p className="text-sm text-neutral-400">Irreversible actions for your account.</p>
-          </div>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 border border-red-900/50 rounded-xl bg-red-950/20">
-          <div>
-            <p className="text-sm font-medium text-white">Delete Account</p>
-            <p className="text-xs text-neutral-400 mt-1 max-w-lg">
-              Permanently delete your account and all associated data. This action cannot be undone and will require an email confirmation.
-            </p>
-          </div>
-          <button className="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-2">
-            <Trash2 className="w-4 h-4" />
-            Delete Account
-          </button>
-        </div>
-      </div>
-      
-    </div>
-  );
+    <section className="rounded-2xl border border-red-900/30 bg-neutral-900 p-6 sm:p-8">
+      <div className="mb-6 flex items-center gap-3"><Shield className="h-5 w-5 text-red-400" /><div><h2 className="text-xl text-white">Data and danger zone</h2><p className="text-sm text-neutral-400">Export your data before deleting it.</p></div></div>
+      <DangerActions email={session.user.email} canDelete={session.role === 'owner'} />
+    </section>
+  </div>;
 }

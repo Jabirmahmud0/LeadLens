@@ -39,7 +39,7 @@ function MultiSelect({ value, onChange, options, icon: Icon }: { value: string[]
             key={opt}
             type="button"
             onClick={() => toggle(opt)}
-            className={`px-3 py-1.5 rounded-lg text-sm transition-colors border flex items-center gap-2 \${
+            className={`px-3 py-1.5 rounded-lg text-sm transition-colors border flex items-center gap-2 ${
               isSelected 
                 ? 'bg-white text-black border-white' 
                 : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:border-neutral-600'

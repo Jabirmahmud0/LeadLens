@@ -1,0 +1,1 @@
+ALTER TABLE "report_findings" ADD COLUMN "private_notes" text;

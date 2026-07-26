@@ -33,7 +33,7 @@ export async function sendVerificationEmail(email: string, token: string, baseUr
 }
 
 export async function sendPasswordResetEmail(email: string, token: string, baseUrl: string) {
-  const resetUrl = `${baseUrl}/api/auth/reset-password?token=${token}`;
+  const resetUrl = `${baseUrl}/reset-password?token=${encodeURIComponent(token)}`;
   
   await transporter.sendMail({
     from: `"LeadLens" <${process.env.SMTP_FROM || 'noreply@leadlens.ai'}>`,

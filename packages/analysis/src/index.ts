@@ -4,3 +4,4 @@ export * from './extraction';
 export * from './technical-checks';
 export * from './tech-detection';
 export * from './pagespeed';
+export * from './safe-fetch';

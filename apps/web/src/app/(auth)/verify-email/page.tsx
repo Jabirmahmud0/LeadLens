@@ -3,20 +3,20 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Mail, ArrowRight, RefreshCw, CheckCircle2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 
 export default function VerifyEmailPage() {
-  const router = useRouter();
+  const [userEmail, setUserEmail] = useState('');
   const [countdown, setCountdown] = useState(0);
   const [isResending, setIsResending] = useState(false);
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
-  // In a real app we'd fetch the user's unverified email from context/API
-  // For the UI demonstration, we&apos;ll hardcode or use a fallback
-  const userEmail = "jane@acmedigital.com";
   const maskedEmail = userEmail.replace(/(.{2})(.*)(?=@)/, (gp1, gp2, gp3) => {
     return gp2 + '*'.repeat(gp3.length);
   });
+
+  useEffect(() => {
+    setUserEmail(new URLSearchParams(window.location.search).get('email') || '');
+  }, []);
 
   useEffect(() => {
     if (countdown > 0) {
@@ -26,7 +26,7 @@ export default function VerifyEmailPage() {
   }, [countdown]);
 
   const handleResend = async () => {
-    if (countdown > 0) return;
+    if (countdown > 0 || !userEmail) return;
     
     setIsResending(true);
     setMessage(null);
@@ -90,12 +90,12 @@ export default function VerifyEmailPage() {
         <h2 className="text-3xl font-light tracking-tight text-white">Check your email</h2>
         <p className="mt-4 text-sm text-neutral-400 leading-relaxed">
           we&apos;ve sent a verification link to <br/>
-          <span className="font-medium text-white">{maskedEmail}</span>
+          <span className="font-medium text-white">{maskedEmail || 'your registered address'}</span>
         </p>
       </div>
 
       {message && (
-        <div className={`p-3 rounded-xl text-sm \${message.type === 'success' ? 'bg-green-950/50 border border-green-900/50 text-green-200' : 'bg-red-950/50 border border-red-900/50 text-red-200'}`}>
+        <div className={`p-3 rounded-xl text-sm ${message.type === 'success' ? 'bg-green-950/50 border border-green-900/50 text-green-200' : 'bg-red-950/50 border border-red-900/50 text-red-200'}`}>
           {message.text}
         </div>
       )}
@@ -103,11 +103,11 @@ export default function VerifyEmailPage() {
       <div className="pt-6 space-y-4">
         <button
           onClick={handleResend}
-          disabled={countdown > 0 || isResending}
+          disabled={countdown > 0 || isResending || !userEmail}
           className="group relative flex w-full justify-center items-center gap-2 rounded-xl bg-neutral-800 px-4 py-3 text-sm font-medium text-white hover:bg-neutral-700 focus:outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-neutral-700"
         >
-          {isResending ? <RefreshCw className="w-4 h-4 animate-spin" /> : <RefreshCw className={`w-4 h-4 \${countdown === 0 ? 'group-hover:rotate-180 transition-transform duration-500' : ''}`} />}
-          {countdown > 0 ? `Resend in \${countdown}s` : 'Resend verification email'}
+          {isResending ? <RefreshCw className="w-4 h-4 animate-spin" /> : <RefreshCw className={`w-4 h-4 ${countdown === 0 ? 'group-hover:rotate-180 transition-transform duration-500' : ''}`} />}
+          {countdown > 0 ? `Resend in ${countdown}s` : 'Resend verification email'}
         </button>
 
         <p className="text-sm text-neutral-500">

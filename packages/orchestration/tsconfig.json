@@ -1,0 +1,4 @@
+{
+  "extends": "@leadlens/config/tsconfig.base.json",
+  "include": ["src"]
+}

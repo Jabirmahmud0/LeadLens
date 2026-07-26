@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useFieldArray, useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -31,7 +31,7 @@ export default function CaseStudiesStep() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { register, control, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormValues>({
+  const { register, control, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       caseStudies: [
@@ -48,6 +48,7 @@ export default function CaseStudiesStep() {
       ]
     }
   });
+  useEffect(() => { fetch('/api/settings/bootstrap').then(response => response.ok ? response.json() : null).then(data => { if (data?.caseStudies?.length) reset({ caseStudies: data.caseStudies }); }).catch(() => undefined); }, [reset]);
 
   const { fields, append, remove } = useFieldArray({
     control,

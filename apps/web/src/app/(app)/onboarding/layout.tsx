@@ -35,7 +35,7 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
             <div className="h-1.5 w-full bg-neutral-800 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-white transition-all duration-500 ease-in-out"
-                style={{ width: `\${completionPercentage}%` }}
+                style={{ width: `${completionPercentage}%` }}
               />
             </div>
             <div className="mt-2 flex justify-between text-xs text-neutral-500">
@@ -52,7 +52,7 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
         <div className="h-1 w-full bg-neutral-800 sm:hidden">
           <div 
             className="h-full bg-white transition-all duration-500 ease-in-out"
-            style={{ width: `\${completionPercentage}%` }}
+            style={{ width: `${completionPercentage}%` }}
           />
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, integer, boolean, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, integer, boolean, jsonb, index } from 'drizzle-orm/pg-core';
 import { organizations } from './org';
 import { analysisJobs } from './analysis';
 import { reports, reportFindings } from './report';
@@ -13,6 +13,7 @@ export const aiRuns = pgTable('ai_runs', {
   provider: text('provider'),
   model: text('model'),
   promptVersion: text('prompt_version'),
+  inputHash: text('input_hash'),
   status: text('status'),
   inputTokens: integer('input_tokens'),
   outputTokens: integer('output_tokens'),
@@ -63,7 +64,7 @@ export const usageEvents = pgTable('usage_events', {
   eventName: text('event_name').notNull(),
   properties: jsonb('properties'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-});
+}, (table) => ({ orgCreatedIdx: index('usage_events_org_created_idx').on(table.organizationId, table.createdAt), eventCreatedIdx: index('usage_events_event_created_idx').on(table.eventName, table.createdAt) }));
 
 export const auditLogs = pgTable('audit_logs', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -73,4 +74,4 @@ export const auditLogs = pgTable('audit_logs', {
   details: jsonb('details'),
   ipHash: text('ip_hash'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-});
+}, (table) => ({ orgCreatedIdx: index('audit_logs_org_created_idx').on(table.organizationId, table.createdAt), actionCreatedIdx: index('audit_logs_action_created_idx').on(table.action, table.createdAt) }));

@@ -1,5 +1,5 @@
 import { db, schema } from '@leadlens/database';
-import { eq, and, gt } from 'drizzle-orm';
+import { eq, and, gt, lt } from 'drizzle-orm';
 import { hashToken } from './session';
 
 export async function checkRateLimit(
@@ -11,6 +11,7 @@ export async function checkRateLimit(
 ): Promise<boolean> {
   const ipHash = hashToken(ip); // Reuse hashToken for IP hashing to anonymize
   const since = new Date(Date.now() - windowMinutes * 60 * 1000);
+  await db.delete(schema.authAttempts).where(lt(schema.authAttempts.createdAt, new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)));
 
   // Record attempt
   await db.insert(schema.authAttempts).values({

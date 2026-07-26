@@ -2,7 +2,7 @@ import * as React from 'react';
 import { getSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { db, schema } from '@leadlens/database';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and, sql } from 'drizzle-orm';
 import { EmptyState, Badge } from '@leadlens/ui';
 import { Activity, Search, Filter, Play, CheckCircle2, AlertTriangle, Download } from 'lucide-react';
 
@@ -10,23 +10,28 @@ export const metadata = {
   title: 'Analyses | LeadLens',
 };
 
-async function getAnalyses(orgId: string) {
+async function getAnalyses(orgId: string, query: string, status: string, page: number) {
+  const pageSize = 20;
   const jobs = await db.query.analysisJobs.findMany({
-    where: eq(schema.analysisJobs.organizationId, orgId),
+    where: and(eq(schema.analysisJobs.organizationId, orgId), status ? eq(schema.analysisJobs.status, status) : undefined, query ? sql`exists (select 1 from ${schema.prospects} p where p.id = ${schema.analysisJobs.prospectId} and (p.company_name ilike ${`%${query}%`} or p.normalized_domain ilike ${`%${query}%`}))` : undefined),
     orderBy: [desc(schema.analysisJobs.createdAt)],
     with: {
       prospect: true
-    }
+    }, limit: pageSize, offset: (page - 1) * pageSize,
   });
   
   return jobs;
 }
 
-export default async function AnalysesPage() {
+export default async function AnalysesPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; page?: string }> }) {
   const session = await getSession();
   if (!session || !session.organization) redirect('/login');
 
-  const analyses = await getAnalyses(session.organization.id);
+  const params = await searchParams;
+  const query = params.q?.trim().slice(0, 100) || '';
+  const status = ['queued','processing','completed','partial','failed','cancelled'].includes(params.status || '') ? params.status! : '';
+  const page = Math.max(1, Number.parseInt(params.page || '1', 10) || 1);
+  const analyses = await getAnalyses(session.organization.id, query, status, page);
 
   return (
     <div className="p-6 sm:p-8 max-w-5xl mx-auto space-y-8 flex flex-col h-[calc(100vh-4rem)] lg:h-screen">
@@ -38,19 +43,18 @@ export default async function AnalysesPage() {
         </div>
         
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="relative flex-1 sm:w-64">
+          <form method="get" className="flex flex-1 gap-2 sm:w-auto"><div className="relative flex-1 sm:w-64">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-neutral-500" />
             </div>
             <input
               type="text"
+              name="q"
+              defaultValue={query}
               className="block w-full pl-10 rounded-lg border border-neutral-800 bg-neutral-900 px-4 py-2 text-sm text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
               placeholder="Search activity..."
             />
-          </div>
-          <button className="p-2 border border-neutral-800 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors">
-            <Filter className="w-4 h-4" />
-          </button>
+          </div><select name="status" defaultValue={status} aria-label="Filter analyses by status" className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-neutral-300"><option value="">All statuses</option><option value="queued">Queued</option><option value="processing">Processing</option><option value="completed">Completed</option><option value="partial">Partial</option><option value="failed">Failed</option><option value="cancelled">Cancelled</option></select><button type="submit" aria-label="Apply filters" className="p-2 border border-neutral-800 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"><Filter className="w-4 h-4" /></button></form>
         </div>
       </div>
 
@@ -108,7 +112,7 @@ export default async function AnalysesPage() {
                     
                     {a.status === 'completed' && (
                       <a 
-                        href={`/analyses/${a.id}/report/executive-summary`}
+                        href={`/analyses/${a.id}/report`}
                         className="p-2 text-neutral-500 hover:text-white rounded-lg hover:bg-neutral-800 transition-colors shrink-0 bg-neutral-800/50"
                         title="View Report"
                       >
@@ -122,6 +126,7 @@ export default async function AnalysesPage() {
           </div>
         )}
       </div>
+      {(page > 1 || analyses.length === 20) && <nav className="flex justify-center gap-3 text-sm">{page > 1 && <a className="rounded-lg border border-neutral-800 px-4 py-2 text-neutral-300" href={`/analyses?q=${encodeURIComponent(query)}&status=${encodeURIComponent(status)}&page=${page - 1}`}>Previous</a>}{analyses.length === 20 && <a className="rounded-lg border border-neutral-800 px-4 py-2 text-neutral-300" href={`/analyses?q=${encodeURIComponent(query)}&status=${encodeURIComponent(status)}&page=${page + 1}`}>Next</a>}</nav>}
     </div>
   );
 }

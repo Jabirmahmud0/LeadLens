@@ -16,13 +16,18 @@ interface EvidenceMarqueeProps {
   className?: string;
   speed?: 'fast' | 'normal' | 'slow';
   direction?: 'left' | 'right';
+  lightMode?: boolean;
+  fadeColor?: string;
 }
 
 export function EvidenceMarquee({ 
   className,
   speed = 'normal',
-  direction = 'left' 
+  direction = 'left',
+  lightMode = false,
+  fadeColor,
 }: EvidenceMarqueeProps) {
+  const fade = fadeColor ?? (lightMode ? '#ffffff' : '#000000');
   
   // Duplicate array for infinite scroll effect
   const items = [...EVIDENCE_CHIPS, ...EVIDENCE_CHIPS];
@@ -33,8 +38,8 @@ export function EvidenceMarquee({
       className
     )}>
       {/* Fade edges */}
-      <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-      <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-y-0 left-0 w-24 z-10 pointer-events-none" style={{ background: `linear-gradient(to right, ${fade}, transparent)` }} />
+      <div className="absolute inset-y-0 right-0 w-24 z-10 pointer-events-none" style={{ background: `linear-gradient(to left, ${fade}, transparent)` }} />
       
       <div 
         className={cn(
@@ -44,6 +49,7 @@ export function EvidenceMarquee({
         )}
         style={{
           animationName: direction === 'left' ? 'scroll-left' : 'scroll-right',
+          animationDuration: speed === 'fast' ? '20s' : speed === 'slow' ? '60s' : '40s',
           animationTimingFunction: 'linear',
           animationIterationCount: 'infinite',
         }}
@@ -53,12 +59,12 @@ export function EvidenceMarquee({
           return (
             <div 
               key={i}
-              className="flex items-center gap-2 px-4 py-2 rounded-full border border-neutral-800 bg-neutral-900/50 backdrop-blur-sm whitespace-nowrap"
+              className={cn("flex items-center gap-2 px-4 py-2 rounded-full border whitespace-nowrap", lightMode ? 'border-neutral-200 bg-white shadow-sm' : 'border-neutral-800 bg-neutral-900/50 backdrop-blur-sm')}
             >
               <div className={cn("w-5 h-5 rounded-full flex items-center justify-center", item.bg)}>
                 <Icon className={cn("w-3 h-3", item.color)} />
               </div>
-              <span className="text-sm font-medium text-neutral-300">{item.text}</span>
+              <span className={cn("text-sm font-medium", lightMode ? 'text-neutral-600' : 'text-neutral-300')}>{item.text}</span>
             </div>
           );
         })}
@@ -73,6 +79,7 @@ export function EvidenceMarquee({
         )}
         style={{
           animationName: direction === 'left' ? 'scroll-left' : 'scroll-right',
+          animationDuration: speed === 'fast' ? '20s' : speed === 'slow' ? '60s' : '40s',
           animationTimingFunction: 'linear',
           animationIterationCount: 'infinite',
         }}
@@ -81,13 +88,13 @@ export function EvidenceMarquee({
           const Icon = item.icon;
           return (
             <div 
-              key={`dup-\${i}`}
-              className="flex items-center gap-2 px-4 py-2 rounded-full border border-neutral-800 bg-neutral-900/50 backdrop-blur-sm whitespace-nowrap"
+              key={`dup-${i}`}
+              className={cn("flex items-center gap-2 px-4 py-2 rounded-full border whitespace-nowrap", lightMode ? 'border-neutral-200 bg-white shadow-sm' : 'border-neutral-800 bg-neutral-900/50 backdrop-blur-sm')}
             >
               <div className={cn("w-5 h-5 rounded-full flex items-center justify-center", item.bg)}>
                 <Icon className={cn("w-3 h-3", item.color)} />
               </div>
-              <span className="text-sm font-medium text-neutral-300">{item.text}</span>
+              <span className={cn("text-sm font-medium", lightMode ? 'text-neutral-600' : 'text-neutral-300')}>{item.text}</span>
             </div>
           );
         })}

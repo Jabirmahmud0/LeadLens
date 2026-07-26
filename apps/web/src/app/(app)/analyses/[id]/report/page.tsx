@@ -1,8 +1,11 @@
-import { db } from '@leadlens/database';
+import { db, schema } from '@leadlens/database';
+import { and, eq } from 'drizzle-orm';
+import { requireSession } from '@/lib/auth/session';
 import { notFound } from 'next/navigation';
 import { ScoreRing, Badge, FindingCard } from '@leadlens/ui';
 import { AlertCircle, Target, ArrowRight, Activity, ShieldCheck, Search, Globe, Plus, Check } from 'lucide-react';
 import Link from 'next/link';
+import { ReportFeedback } from './ReportFeedback';
 
 export default async function ReportOverviewPage({
   params,
@@ -10,10 +13,12 @@ export default async function ReportOverviewPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const session = await requireSession();
+  if (!session.organization) notFound();
 
   // Fetch Report with Relations
   const report = await db.query.reports.findFirst({
-    where: (r, { eq }) => eq(r.analysisJobId, id),
+    where: and(eq(schema.reports.analysisJobId, id), eq(schema.reports.organizationId, session.organization.id)),
     with: {
       prospect: true,
       scores: true,
@@ -76,6 +81,7 @@ export default async function ReportOverviewPage({
             {report.executiveSummary}
           </div>
         </section>
+        <ReportFeedback reportId={report.id} />
 
         {/* Top Findings */}
         <section>

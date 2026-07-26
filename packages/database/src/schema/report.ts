@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, jsonb, integer, numeric, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, jsonb, integer, numeric, boolean, unique, index } from 'drizzle-orm/pg-core';
 import { organizations } from './org';
 import { prospects } from './prospect';
 import { analysisJobs } from './analysis';
@@ -9,7 +9,7 @@ export const reports = pgTable('reports', {
   id: uuid('id').primaryKey().defaultRandom(),
   organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
   prospectId: uuid('prospect_id').references(() => prospects.id, { onDelete: 'cascade' }).notNull(),
-  analysisJobId: uuid('analysis_job_id').references(() => analysisJobs.id, { onDelete: 'cascade' }).notNull(),
+  analysisJobId: uuid('analysis_job_id').references(() => analysisJobs.id, { onDelete: 'cascade' }).notNull().unique(),
   version: integer('version').default(1).notNull(),
   title: text('title'),
   executiveSummary: text('executive_summary'),
@@ -24,7 +24,10 @@ export const reports = pgTable('reports', {
   generatedAt: timestamp('generated_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-});
+}, (table) => ({
+  orgCreatedIdx: index('reports_org_created_idx').on(table.organizationId, table.createdAt),
+  orgProspectIdx: index('reports_org_prospect_idx').on(table.organizationId, table.prospectId),
+}));
 
 export const reportScores = pgTable('report_scores', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -53,9 +56,10 @@ export const reportFindings = pgTable('report_findings', {
   sortOrder: integer('sort_order').default(0),
   isHidden: boolean('is_hidden').default(false),
   isPinned: boolean('is_pinned').default(false),
+  privateNotes: text('private_notes'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-});
+}, (table) => ({ reportSortIdx: index('report_findings_report_sort_idx').on(table.reportId, table.sortOrder) }));
 
 export const findingSources = pgTable('finding_sources', {
   findingId: uuid('finding_id').references(() => reportFindings.id, { onDelete: 'cascade' }).notNull(),
@@ -125,6 +129,20 @@ export const proposalStarters = pgTable('proposal_starters', {
   userEditedContent: text('user_edited_content'),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
+
+export const reportVersions = pgTable('report_versions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  analysisJobId: uuid('analysis_job_id').references(() => analysisJobs.id, { onDelete: 'cascade' }).notNull(),
+  version: integer('version').notNull(),
+  section: text('section').notNull(),
+  content: jsonb('content').notNull(),
+  source: text('source').default('edit').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (table) => ({
+  versionSectionUnique: unique('report_versions_job_version_section_unique').on(table.analysisJobId, table.version, table.section),
+  orgJobIdx: index('report_versions_org_job_idx').on(table.organizationId, table.analysisJobId),
+}));
 
 import { relations } from 'drizzle-orm';
 
@@ -198,4 +216,3 @@ export const findingSourcesRelations = relations(findingSources, ({ one }) => ({
     references: [sourcePages.id],
   }),
 }));
-

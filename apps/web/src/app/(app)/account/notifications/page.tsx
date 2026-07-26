@@ -2,6 +2,7 @@ import * as React from 'react';
 import { getSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { Bell, Mail, ShieldAlert, Sparkles } from 'lucide-react';
+import { updateNotificationPreferences } from './actions';
 
 export const metadata = {
   title: 'Notifications | Account | LeadLens',
@@ -25,7 +26,7 @@ export default async function NotificationsPage() {
           </div>
         </div>
         
-        <div className="space-y-6">
+        <form action={updateNotificationPreferences} className="space-y-6">
           
           {/* Analysis Reports */}
           <div className="flex items-start justify-between gap-4 py-4 border-b border-neutral-800">
@@ -38,10 +39,7 @@ export default async function NotificationsPage() {
                 </p>
               </div>
             </div>
-            {/* Simple toggle UI stub */}
-            <div className="w-11 h-6 bg-blue-600 rounded-full relative cursor-pointer flex-shrink-0 transition-colors">
-              <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full transition-transform" />
-            </div>
+            <input name="reportCompletionEmails" type="checkbox" defaultChecked={session.user.reportCompletionEmails} className="h-5 w-5 accent-blue-600" aria-label="Report completion emails" />
           </div>
 
           {/* Product Updates */}
@@ -55,10 +53,7 @@ export default async function NotificationsPage() {
                 </p>
               </div>
             </div>
-            {/* Simple toggle UI stub */}
-            <div className="w-11 h-6 bg-neutral-700 rounded-full relative cursor-pointer flex-shrink-0 transition-colors">
-              <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform" />
-            </div>
+            <input name="productUpdateEmails" type="checkbox" defaultChecked={session.user.productUpdateEmails} className="h-5 w-5 accent-blue-600" aria-label="Product update emails" />
           </div>
 
           {/* Security Alerts (Disabled toggle) */}
@@ -72,13 +67,11 @@ export default async function NotificationsPage() {
                 </p>
               </div>
             </div>
-            {/* Simple toggle UI stub */}
-            <div className="w-11 h-6 bg-neutral-800 rounded-full relative opacity-50 cursor-not-allowed flex-shrink-0">
-              <div className="absolute right-1 top-1 w-4 h-4 bg-neutral-500 rounded-full" />
-            </div>
+            <input type="checkbox" checked readOnly disabled className="h-5 w-5 accent-neutral-500" aria-label="Security emails always enabled" />
           </div>
 
-        </div>
+          <button type="submit" className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-black hover:bg-neutral-200">Save preferences</button>
+        </form>
       </div>
       
     </div>

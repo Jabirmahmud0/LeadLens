@@ -1,18 +1,25 @@
 'use client';
 
 import * as React from 'react';
-import { cn } from '@leadlens/ui';
-import { CheckCircle2, Info, ArrowRight, Star } from 'lucide-react';
 import Link from 'next/link';
+import { cn } from '@leadlens/ui';
+import { ArrowRight, Check, CheckCircle2, FileText, Sparkles } from 'lucide-react';
+import styles from './pricing.module.css';
 
 type PlanTier = 'free' | 'solo' | 'agency' | 'growth';
 
-export function PricingSimulator() {
-  const [prospects, setProspects] = React.useState<number>(10);
-  const [teamSize, setTeamSize] = React.useState<number>(1);
-  const [needsExport, setNeedsExport] = React.useState<boolean>(false);
+const PLANS: Array<{ id: PlanTier; name: string; price: string; cadence?: string; description: string; features: string[]; action: string }> = [
+  { id: 'free', name: 'Hobby', price: '$0', cadence: '/ month', description: 'Explore the complete workflow with a small prospect list.', features: ['10 analyses per month', '1 workspace seat', 'Standard web export'], action: 'Start free' },
+  { id: 'solo', name: 'Solo', price: '$49', cadence: '/ month', description: 'For independent consultants with an active sales pipeline.', features: ['50 analyses per month', 'Up to 3 team seats', 'Case-study matching', 'Standard web export'], action: 'Choose Solo' },
+  { id: 'agency', name: 'Agency', price: '$199', cadence: '/ month', description: 'For growing agencies coordinating sales and strategy.', features: ['200 analyses per month', 'Up to 10 team seats', 'White-labeled exports', 'Advanced service matching'], action: 'Choose Agency' },
+  { id: 'growth', name: 'Growth', price: 'Custom', description: 'For larger organizations with higher volume and governance needs.', features: ['Custom analysis volume', 'Custom seat allocation', 'Integration planning', 'Dedicated onboarding'], action: 'Discuss Growth' },
+];
 
-  // Determine recommended plan based on inputs
+export function PricingSimulator() {
+  const [prospects, setProspects] = React.useState(10);
+  const [teamSize, setTeamSize] = React.useState(1);
+  const [needsExport, setNeedsExport] = React.useState(false);
+
   const recommendedPlan: PlanTier = React.useMemo(() => {
     if (teamSize > 10 || prospects > 200) return 'growth';
     if (teamSize > 3 || prospects > 50 || needsExport) return 'agency';
@@ -20,303 +27,52 @@ export function PricingSimulator() {
     return 'free';
   }, [teamSize, prospects, needsExport]);
 
+  const recommended = PLANS.find((plan) => plan.id === recommendedPlan)!;
+
   return (
-    <div className="w-full space-y-16">
-      
-      {/* 1. Simulator Controls */}
-      <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-8 lg:p-10 shadow-2xl max-w-4xl mx-auto">
-        <h3 className="text-xl font-bold text-white mb-8 flex items-center gap-2">
-          Calculate your Needs
-          <div className="group relative">
-            <Info className="w-4 h-4 text-neutral-500 cursor-help" />
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-black border border-neutral-700 rounded-xl text-xs text-neutral-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl">
-              We recommend plans based on your monthly prospecting volume and team collaboration requirements.
-            </div>
-          </div>
-        </h3>
+    <div>
+      <div className="grid overflow-hidden rounded-[1.75rem] border border-[#cfe0d3] bg-[#f2f7f3] shadow-[0_28px_70px_-52px_rgba(20,83,45,0.48)] lg:grid-cols-[1.08fr_0.92fr]">
+        <div className="bg-white p-6 sm:p-8 lg:p-10">
+          <div className="flex items-start justify-between gap-5"><div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700">Plan finder</p><h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">How does your team prospect?</h2></div><span className="hidden rounded-full bg-emerald-50 px-3 py-1.5 text-[10px] font-bold text-emerald-700 sm:block">Updates live</span></div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          {/* Prospects Slider */}
-          <div className="space-y-6">
-            <div className="flex justify-between items-end">
-              <label className="text-sm font-medium text-neutral-300">
-                Analyses / Month
-              </label>
-              <span className="text-2xl font-bold text-white tabular-nums">
-                {prospects === 500 ? '500+' : prospects}
-              </span>
+          <div className="mt-10 space-y-10">
+            <div>
+              <div className="flex items-end justify-between gap-4"><label htmlFor="analysis-volume" className="text-xs font-semibold text-[#52675e]">Analyses each month</label><span className="text-3xl font-semibold tracking-[-0.04em] text-[#16352a]">{prospects === 500 ? '500+' : prospects}</span></div>
+              <input id="analysis-volume" type="range" min="0" max="500" step="10" value={prospects} onChange={(event) => setProspects(Number(event.target.value))} className="mt-5 h-2 w-full cursor-pointer appearance-none rounded-full bg-[#dfebe2] accent-emerald-700" />
+              <div className="mt-2 flex justify-between text-[9px] font-bold uppercase tracking-wider text-[#91a49a]"><span>0</span><span>250</span><span>500+</span></div>
             </div>
-            <input
-              type="range"
-              min="0"
-              max="500"
-              step="10"
-              value={prospects}
-              onChange={(e) => setProspects(parseInt(e.target.value))}
-              className="w-full h-2 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
-            />
-            <div className="flex justify-between text-xs text-neutral-500">
-              <span>0</span>
-              <span>250</span>
-              <span>500+</span>
+
+            <div>
+              <div className="flex items-end justify-between gap-4"><label htmlFor="team-size" className="text-xs font-semibold text-[#52675e]">People collaborating</label><span className="text-3xl font-semibold tracking-[-0.04em] text-[#16352a]">{teamSize === 50 ? '50+' : teamSize} <small className="text-sm font-medium text-[#789084]">{teamSize === 1 ? 'seat' : 'seats'}</small></span></div>
+              <input id="team-size" type="range" min="1" max="50" value={teamSize} onChange={(event) => setTeamSize(Number(event.target.value))} className="mt-5 h-2 w-full cursor-pointer appearance-none rounded-full bg-[#dfebe2] accent-emerald-700" />
+              <div className="mt-2 flex justify-between text-[9px] font-bold uppercase tracking-wider text-[#91a49a]"><span>1</span><span>25</span><span>50+</span></div>
             </div>
           </div>
 
-          {/* Team Size Slider */}
-          <div className="space-y-6">
-            <div className="flex justify-between items-end">
-              <label className="text-sm font-medium text-neutral-300">
-                Team Size
-              </label>
-              <span className="text-2xl font-bold text-white tabular-nums">
-                {teamSize === 50 ? '50+' : teamSize} {teamSize === 1 ? 'Seat' : 'Seats'}
-              </span>
-            </div>
-            <input
-              type="range"
-              min="1"
-              max="50"
-              step="1"
-              value={teamSize}
-              onChange={(e) => setTeamSize(parseInt(e.target.value))}
-              className="w-full h-2 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
-            />
-            <div className="flex justify-between text-xs text-neutral-500">
-              <span>1</span>
-              <span>25</span>
-              <span>50+</span>
-            </div>
-          </div>
+          <div className="mt-9 flex items-center justify-between gap-5 border-t border-[#e0e9e2] pt-7"><div className="flex items-start gap-3"><span className="grid size-9 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-700"><FileText className="size-4" /></span><div><label htmlFor="white-label-toggle" className="text-sm font-semibold text-[#16352a]">White-labeled exports</label><p className="mt-1 text-xs leading-5 text-[#789084]">Deliver the brief using your agency identity.</p></div></div><button id="white-label-toggle" type="button" role="switch" aria-checked={needsExport} onClick={() => setNeedsExport((value) => !value)} className={cn('relative h-7 w-12 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2', needsExport ? 'bg-emerald-700' : 'bg-[#d7e2da]')}><span className={cn('absolute left-0 top-1 size-5 rounded-full bg-white shadow-sm transition-transform', needsExport ? 'translate-x-6' : 'translate-x-1')} /></button></div>
         </div>
 
-        {/* Export Toggle */}
-        <div className="mt-12 pt-8 border-t border-neutral-800 flex items-center justify-between">
-          <div>
-            <label className="text-sm font-medium text-white block mb-1">
-              Need White-labeled PDF Exports?
-            </label>
-            <p className="text-xs text-neutral-500">
-              Remove LeadLens branding from the generated Opportunity Briefs.
-            </p>
-          </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={needsExport}
-            onClick={() => setNeedsExport(!needsExport)}
-            className={cn(
-              "relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900",
-              needsExport ? "bg-blue-600" : "bg-neutral-700"
-            )}
-          >
-            <span
-              className={cn(
-                "pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform",
-                needsExport ? "translate-x-2.5" : "-translate-x-2.5"
-              )}
-            />
-          </button>
+        <div key={recommendedPlan} className={`${styles.recommendation} flex flex-col justify-between bg-[#16352a] p-6 text-white sm:p-8 lg:p-10`} aria-live="polite">
+          <div><div className="flex items-center justify-between"><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-300">Recommended for you</p><Sparkles className="size-5 text-emerald-300" /></div><p className="mt-7 text-5xl font-semibold tracking-[-0.055em]">{recommended.name}</p><div className="mt-3 flex items-end gap-2"><span className="text-2xl font-semibold text-emerald-300">{recommended.price}</span>{recommended.cadence && <span className="pb-1 text-xs text-[#b9d3c3]">{recommended.cadence}</span>}</div><p className="mt-5 max-w-md text-sm leading-6 text-[#b9d3c3]">{recommended.description}</p></div>
+          <div className="mt-12"><p className="text-[10px] font-bold uppercase tracking-wider text-emerald-300">Why this fits</p><ul className="mt-4 space-y-3 text-xs text-white">{[`${prospects || 0} monthly analyses`, `${teamSize} collaborating ${teamSize === 1 ? 'seat' : 'seats'}`, needsExport ? 'White-labeled output required' : 'Standard output works'].map((reason) => <li key={reason} className="flex items-center gap-2"><Check className="size-3.5 text-emerald-300" />{reason}</li>)}</ul><Link href="/register" className="mt-7 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white text-sm font-semibold text-emerald-800 transition-transform hover:-translate-y-0.5">{recommended.action}<ArrowRight className="size-4" /></Link></div>
         </div>
       </div>
 
-      {/* 2. Pricing Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        
-        {/* Free Plan */}
-        <div className={cn(
-          "rounded-3xl p-6 border transition-all duration-300 relative flex flex-col",
-          recommendedPlan === 'free' 
-            ? "bg-neutral-900 border-blue-500 shadow-[0_0_30px_rgba(37,99,235,0.15)] scale-105 z-10" 
-            : "bg-black border-neutral-800 hover:border-neutral-700 opacity-70 hover:opacity-100"
-        )}>
-          {recommendedPlan === 'free' && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
-              <Star className="w-3 h-3" /> Recommended
-            </div>
-          )}
-          <div className="mb-8">
-            <h4 className="text-lg font-medium text-white mb-2">Hobby</h4>
-            <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-bold text-white">$0</span>
-              <span className="text-neutral-500">/mo</span>
-            </div>
-            <p className="text-sm text-neutral-400 mt-3 h-10">
-              For freelancers wanting to test the waters.
-            </p>
-          </div>
-          
-          <ul className="space-y-3 mb-8 flex-1">
-            <li className="flex items-start gap-3 text-sm text-neutral-300">
-              <CheckCircle2 className="w-4 h-4 text-neutral-500 shrink-0 mt-0.5" />
-              10 Analyses / month
-            </li>
-            <li className="flex items-start gap-3 text-sm text-neutral-300">
-              <CheckCircle2 className="w-4 h-4 text-neutral-500 shrink-0 mt-0.5" />
-              1 Team Seat
-            </li>
-            <li className="flex items-start gap-3 text-sm text-neutral-300">
-              <CheckCircle2 className="w-4 h-4 text-neutral-500 shrink-0 mt-0.5" />
-              Standard Web Export
-            </li>
-          </ul>
-          
-          <Link href="/signup" className={cn(
-            "w-full py-2.5 rounded-xl text-sm font-medium text-center transition-colors",
-            recommendedPlan === 'free' ? "bg-white text-black hover:bg-neutral-200" : "bg-neutral-800 text-white hover:bg-neutral-700"
-          )}>
-            Get Started
-          </Link>
-        </div>
+      <div className="mt-20"><div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700">Compare plans</p><h2 className="mt-3 text-4xl font-semibold tracking-[-0.045em]">A plan for each stage of growth.</h2></div><p className="max-w-md text-sm leading-6 text-[#60766b]">The highlighted plan follows your calculator choices above.</p></div>
 
-        {/* Solo Plan */}
-        <div className={cn(
-          "rounded-3xl p-6 border transition-all duration-300 relative flex flex-col",
-          recommendedPlan === 'solo' 
-            ? "bg-neutral-900 border-blue-500 shadow-[0_0_30px_rgba(37,99,235,0.15)] scale-105 z-10" 
-            : "bg-black border-neutral-800 hover:border-neutral-700 opacity-70 hover:opacity-100"
-        )}>
-          {recommendedPlan === 'solo' && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
-              <Star className="w-3 h-3" /> Recommended
-            </div>
-          )}
-          <div className="mb-8">
-            <h4 className="text-lg font-medium text-white mb-2">Solo</h4>
-            <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-bold text-white">$49</span>
-              <span className="text-neutral-500">/mo</span>
-            </div>
-            <p className="text-sm text-neutral-400 mt-3 h-10">
-              For independent consultants pitching actively.
-            </p>
-          </div>
-          
-          <ul className="space-y-3 mb-8 flex-1">
-            <li className="flex items-start gap-3 text-sm text-neutral-300">
-              <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-              50 Analyses / month
-            </li>
-            <li className="flex items-start gap-3 text-sm text-neutral-300">
-              <CheckCircle2 className="w-4 h-4 text-neutral-500 shrink-0 mt-0.5" />
-              Up to 3 Team Seats
-            </li>
-            <li className="flex items-start gap-3 text-sm text-neutral-300">
-              <CheckCircle2 className="w-4 h-4 text-neutral-500 shrink-0 mt-0.5" />
-              Standard Web Export
-            </li>
-            <li className="flex items-start gap-3 text-sm text-neutral-300">
-              <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-              Basic Case Study RAG
-            </li>
-          </ul>
-          
-          <Link href="/signup" className={cn(
-            "w-full py-2.5 rounded-xl text-sm font-medium text-center transition-colors",
-            recommendedPlan === 'solo' ? "bg-white text-black hover:bg-neutral-200" : "bg-neutral-800 text-white hover:bg-neutral-700"
-          )}>
-            Start Free Trial
-          </Link>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {PLANS.map((plan) => {
+            const active = plan.id === recommendedPlan;
+            return (
+              <article key={plan.id} className={`${styles.planCard} relative flex flex-col rounded-[1.4rem] border p-6 ${active ? 'border-emerald-600 bg-[#f0f8f2] shadow-[0_22px_55px_-42px_rgba(20,83,45,0.55)]' : 'border-[#dce6df] bg-white'}`}>
+                {active && <span className="absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-[#166534] px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-white"><span className="size-1.5 rounded-full bg-emerald-300" />Best fit</span>}
+                <p className="text-sm font-semibold text-[#16352a]">{plan.name}</p><div className="mt-6 flex items-end gap-1.5"><span className="text-4xl font-semibold tracking-[-0.055em]">{plan.price}</span>{plan.cadence && <span className="pb-1 text-xs text-[#789084]">{plan.cadence}</span>}</div><p className="mt-4 min-h-16 text-sm leading-6 text-[#60766b]">{plan.description}</p>
+                <ul className="mt-7 flex-1 space-y-3 border-t border-[#e0e9e2] pt-6">{plan.features.map((feature) => <li key={feature} className="flex items-start gap-2 text-xs font-medium text-[#365246]"><CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-emerald-600" />{feature}</li>)}</ul>
+                <Link href="/register" className={cn('mt-8 inline-flex h-11 items-center justify-center rounded-xl text-sm font-semibold transition-colors', active ? 'bg-[#166534] text-white hover:bg-[#14532d]' : 'bg-[#edf3ee] text-[#16352a] hover:bg-[#e1ebe4]')}>{plan.action}</Link>
+              </article>
+            );
+          })}
         </div>
-
-        {/* Agency Plan */}
-        <div className={cn(
-          "rounded-3xl p-6 border transition-all duration-300 relative flex flex-col",
-          recommendedPlan === 'agency' 
-            ? "bg-neutral-900 border-blue-500 shadow-[0_0_30px_rgba(37,99,235,0.15)] scale-105 z-10" 
-            : "bg-black border-neutral-800 hover:border-neutral-700 opacity-70 hover:opacity-100"
-        )}>
-          {recommendedPlan === 'agency' && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
-              <Star className="w-3 h-3" /> Recommended
-            </div>
-          )}
-          <div className="mb-8">
-            <h4 className="text-lg font-medium text-white mb-2">Agency</h4>
-            <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-bold text-white">$199</span>
-              <span className="text-neutral-500">/mo</span>
-            </div>
-            <p className="text-sm text-neutral-400 mt-3 h-10">
-              For growing agencies with dedicated sales teams.
-            </p>
-          </div>
-          
-          <ul className="space-y-3 mb-8 flex-1">
-            <li className="flex items-start gap-3 text-sm text-neutral-300">
-              <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-              200 Analyses / month
-            </li>
-            <li className="flex items-start gap-3 text-sm text-neutral-300">
-              <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-              Up to 10 Team Seats
-            </li>
-            <li className="flex items-start gap-3 text-sm text-neutral-300">
-              <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-              White-labeled PDF Export
-            </li>
-            <li className="flex items-start gap-3 text-sm text-neutral-300">
-              <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-              Advanced Service Matching
-            </li>
-          </ul>
-          
-          <Link href="/signup" className={cn(
-            "w-full py-2.5 rounded-xl text-sm font-medium text-center transition-colors",
-            recommendedPlan === 'agency' ? "bg-white text-black hover:bg-neutral-200" : "bg-neutral-800 text-white hover:bg-neutral-700"
-          )}>
-            Start Free Trial
-          </Link>
-        </div>
-
-        {/* Growth Plan */}
-        <div className={cn(
-          "rounded-3xl p-6 border transition-all duration-300 relative flex flex-col",
-          recommendedPlan === 'growth' 
-            ? "bg-neutral-900 border-blue-500 shadow-[0_0_30px_rgba(37,99,235,0.15)] scale-105 z-10" 
-            : "bg-black border-neutral-800 hover:border-neutral-700 opacity-70 hover:opacity-100"
-        )}>
-          {recommendedPlan === 'growth' && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
-              <Star className="w-3 h-3" /> Recommended
-            </div>
-          )}
-          <div className="mb-8">
-            <h4 className="text-lg font-medium text-white mb-2">Growth</h4>
-            <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-bold text-white">Custom</span>
-            </div>
-            <p className="text-sm text-neutral-400 mt-3 h-10">
-              For large organizations with complex needs.
-            </p>
-          </div>
-          
-          <ul className="space-y-3 mb-8 flex-1">
-            <li className="flex items-start gap-3 text-sm text-neutral-300">
-              <CheckCircle2 className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
-              Unlimited Analyses
-            </li>
-            <li className="flex items-start gap-3 text-sm text-neutral-300">
-              <CheckCircle2 className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
-              Unlimited Seats
-            </li>
-            <li className="flex items-start gap-3 text-sm text-neutral-300">
-              <CheckCircle2 className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
-              Custom Integrations (CRM)
-            </li>
-            <li className="flex items-start gap-3 text-sm text-neutral-300">
-              <CheckCircle2 className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
-              Dedicated Success Manager
-            </li>
-          </ul>
-          
-          <Link href="/contact" className={cn(
-            "w-full py-2.5 rounded-xl text-sm font-medium text-center transition-colors",
-            recommendedPlan === 'growth' ? "bg-white text-black hover:bg-neutral-200" : "bg-neutral-800 text-white hover:bg-neutral-700"
-          )}>
-            Contact Sales
-          </Link>
-        </div>
-
       </div>
     </div>
   );

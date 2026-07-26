@@ -3,7 +3,7 @@ import { getSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { db, schema } from '@leadlens/database';
 import { eq, desc } from 'drizzle-orm';
-import { Badge, EmptyState } from '@leadlens/ui';
+import { EmptyState } from '@leadlens/ui';
 import { Plus, Briefcase, MoreHorizontal, CheckCircle2, XCircle } from 'lucide-react';
 import Link from 'next/link';
 
@@ -26,10 +26,10 @@ export default async function ServicesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-medium text-white">Service Portfolio</h2>
-        <button className="bg-white text-black px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-200 transition-colors flex items-center gap-2">
+        <Link href="/onboarding/services" className="bg-white text-black px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-200 transition-colors flex items-center gap-2">
           <Plus className="w-4 h-4" />
           Add Service
-        </button>
+        </Link>
       </div>
 
       {services.length === 0 ? (
@@ -38,9 +38,9 @@ export default async function ServicesPage() {
           title="No services configured"
           description="Add your core service offerings so LeadLens can match them to prospect issues."
           action={
-            <button className="bg-white text-black px-6 py-2 rounded-lg text-sm font-medium hover:bg-neutral-200 mt-4 inline-block">
+            <Link href="/onboarding/services" className="bg-white text-black px-6 py-2 rounded-lg text-sm font-medium hover:bg-neutral-200 mt-4 inline-block">
               Create Service
-            </button>
+            </Link>
           }
         />
       ) : (
@@ -87,9 +87,9 @@ export default async function ServicesPage() {
                     )}
                   </td>
                   <td className="py-4 px-6 text-right">
-                    <button className="p-2 text-neutral-500 hover:text-white rounded-lg hover:bg-neutral-800 transition-colors">
+                    <Link href="/onboarding/services" aria-label={`Edit ${service.name}`} className="inline-flex p-2 text-neutral-500 hover:text-white rounded-lg hover:bg-neutral-800 transition-colors">
                       <MoreHorizontal className="w-5 h-5" />
-                    </button>
+                    </Link>
                   </td>
                 </tr>
               ))}

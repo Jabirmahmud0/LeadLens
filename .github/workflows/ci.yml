@@ -12,9 +12,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 10.33.0
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -22,7 +22,7 @@ jobs:
           cache: 'pnpm'
       
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Typecheck
         run: pnpm run typecheck
@@ -30,8 +30,13 @@ jobs:
       - name: Lint
         run: pnpm run lint
 
-      # - name: Test
-      #   run: pnpm run test
+      - name: Test
+        run: pnpm run test
+
+      - name: Validate migrations
+        run: pnpm run db:check
 
       - name: Build
         run: pnpm run build
+        env:
+          DATABASE_URL: postgres://ci:ci@127.0.0.1:5432/leadlens

@@ -1,4 +1,6 @@
-import { db } from '@leadlens/database';
+import { db, schema } from '@leadlens/database';
+import { and, eq } from 'drizzle-orm';
+import { requireSession } from '@/lib/auth/session';
 import { notFound } from 'next/navigation';
 import { ClientEditor } from './ClientEditor';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
@@ -10,10 +12,12 @@ export default async function ReportOutreachPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const session = await requireSession();
+  if (!session.organization) notFound();
 
   // Fetch Report with Relations
   const report = await db.query.reports.findFirst({
-    where: (r, { eq }) => eq(r.analysisJobId, id),
+    where: and(eq(schema.reports.analysisJobId, id), eq(schema.reports.organizationId, session.organization.id)),
     with: {
       outreach: true
     }
@@ -23,7 +27,6 @@ export default async function ReportOutreachPage({
     notFound();
   }
 
-  // Use the first outreach strategy available
   const activeOutreach = report.outreach[0];
 
   return (
@@ -39,8 +42,8 @@ export default async function ReportOutreachPage({
           </p>
         </div>
 
-        {activeOutreach ? (
-          <ClientEditor outreach={activeOutreach} />
+        {report.outreach.length > 0 ? (
+          <div className="space-y-10">{report.outreach.map(outreach => <section key={outreach.id} aria-labelledby={`outreach-${outreach.id}`}><h2 id={`outreach-${outreach.id}`} className="mb-3 text-lg font-medium capitalize text-white">{outreach.channel || 'Message'}</h2><ClientEditor outreach={outreach} /></section>)}</div>
         ) : (
           <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-10 text-center">
             <p className="text-neutral-500">No outreach templates generated for this report.</p>

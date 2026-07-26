@@ -3,6 +3,7 @@
 import posthog from 'posthog-js';
 import { PostHogProvider as PHProvider } from 'posthog-js/react';
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
 // Only initialize if we have a key (prevents crashing in local dev if key is missing)
 if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
@@ -15,12 +16,12 @@ if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
 }
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   useEffect(() => {
-    // Manually capture pageviews when the component mounts in the browser
     if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
-      posthog.capture('$pageview');
+      posthog.capture('$pageview', { $current_url: window.location.href, pathname });
     }
-  }, []);
+  }, [pathname]);
 
   return <PHProvider client={posthog}>{children}</PHProvider>;
 }

@@ -1,0 +1,21 @@
+{
+  "name": "@leadlens/orchestration",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"src/**/*.ts\""
+  },
+  "dependencies": {
+    "@leadlens/ai": "workspace:*",
+    "@leadlens/analysis": "workspace:*",
+    "@leadlens/database": "workspace:*",
+    "@leadlens/email": "workspace:*",
+    "drizzle-orm": "^0.45.2"
+  },
+  "devDependencies": {
+    "@leadlens/config": "workspace:*",
+    "typescript": "^5.0.0"
+  }
+}

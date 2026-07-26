@@ -8,6 +8,48 @@
       "when": 1785018863254,
       "tag": "0000_flawless_iron_patriot",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1785086111919,
+      "tag": "0001_silent_tarot",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1785086342391,
+      "tag": "0002_big_crusher_hogan",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1785087245030,
+      "tag": "0003_funny_franklin_storm",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1785092324578,
+      "tag": "0004_motionless_rocket_racer",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1785093287436,
+      "tag": "0005_calm_micromax",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1785093679675,
+      "tag": "0006_talented_smasher",
+      "breakpoints": true
     }
   ]
 }

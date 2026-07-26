@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db, schema } from '@leadlens/database';
 import { eq } from 'drizzle-orm';
-import { verifyPassword, createSession, checkRateLimit, RATE_LIMITS } from '@leadlens/auth';
+import { verifyPassword, createSession, checkRateLimit, RATE_LIMITS, hashToken } from '@leadlens/auth';
 import { setSessionCookie } from '@/lib/auth-cookies';
 
 const loginSchema = z.object({
@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
     // Verify password
     const isValid = await verifyPassword(password, user.passwordHash);
     if (!isValid) {
+      try { await db.insert(schema.auditLogs).values({ userId: user.id, action: 'login_failed', ipHash: hashToken(ip) }); } catch (auditError) { console.error('Unable to write login audit:', auditError); }
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
@@ -45,6 +46,8 @@ export async function POST(req: NextRequest) {
     const userAgent = req.headers.get('user-agent') || undefined;
     const { token } = await createSession(user.id, ip, userAgent);
     await setSessionCookie(token);
+    await db.update(schema.users).set({ lastLoginAt: new Date() }).where(eq(schema.users.id, user.id));
+    try { await db.insert(schema.auditLogs).values({ userId: user.id, action: 'login_succeeded', ipHash: hashToken(ip) }); } catch (auditError) { console.error('Unable to write login audit:', auditError); }
 
     return NextResponse.json({ success: true });
   } catch (err) {

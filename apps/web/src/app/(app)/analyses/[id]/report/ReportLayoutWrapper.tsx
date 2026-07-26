@@ -11,14 +11,16 @@ import {
   FileText, 
   Link 
 } from 'lucide-react';
+import { ReportActions } from './ReportActions';
 
 interface ReportLayoutWrapperProps {
   children: React.ReactNode;
   agencyName?: string;
   analysisId: string;
+  reportId: string;
 }
 
-export function ReportLayoutWrapper({ children, agencyName, analysisId }: ReportLayoutWrapperProps) {
+export function ReportLayoutWrapper({ children, agencyName, analysisId, reportId }: ReportLayoutWrapperProps) {
   const pathname = usePathname();
 
   const navGroups = [
@@ -56,6 +58,7 @@ export function ReportLayoutWrapper({ children, agencyName, analysisId }: Report
       }
     >
       {children}
+      <ReportActions reportId={reportId} analysisId={analysisId} />
     </AppShell>
   );
 }

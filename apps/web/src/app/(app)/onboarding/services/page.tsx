@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -30,7 +30,7 @@ export default function ServicesStep() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { register, control, handleSubmit, watch, setValue, formState: { errors } } = useForm<ServicesFormValues>({
+  const { register, control, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<ServicesFormValues>({
     resolver: zodResolver(servicesSchema),
     defaultValues: {
       services: [
@@ -49,6 +49,7 @@ export default function ServicesStep() {
       ]
     }
   });
+  useEffect(() => { fetch('/api/settings/bootstrap').then(response => response.ok ? response.json() : null).then(data => { if (data?.services?.length) reset({ services: data.services }); }).catch(() => undefined); }, [reset]);
 
   const { fields, append, remove, move } = useFieldArray({
     control,

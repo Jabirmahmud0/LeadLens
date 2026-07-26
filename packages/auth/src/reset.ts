@@ -1,10 +1,11 @@
 import { db, schema } from '@leadlens/database';
-import { eq, and, gt, isNull } from 'drizzle-orm';
-import { generateToken, hashToken, revokeAllSessions } from './session';
+import { eq, and, gt, isNull, or, lt, isNotNull } from 'drizzle-orm';
+import { generateToken, hashToken } from './session';
 import { hashPassword } from './password';
 import { sendPasswordResetEmail } from './email';
 
 export async function createPasswordResetToken(email: string, baseUrl: string) {
+  await db.delete(schema.passwordResetTokens).where(or(lt(schema.passwordResetTokens.expiresAt, new Date()), isNotNull(schema.passwordResetTokens.usedAt)));
   // Find user by email
   const [user] = await db.select().from(schema.users).where(eq(schema.users.email, email.toLowerCase()));
   
@@ -50,18 +51,12 @@ export async function resetPassword(token: string, newPassword: string): Promise
 
   const newHash = await hashPassword(newPassword);
 
-  // Mark token as used
-  await db.update(schema.passwordResetTokens)
-    .set({ usedAt: new Date() })
-    .where(eq(schema.passwordResetTokens.id, resetTokenRow.id));
-
-  // Update user password
-  await db.update(schema.users)
-    .set({ passwordHash: newHash })
-    .where(eq(schema.users.id, resetTokenRow.userId));
-
-  // Revoke all existing sessions for security
-  await revokeAllSessions(resetTokenRow.userId);
+  await db.transaction(async (tx) => {
+    await tx.update(schema.passwordResetTokens).set({ usedAt: new Date() }).where(eq(schema.passwordResetTokens.id, resetTokenRow.id));
+    await tx.update(schema.users).set({ passwordHash: newHash }).where(eq(schema.users.id, resetTokenRow.userId));
+    await tx.update(schema.sessions).set({ revokedAt: new Date() }).where(eq(schema.sessions.userId, resetTokenRow.userId));
+    await tx.insert(schema.auditLogs).values({ userId: resetTokenRow.userId, action: 'password_reset_completed' });
+  });
 
   return true;
 }

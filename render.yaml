@@ -15,11 +15,30 @@ services:
         sync: false # Must be set in Render dashboard
       - key: SENTRY_DSN
         sync: false
-      - key: OPENAI_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
-      - key: ANTHROPIC_API_KEY
-        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.0-flash
       - key: GROQ_API_KEY
         sync: false
-      - key: POSTHOG_KEY
+      - key: PAGESPEED_API_KEY
+        sync: false
+      - key: NEXT_PUBLIC_APP_URL
+        sync: false
+      - key: SMTP_HOST
+        value: smtp-relay.brevo.com
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: CRAWL_MAX_PAGES
+        value: 8
+      - key: CRAWL_FETCH_TIMEOUT_MS
+        value: 10000
+      - key: CRAWL_MAX_DURATION_MS
+        value: 60000
         sync: false

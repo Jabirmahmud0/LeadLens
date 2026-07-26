@@ -1,6 +1,7 @@
-import { db } from '@leadlens/database';
+import { queries } from '@leadlens/database';
 import { notFound, redirect } from 'next/navigation';
 import { ReportLayoutWrapper } from './ReportLayoutWrapper';
+import { requireSession } from '@/lib/auth/session';
 
 export default async function ReportLayout({
   children,
@@ -10,11 +11,14 @@ export default async function ReportLayout({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const session = await requireSession();
+
+  if (!session.organization) {
+    notFound();
+  }
 
   // 1. Fetch Job
-  const job = await db.query.analysisJobs.findFirst({
-    where: (j, { eq }) => eq(j.id, id),
-  });
+  const job = await queries.jobs.getJobForOrganization(id, session.organization.id);
 
   if (!job) {
     notFound();
@@ -26,13 +30,10 @@ export default async function ReportLayout({
   }
 
   // 2. Fetch Report
-  const report = await db.query.reports.findFirst({
-    where: (r, { eq }) => eq(r.analysisJobId, id),
-    with: {
-      prospect: true,
-      organization: true,
-    }
-  });
+  const report = await queries.reports.getReportForOrganizationByAnalysisId(
+    id,
+    session.organization.id,
+  );
 
   if (!report) {
     notFound();
@@ -42,6 +43,7 @@ export default async function ReportLayout({
     <ReportLayoutWrapper 
       agencyName={report.organization.name || undefined} 
       analysisId={id}
+      reportId={report.id}
     >
       {children}
     </ReportLayoutWrapper>

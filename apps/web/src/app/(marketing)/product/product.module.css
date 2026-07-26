@@ -1,0 +1,19 @@
+.page { font-family: "Segoe UI Variable Text", "Aptos", "Segoe UI", Arial, sans-serif; font-style: normal; }
+.display { font-family: "Segoe UI Variable Display", "Aptos Display", "Segoe UI", Arial, sans-serif; font-style: normal; }
+.hero { isolation: isolate; }
+.hero::before { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(circle at 76% 32%, rgba(187,247,208,.58), transparent 26rem); }
+.reveal { opacity: 0; animation: reveal .9s cubic-bezier(.22,1,.36,1) forwards; }
+.delayOne { animation-delay: 120ms; }
+.pulse { display: inline-block; width: .42rem; height: .42rem; border-radius: 99px; background: #16a34a; box-shadow: 0 0 0 0 rgba(22,163,74,.42); animation: pulse 2.3s ease-out infinite; }
+.heroGlow { position: absolute; inset: 12% 4%; z-index: -1; border-radius: 999px; background: #bbf7d0; filter: blur(70px); opacity: .65; animation: drift 8s ease-in-out infinite alternate; }
+.dossier { animation: float 7s ease-in-out infinite; }
+.floatNote { animation: noteFloat 5s ease-in-out infinite; }
+.progress { width: 74%; animation: progress 4s ease-in-out infinite alternate; }
+.productClose { background: radial-gradient(circle at 78% 50%, rgba(187,247,208,.5), transparent 26rem), #f2f8f3; }
+@keyframes reveal { from { opacity: 0; transform: translateY(24px); filter: blur(5px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
+@keyframes pulse { 70% { box-shadow: 0 0 0 8px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+@keyframes drift { from { transform: translate3d(-3%,-4%,0) scale(.94); } to { transform: translate3d(5%,5%,0) scale(1.08); } }
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+@keyframes noteFloat { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-7px) rotate(1deg); } }
+@keyframes progress { from { width: 65%; } to { width: 86%; } }
+@media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; } .reveal,.pulse,.heroGlow,.dossier,.floatNote,.progress { animation: none; } }

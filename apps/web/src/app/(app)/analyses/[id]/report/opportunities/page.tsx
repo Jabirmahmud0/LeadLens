@@ -1,4 +1,6 @@
-import { db } from '@leadlens/database';
+import { db, schema } from '@leadlens/database';
+import { and, eq } from 'drizzle-orm';
+import { requireSession } from '@/lib/auth/session';
 import { notFound } from 'next/navigation';
 import { Badge } from '@leadlens/ui';
 import { Target, CheckCircle2, AlertTriangle, Lightbulb } from 'lucide-react';
@@ -9,10 +11,12 @@ export default async function ReportOpportunitiesPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const session = await requireSession();
+  if (!session.organization) notFound();
 
   // Fetch Report with Relations
   const report = await db.query.reports.findFirst({
-    where: (r, { eq }) => eq(r.analysisJobId, id),
+    where: and(eq(schema.reports.analysisJobId, id), eq(schema.reports.organizationId, session.organization.id)),
     with: {
       serviceRecommendations: {
         orderBy: (sr, { asc }) => asc(sr.rank)
@@ -67,6 +71,7 @@ export default async function ReportOpportunitiesPage({
             const isPrimary = idx === 0;
             const suggestedScope = rec.suggestedScope as { text: string } | null;
             const risks = rec.risks as string[] | null;
+            const context = rec.assumptions as { opportunity?: { buyingSignals?: string[]; requiredProof?: string; risks?: string[] }; proposalRisks?: string[] } | null;
 
             return (
               <div 
@@ -129,6 +134,8 @@ export default async function ReportOpportunitiesPage({
                       </ul>
                     </div>
                   )}
+
+                  {context?.opportunity && <div className="md:col-span-2 grid gap-4 md:grid-cols-2"><div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4"><h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-500">Buying signals</h4><ul className="space-y-1 text-sm text-neutral-300">{(context.opportunity.buyingSignals || []).map(signal => <li key={signal}>• {signal}</li>)}</ul></div><div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4"><h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-500">Proof required</h4><p className="text-sm text-neutral-300">{context.opportunity.requiredProof || 'Validate during discovery.'}</p></div></div>}
 
                 </div>
               </div>

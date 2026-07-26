@@ -3,7 +3,7 @@ import { withSentryConfig } from '@sentry/nextjs';
 import { validateEnv } from '@leadlens/shared';
 
 // Validate environment variables at build and startup time
-validateEnv();
+validateEnv('web');
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@leadlens/ui"],
@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://app.posthog.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://app.posthog.com; frame-ancestors 'none'; object-src 'none';"
+            value: `default-src 'self'; script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''} https://app.posthog.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://app.posthog.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests;`
           },
           {
             key: 'X-Content-Type-Options',

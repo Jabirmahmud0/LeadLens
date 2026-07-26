@@ -1,37 +1,56 @@
 import { z } from 'zod';
 
-const envSchema = z.object({
-  // Required in all environments
+const commonEnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
-  
-  // App
-  NEXT_PUBLIC_APP_URL: z.string().url().optional(), // usually available, but might be dynamic in Vercel
-  
-  // Auth
-  WORKER_SECRET: z.string().min(1, 'WORKER_SECRET is required'),
-
-  // External APIs (Required for full functionality)
-  SENTRY_DSN: z.string().min(1, 'SENTRY_DSN is required').optional(),
-  POSTHOG_KEY: z.string().min(1, 'POSTHOG_KEY is required').optional(),
-  OPENAI_API_KEY: z.string().min(1, 'OPENAI_API_KEY is required').optional(),
-  ANTHROPIC_API_KEY: z.string().min(1, 'ANTHROPIC_API_KEY is required').optional(),
-  GROQ_API_KEY: z.string().min(1, 'GROQ_API_KEY is required').optional(),
-  
-  // Resend / Email
-  RESEND_API_KEY: z.string().optional(),
+  NEXT_PUBLIC_APP_URL: z.string().url().optional(),
+  NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
+  NEXT_PUBLIC_POSTHOG_HOST: z.string().url().optional(),
+  SENTRY_DSN: z.string().url().or(z.literal('')).optional(),
+  SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).optional(),
+  SENTRY_PROFILES_SAMPLE_RATE: z.coerce.number().min(0).max(1).optional(),
 });
 
-export function validateEnv() {
-  const parsed = envSchema.safeParse(process.env);
-  
+const webEnvSchema = commonEnvSchema.extend({
+  WORKER_URL: z.string().url().optional(),
+  WORKER_SECRET: z.string().min(16).optional(),
+  CRON_SECRET: z.string().min(16).optional(),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().int().positive().optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().optional(),
+  MONTHLY_ANALYSIS_LIMIT: z.coerce.number().int().positive().optional(),
+  ADMIN_EMAILS: z.string().optional(),
+});
+
+const workerEnvSchema = commonEnvSchema.extend({
+  WORKER_SECRET: z.string().min(16, 'WORKER_SECRET must be at least 16 characters'),
+  GEMINI_API_KEY: z.string().min(1, 'GEMINI_API_KEY is required'),
+  GEMINI_MODEL: z.string().optional(),
+  GROQ_API_KEY: z.string().optional(),
+  GROQ_MODEL: z.string().optional(),
+  PAGESPEED_API_KEY: z.string().optional(),
+  WORKER_POLL_INTERVAL_MS: z.coerce.number().int().positive().optional(),
+  WORKER_HEARTBEAT_INTERVAL_MS: z.coerce.number().int().positive().optional(),
+  CRAWL_MAX_PAGES: z.coerce.number().int().min(1).max(20).optional(),
+  CRAWL_FETCH_TIMEOUT_MS: z.coerce.number().int().min(1000).max(30000).optional(),
+  CRAWL_MAX_DURATION_MS: z.coerce.number().int().min(5000).max(300000).optional(),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().int().positive().optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().optional(),
+});
+
+export type EnvironmentScope = 'common' | 'web' | 'worker';
+
+export function validateEnv(scope: EnvironmentScope = 'common') {
+  const schema = scope === 'worker' ? workerEnvSchema : scope === 'web' ? webEnvSchema : commonEnvSchema;
+  const parsed = schema.safeParse(process.env);
   if (!parsed.success) {
-    console.error('❌ Invalid environment variables:', JSON.stringify(parsed.error.format(), null, 2));
-    throw new Error('Invalid environment variables');
+    console.error('Invalid environment variables:', JSON.stringify(parsed.error.format(), null, 2));
+    throw new Error(`Invalid ${scope} environment variables`);
   }
-  
   return parsed.data;
 }
-
-// In Next.js we might run this file, so we can run validation eagerly if we import it
-export const env = envSchema.parse(process.env);

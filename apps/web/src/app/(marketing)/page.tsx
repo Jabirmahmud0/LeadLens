@@ -1,196 +1,399 @@
-import * as React from 'react';
-import Link from 'next/link';
-import { ArrowRight, Search, Zap, CheckCircle2, SearchCode, LineChart } from 'lucide-react';
-import { EvidenceMarquee } from '@leadlens/ui';
+import {
+  ArrowRight,
+  BarChart3,
+  Check,
+  CheckCircle2,
+  ChevronRight,
+  CircleDot,
+  FileText,
+  Globe2,
+  Layers3,
+  Mail,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  WandSparkles,
+} from 'lucide-react';
+import styles from './home.module.css';
 
-export const metadata = {
-  title: 'LeadLens | Stop guessing. Start closing.',
-};
+const researchFeed = [
+  { label: 'Source captured', title: 'Pricing page', meta: 'Observed · just now', icon: Globe2, tone: 'emerald' },
+  { label: 'Finding verified', title: 'CTA path breaks', meta: 'High impact · 3 sources', icon: CheckCircle2, tone: 'forest' },
+  { label: 'Service matched', title: 'Conversion strategy', meta: 'Strong fit · 94%', icon: Layers3, tone: 'mint' },
+  { label: 'Hypothesis labeled', title: 'Visitor hesitation', meta: 'Needs validation', icon: Sparkles, tone: 'amber' },
+  { label: 'Coverage update', title: '8 pages reviewed', meta: 'Good source depth', icon: BarChart3, tone: 'teal' },
+  { label: 'Output ready', title: 'Opportunity brief', meta: 'Editable · source linked', icon: FileText, tone: 'lime' },
+];
+
+function ProductStage() {
+  return (
+    <div className={styles.stageWrap}>
+      <div className={styles.orbOne} />
+      <div className={styles.orbTwo} />
+
+      <div className={`${styles.floatCard} ${styles.floatLeft}`}>
+        <span className="grid size-9 place-items-center rounded-xl bg-emerald-50 text-emerald-600">
+          <CheckCircle2 className="size-4" aria-hidden="true" />
+        </span>
+        <span><strong className="block text-sm text-slate-900">Evidence captured</strong><span className="text-xs text-slate-500">8 public pages reviewed</span></span>
+      </div>
+
+      <div className={`${styles.floatCard} ${styles.floatRight}`}>
+        <span className="grid size-9 place-items-center rounded-xl bg-teal-50 text-teal-700">
+          <WandSparkles className="size-4" aria-hidden="true" />
+        </span>
+        <span><strong className="block text-sm text-slate-900">Brief ready</strong><span className="text-xs text-slate-500">Sources and caveats included</span></span>
+      </div>
+
+      <div className={styles.productWindow}>
+        <div className="flex h-12 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-5">
+          <div className="flex items-center gap-2">
+            <span className="size-2.5 rounded-full bg-rose-300" />
+            <span className="size-2.5 rounded-full bg-amber-300" />
+            <span className="size-2.5 rounded-full bg-emerald-300" />
+          </div>
+          <div className="hidden items-center gap-2 rounded-lg bg-slate-100 px-3 py-1.5 text-[11px] text-slate-500 sm:flex">
+            <ShieldCheck className="size-3" aria-hidden="true" /> app.leadlens.ai / brief
+          </div>
+          <span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">Live sample</span>
+        </div>
+
+        <div className="grid min-h-[460px] grid-cols-1 bg-[#f5f8f4] md:grid-cols-[160px_1fr]">
+          <aside className="hidden border-r border-slate-200 bg-white p-4 md:block">
+            <div className="mb-6 flex items-center gap-2.5 px-1">
+              <span className="grid size-8 place-items-center rounded-lg bg-slate-950 text-xs font-bold text-white">N</span>
+              <span><strong className="block text-xs text-slate-900">Northstar</strong><span className="text-[10px] text-slate-400">Opportunity brief</span></span>
+            </div>
+            <nav className="space-y-1" aria-label="Sample brief navigation">
+              {[
+                ['Overview', BarChart3, true],
+                ['Findings', Search, false],
+                ['Opportunities', Layers3, false],
+                ['Outreach', Mail, false],
+                ['Sources', Globe2, false],
+              ].map(([label, Icon, active]) => {
+                const IconComponent = Icon as typeof BarChart3;
+                return (
+                  <div key={label as string} className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium ${active ? 'bg-emerald-50 text-emerald-800' : 'text-slate-500'}`}>
+                    <IconComponent className="size-3.5" aria-hidden="true" /> {label as string}
+                  </div>
+                );
+              })}
+            </nav>
+            <div className="mt-24 rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Coverage</p>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200"><div className="h-full w-[86%] rounded-full bg-emerald-500" /></div>
+              <p className="mt-2 text-[10px] text-slate-500">Good source coverage</p>
+            </div>
+          </aside>
+
+          <main className="relative min-w-0 p-4 sm:p-6 lg:p-7">
+            <div className={styles.scanLine} />
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-emerald-700">Opportunity overview</p>
+                <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">A sharper path to conversion</h2>
+                <p className="mt-1 text-xs text-slate-500">Updated just now · 8 pages analyzed</p>
+              </div>
+              <button className="hidden h-9 items-center gap-1.5 rounded-lg bg-slate-950 px-3 text-xs font-semibold text-white sm:flex" type="button" tabIndex={-1}>
+                Export brief <ArrowRight className="size-3" />
+              </button>
+            </div>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              {[
+                ['Opportunity', 'High', 'text-emerald-700'],
+                ['Findings', '12', 'text-slate-950'],
+                ['Sources', '18', 'text-slate-950'],
+              ].map(([label, value, color]) => (
+                <div key={label} className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm">
+                  <p className="text-[10px] font-medium text-slate-400">{label}</p>
+                  <p className={`mt-1 text-xl font-semibold ${color}`}>{value}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold text-slate-900">Priority findings</p>
+                <span className="text-[10px] text-slate-400">Impact × confidence</span>
+              </div>
+              <div className="mt-4 space-y-3">
+                {[
+                  ['Conversion path is unclear', 'Observed', 'High', 'bg-emerald-600', 'w-[88%]'],
+                  ['Service positioning is broad', 'Observed', 'High', 'bg-teal-500', 'w-[72%]'],
+                  ['Measurement may be incomplete', 'Hypothesis', 'Medium', 'bg-amber-400', 'w-[54%]'],
+                ].map(([title, kind, impact, color, width]) => (
+                  <div key={title} className="grid grid-cols-[1fr_auto] items-center gap-4">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="truncate text-xs font-medium text-slate-700">{title}</p>
+                        <span className={`hidden rounded px-1.5 py-0.5 text-[8px] font-bold uppercase sm:inline ${kind === 'Observed' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>{kind}</span>
+                      </div>
+                      <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full ${color} ${width}`} /></div>
+                    </div>
+                    <span className="text-[10px] font-semibold text-slate-500">{impact}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-3 flex items-center justify-between rounded-xl border border-emerald-100 bg-emerald-50/70 px-4 py-3">
+              <span className="flex items-center gap-2 text-xs font-medium text-emerald-950"><Sparkles className="size-3.5 text-emerald-700" /> Recommended angle: conversion clarity</span>
+              <ChevronRight className="size-4 text-emerald-500" />
+            </div>
+          </main>
+
+          <aside className="hidden border-l border-slate-200 bg-white p-5">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">Evidence trail</p>
+            <div className="mt-4 space-y-3">
+              {[
+                ['Homepage', 'CTA changes by section', 'Verified'],
+                ['Services', 'Six offers, equal weight', 'Verified'],
+                ['Pricing', 'No persistent next step', 'Verified'],
+              ].map(([page, note, status]) => (
+                <div key={page} className="rounded-xl border border-slate-200 p-3">
+                  <div className="flex items-center justify-between"><span className="text-[10px] font-semibold text-slate-700">{page}</span><span className="size-1.5 rounded-full bg-emerald-500" /></div>
+                  <p className="mt-2 text-[10px] leading-4 text-slate-500">{note}</p>
+                  <p className="mt-2 text-[9px] font-medium text-emerald-600">{status}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 rounded-xl bg-slate-950 p-4 text-white">
+              <CircleDot className="size-4 text-emerald-300" />
+              <p className="mt-3 text-xs font-semibold">Nothing hidden</p>
+              <p className="mt-1 text-[10px] leading-4 text-slate-400">Sources, limitations, and hypotheses travel with the brief.</p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SignalTicker() {
+  return (
+    <section className={styles.feedRail} aria-label="Live example research feed">
+      <div className={styles.feedStatus}>
+        <span className={styles.feedSignal}><span className={styles.pulseDot} /></span>
+        <span><strong>Research feed</strong><small>Signals becoming a brief</small></span>
+      </div>
+      <div className={styles.ticker}>
+        <div className={styles.tickerTrack}>
+          {[0, 1].map((copy) => (
+            <div key={copy} className={styles.tickerSet} aria-hidden={copy === 1}>
+              {researchFeed.map(({ label, title, meta, icon: Icon, tone }) => (
+                <article key={`${copy}-${label}`} className={styles.feedCard}>
+                  <span className={`${styles.feedIcon} ${styles[`tone${tone[0].toUpperCase()}${tone.slice(1)}`]}`}><Icon className="size-4" aria-hidden="true" /></span>
+                  <span className={styles.feedCopy}>
+                    <span className={styles.feedLabel}>{label}</span>
+                    <strong>{title}</strong>
+                    <small>{meta}</small>
+                  </span>
+                  <span className={styles.feedCheck}><Check className="size-3" aria-hidden="true" /></span>
+                </article>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function MarketingHomePage() {
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* 1. Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden">
-        {/* Abstract Background Effects */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[80px] pointer-events-none" />
-        
-        <div className="max-w-7xl mx-auto px-6 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          
-          {/* Hero Left: Copy & CTA */}
-          <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400 text-sm font-medium">
-              <Zap className="w-4 h-4" />
-              <span>The AI analysis pipeline for agencies</span>
+    <div className={`${styles.page} overflow-hidden bg-[#fbfcf8] text-[#10251d]`}>
+      <section className={`${styles.hero} px-5 pb-20 pt-36 sm:px-8 sm:pt-40 lg:px-10 lg:pb-28`}>
+        <div className={styles.heroGrid} />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-[0.86fr_1.14fr] lg:gap-12 xl:gap-20">
+          <div className="text-left">
+            <div className={`${styles.reveal} inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3.5 py-2 text-xs font-semibold text-emerald-800 shadow-sm backdrop-blur`}>
+              <span className={styles.pulseDot} /> Prospect intelligence for digital agencies
             </div>
-            
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1]">
-              Stop guessing.<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Start closing.</span>
+            <h1 className={`${styles.displayFont} ${styles.reveal} ${styles.delayOne} mt-7 max-w-2xl text-[clamp(3.6rem,6.4vw,6.6rem)] font-semibold leading-[0.91] tracking-[-0.065em] text-[#10251d]`}>
+              See what<br />others <span className={styles.accentText}>overlook.</span>
             </h1>
-            
-            <p className="text-lg text-neutral-400 max-w-xl leading-relaxed">
-              Instantly turn any prospect&apos;s website into a heavily researched, highly persuasive Opportunity Brief. Pitch with proof, not promises.
+            <p className={`${styles.reveal} ${styles.delayTwo} mt-7 max-w-xl text-lg leading-8 text-[#52675e] sm:text-xl`}>
+              Turn a prospect&apos;s public website into a source-backed brief that connects real findings to the services your agency sells.
             </p>
-            
-            <form action="/signup" method="GET" className="relative max-w-lg group mt-4">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-blue-400 group-focus-within:text-blue-500 transition-colors" />
-              </div>
-              <input
-                type="url"
-                name="url"
-                required
-                className="block w-full pl-12 pr-40 rounded-2xl border border-neutral-800 bg-neutral-900/80 px-4 py-5 text-white placeholder-neutral-500 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all shadow-xl backdrop-blur-xl"
-                placeholder="https://prospect-website.com"
-              />
-              <div className="absolute inset-y-2 right-2">
-                <button type="submit" className="h-full px-6 bg-white text-black rounded-xl font-medium hover:bg-neutral-200 transition-colors flex items-center gap-2">
-                  Analyze
-                  <ArrowRight className="w-4 h-4" />
+
+            <form action="/register" method="GET" className={`${styles.reveal} ${styles.delayThree} mt-9 max-w-xl`}>
+              <label htmlFor="hero-url" className="sr-only">Prospect website URL</label>
+              <div className="flex flex-col gap-2 rounded-2xl border border-[#cddbd3] bg-white p-2 shadow-[0_24px_60px_-28px_rgba(20,83,45,0.32)] focus-within:border-emerald-600 focus-within:ring-4 focus-within:ring-emerald-100 sm:flex-row">
+                <div className="flex min-w-0 flex-1 items-center gap-3 px-3">
+                  <Globe2 className="size-5 shrink-0 text-[#7a9186]" aria-hidden="true" />
+                  <input id="hero-url" type="url" name="url" required inputMode="url" autoComplete="url" placeholder="Paste a prospect website" className="h-12 min-w-0 flex-1 bg-transparent text-base text-[#10251d] outline-none placeholder:text-[#8ca096]" />
+                </div>
+                <button type="submit" className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#166534] px-5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[#14532d] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2">
+                  Analyze <ArrowRight className="size-4" aria-hidden="true" />
                 </button>
               </div>
             </form>
-            
-            <div className="flex items-center gap-6 text-sm text-neutral-500 pt-4">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-green-500" />
-                <span>No credit card required</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-green-500" />
-                <span>10 free analyses</span>
-              </div>
+            <div className={`${styles.reveal} ${styles.delayFour} mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs font-medium text-[#60766b]`}>
+              {['No credit card', 'Public data only', 'Editable output'].map((item) => <span key={item} className="flex items-center gap-1.5"><Check className="size-3.5 text-emerald-600" />{item}</span>)}
             </div>
           </div>
-          
-          {/* Hero Right: Lens Visualization */}
-          <div className="relative aspect-square lg:aspect-[4/3] rounded-3xl border border-neutral-800 bg-neutral-900/50 overflow-hidden shadow-2xl flex items-center justify-center p-8 backdrop-blur-md">
-            {/* Abstract visual of turning a website wireframe into a document */}
-            <div className="w-full h-full relative">
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-48 h-64 border-2 border-neutral-800 rounded-xl bg-neutral-950 p-4 opacity-50 transform -rotate-12 transition-transform duration-1000 hover:rotate-0">
-                <div className="w-full h-4 bg-neutral-800 rounded-sm mb-4" />
-                <div className="w-2/3 h-4 bg-neutral-800 rounded-sm mb-2" />
-                <div className="w-3/4 h-4 bg-neutral-800 rounded-sm mb-8" />
-                <div className="w-full h-24 bg-neutral-800 rounded-sm" />
-              </div>
-              
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-56 h-72 border border-blue-500/30 rounded-xl bg-black p-5 shadow-[0_0_50px_rgba(37,99,235,0.2)] transform rotate-6 z-10">
-                <div className="w-12 h-12 bg-blue-500/20 rounded-lg mb-6 flex items-center justify-center">
-                  <Zap className="w-6 h-6 text-blue-400" />
-                </div>
-                <div className="w-3/4 h-3 bg-white/80 rounded-sm mb-3" />
-                <div className="w-full h-2 bg-neutral-600 rounded-sm mb-2" />
-                <div className="w-5/6 h-2 bg-neutral-600 rounded-sm mb-6" />
-                
-                <div className="flex gap-2 mb-2">
-                  <div className="w-full h-8 bg-green-500/20 rounded-md border border-green-500/30" />
-                  <div className="w-full h-8 bg-red-500/20 rounded-md border border-red-500/30" />
-                </div>
-              </div>
-              
-              {/* Connecting line / Lens */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                <div className="w-24 h-24 rounded-full border border-blue-500/50 bg-blue-500/10 backdrop-blur-md flex items-center justify-center shadow-[0_0_30px_rgba(37,99,235,0.3)]">
-                  <SearchCode className="w-8 h-8 text-blue-400" />
-                </div>
-              </div>
-            </div>
-          </div>
-          
-        </div>
-      </section>
 
-      {/* 2. Evidence Marquee */}
-      <section className="py-10 border-y border-neutral-800 bg-neutral-950/50">
-        <div className="max-w-7xl mx-auto px-6 mb-6">
-          <p className="text-sm font-medium text-neutral-500 text-center uppercase tracking-widest">
-            Automatically detecting hundreds of signals
-          </p>
-        </div>
-        <EvidenceMarquee speed="normal" direction="left" />
-        <div className="h-4" />
-        <EvidenceMarquee speed="slow" direction="right" />
-      </section>
-
-      {/* 3. Pipeline Narrative */}
-      <section className="py-32 relative">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center max-w-2xl mx-auto mb-20">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">How it works</h2>
-            <p className="text-lg text-neutral-400">
-              LeadLens handles the heavy lifting of prospect research, so your team can focus on selling.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-8 relative overflow-hidden group">
-              <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-6 border border-blue-500/20">
-                <SearchCode className="w-6 h-6 text-blue-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">1. Collect Evidence</h3>
-              <p className="text-neutral-400 leading-relaxed">
-                Enter a URL, and our engine instantly crawls the site, analyzing performance, structure, content, and hidden meta signals.
-              </p>
-            </div>
-            
-            <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-8 relative overflow-hidden group">
-              <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-6 border border-purple-500/20">
-                <LineChart className="w-6 h-6 text-purple-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">2. Match Services</h3>
-              <p className="text-neutral-400 leading-relaxed">
-                The AI cross-references the detected problems against your agency&apos;s specific service offerings and past case studies.
-              </p>
-            </div>
-            
-            <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-8 relative overflow-hidden group">
-              <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center mb-6 border border-green-500/20">
-                <Zap className="w-6 h-6 text-green-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">3. Generate Brief</h3>
-              <p className="text-neutral-400 leading-relaxed">
-                Output a ready-to-present Opportunity Brief featuring undeniable proof of the prospect&apos;s problems and your solution.
-              </p>
-            </div>
+          <div className={`${styles.reveal} ${styles.delayTwo} lg:translate-x-4`}>
+            <ProductStage />
           </div>
         </div>
       </section>
 
-      {/* 4. Bottom CTA */}
-      <section className="py-32 relative overflow-hidden border-t border-neutral-800">
-        <div className="absolute inset-0 bg-blue-900/10" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-500/20 rounded-full blur-[100px] pointer-events-none" />
-        
-        <div className="max-w-4xl mx-auto px-6 relative z-10 text-center">
-          <h2 className="text-4xl md:text-6xl font-bold text-white mb-8 tracking-tight">
-            Ready to win more pitches?
-          </h2>
-          <p className="text-xl text-blue-200/60 mb-10 max-w-2xl mx-auto">
-            Join top agencies using AI to research faster, pitch smarter, and close bigger deals.
-          </p>
-          
-          <form action="/signup" method="GET" className="relative max-w-lg mx-auto group">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-blue-400" />
+      <SignalTicker />
+
+      <section className="px-5 py-24 sm:px-8 sm:py-32 lg:px-10">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-8 lg:grid-cols-[0.8fr_1fr] lg:items-end">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.18em] text-emerald-700">Less research theater</p>
+              <h2 className="mt-4 text-4xl font-semibold leading-[1.02] tracking-[-0.05em] sm:text-6xl">A sales point of view your team can defend.</h2>
             </div>
-            <input
-              type="url"
-              name="url"
-              required
-              className="block w-full pl-12 pr-40 rounded-2xl border border-white/10 bg-black/50 px-4 py-5 text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-xl backdrop-blur-xl"
-              placeholder="Enter a prospect's website..."
-            />
-            <div className="absolute inset-y-2 right-2">
-              <button type="submit" className="h-full px-8 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition-colors shadow-lg shadow-blue-500/25">
-                Analyze Free
-              </button>
+            <p className="max-w-xl text-lg leading-8 text-slate-600 lg:justify-self-end">The useful part is not another score. It is knowing what was observed, why it matters, and which service creates the strongest next conversation.</p>
+          </div>
+
+          <div className="mt-16 grid auto-rows-[minmax(260px,auto)] gap-4 lg:grid-cols-12">
+            <article className={`${styles.bentoCard} relative overflow-hidden bg-[#edf7f0] p-7 text-[#10251d] sm:p-9 lg:col-span-7 lg:row-span-2`}>
+              <div className="relative z-10 flex h-full flex-col">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="grid size-11 place-items-center rounded-2xl bg-[#166534] text-white"><Search className="size-5" /></span>
+                  <div className="flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-800">
+                    <span className={styles.pulseDot} /> 8 of 8 pages captured
+                  </div>
+                </div>
+
+                <div className={`${styles.evidenceMap} mt-8 rounded-2xl border border-[#cfe4d6] bg-white p-4 shadow-[0_18px_40px_-32px_rgba(20,83,45,0.45)] sm:p-5`}>
+                  <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                    <span className="flex items-center gap-2.5 text-xs font-semibold text-[#16352a]"><Globe2 className="size-4 text-emerald-700" /> northstarstudio.com</span>
+                    <span className="text-[10px] font-semibold text-emerald-700">Crawl complete</span>
+                  </div>
+                  <div className="mt-5 grid gap-2.5 sm:grid-cols-3">
+                    {[
+                      ['Homepage', '4 findings', 'High impact'],
+                      ['Services', '5 findings', 'High impact'],
+                      ['Pricing', '3 findings', 'Medium impact'],
+                    ].map(([page, findings, impact], index) => (
+                      <div key={page} className={`${styles.sourceNode} rounded-xl border border-[#dce9e0] bg-[#f8fbf8] p-3`} style={{ animationDelay: `${index * 140}ms` }}>
+                        <div className="flex items-center justify-between"><span className="text-xs font-semibold text-[#16352a]">{page}</span><CheckCircle2 className="size-3.5 text-emerald-600" /></div>
+                        <p className="mt-4 text-[10px] text-[#668075]">{findings}</p>
+                        <p className="mt-1 text-[10px] font-semibold text-emerald-700">{impact}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-3 flex items-center gap-2 rounded-xl bg-[#16352a] px-3.5 py-3 text-white">
+                    <Sparkles className="size-4 shrink-0 text-emerald-300" />
+                    <p className="text-xs"><span className="font-semibold">Pattern found:</span> the strongest conversion path breaks between services and pricing.</p>
+                  </div>
+                </div>
+
+                <div className="mt-auto pt-9">
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">Evidence first</p>
+                  <h3 className="mt-3 max-w-lg text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">Every finding keeps its source attached.</h3>
+                  <p className="mt-4 max-w-xl leading-7 text-[#52675e]">Review the captured page, separate observations from hypotheses, and surface limitations before the brief leaves your team.</p>
+                </div>
+              </div>
+            </article>
+
+            <article className={`${styles.bentoCard} bg-emerald-50 p-7 sm:p-9 lg:col-span-5`}>
+              <div className="flex items-start justify-between"><span className="grid size-11 place-items-center rounded-2xl bg-emerald-700 text-white"><Layers3 className="size-5" /></span><span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">Agency-specific</span></div>
+              <h3 className="mt-10 text-2xl font-semibold tracking-[-0.035em]">Match findings to your services.</h3>
+              <p className="mt-3 leading-7 text-slate-600">Your catalog shapes the opportunity—not a generic list of recommendations.</p>
+              <div className="mt-7 flex flex-wrap gap-2">{['CRO', 'Web design', 'SEO', 'Analytics'].map((tag, i) => <span key={tag} className={`rounded-lg border px-3 py-2 text-xs font-semibold ${i === 0 ? 'border-emerald-200 bg-white text-emerald-800 shadow-sm' : 'border-emerald-100 text-slate-500'}`}>{tag}</span>)}</div>
+            </article>
+
+            <article className={`${styles.bentoCard} bg-white p-7 sm:p-9 lg:col-span-5`}>
+              <div className="flex items-center gap-3"><span className="grid size-11 place-items-center rounded-2xl bg-emerald-50 text-emerald-600"><ShieldCheck className="size-5" /></span><div><p className="text-sm font-semibold">Trust by default</p><p className="text-xs text-slate-400">Clear evidence labels</p></div></div>
+              <div className="mt-7 grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-emerald-50 p-3"><p className="text-[10px] font-bold uppercase text-emerald-700">Observed</p><p className="mt-2 text-xs leading-5 text-slate-700">No CTA on pricing page.</p></div>
+                <div className="rounded-xl bg-amber-50 p-3"><p className="text-[10px] font-bold uppercase text-amber-700">Hypothesis</p><p className="mt-2 text-xs leading-5 text-slate-700">Visitors may hesitate.</p></div>
+              </div>
+            </article>
+
+            <article className={`${styles.bentoCard} bg-white p-7 sm:p-9 lg:col-span-12`}>
+              <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+                <div>
+                  <span className="grid size-11 place-items-center rounded-2xl bg-teal-50 text-teal-700"><FileText className="size-5" /></span>
+                  <h3 className="mt-7 text-3xl font-semibold tracking-[-0.04em]">From evidence to the next move.</h3>
+                  <p className="mt-3 max-w-md leading-7 text-slate-600">Turn the same researched opportunity into a brief, call plan, outreach draft, and proposal direction.</p>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-3">
+                  {[
+                    ['01', 'Brief', 'Align the team'],
+                    ['02', 'Outreach', 'Start relevant'],
+                    ['03', 'Proposal', 'Frame the value'],
+                  ].map(([number, title, text]) => <div key={number} className="rounded-2xl border border-slate-200 bg-slate-50 p-4"><span className="font-mono text-[10px] text-emerald-600">{number}</span><p className="mt-8 text-sm font-semibold text-slate-900">{title}</p><p className="mt-1 text-xs text-slate-500">{text}</p></div>)}
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section className={`${styles.workflowSection} border-y border-[#d9e6dc] px-5 py-24 sm:px-8 sm:py-32 lg:px-10`}>
+        <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
+          <div className="lg:pt-7">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700">The research handoff</p>
+            <h2 className={`${styles.displayFont} mt-5 max-w-xl text-5xl font-semibold leading-[0.98] tracking-[-0.055em] sm:text-6xl`}>A clear path from website to conversation.</h2>
+            <p className="mt-6 max-w-md text-lg leading-8 text-[#597066]">Each stage makes the next one more useful. No mystery score, no disconnected AI summary.</p>
+            <div className="mt-10 inline-flex items-center gap-3 border-l-2 border-emerald-600 pl-4">
+              <span className="text-3xl font-semibold text-[#16352a]">14</span>
+              <span className="max-w-[150px] text-xs leading-5 text-[#60766b]">durable stages from crawl to final brief</span>
+            </div>
+          </div>
+
+          <div className={styles.processStack}>
+            {[
+              ['01', Globe2, 'Collect the right pages', 'The crawl maps the buying journey and keeps a record of every source.', '8 pages', 'Captured'],
+              ['02', Sparkles, 'Connect the commercial signal', 'Findings become prioritized opportunities matched to your service catalog.', '12 findings', 'Matched'],
+              ['03', FileText, 'Create the point of view', 'Your team edits the brief, verifies the language, and chooses the next move.', '1 brief', 'Ready'],
+            ].map(([number, Icon, title, text, metric, status], index) => {
+              const IconComponent = Icon as typeof Globe2;
+              return (
+                <article key={number as string} className={`${styles.processCard} ${index === 1 ? styles.processOffset : ''}`}>
+                  <div className="flex min-w-0 items-start gap-4 sm:gap-5">
+                    <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#e3f5e8] text-emerald-700"><IconComponent className="size-5" /></span>
+                    <div className="min-w-0">
+                      <p className="font-mono text-[10px] font-bold tracking-wider text-emerald-600">STAGE {number as string}</p>
+                      <h3 className="mt-2 text-xl font-semibold tracking-[-0.025em] text-[#10251d] sm:text-2xl">{title as string}</h3>
+                      <p className="mt-2 max-w-lg text-sm leading-6 text-[#60766b]">{text as string}</p>
+                    </div>
+                  </div>
+                  <div className="mt-6 flex items-center justify-between border-t border-[#e0e9e2] pt-4 sm:mt-0 sm:w-28 sm:shrink-0 sm:flex-col sm:items-end sm:justify-center sm:border-l sm:border-t-0 sm:pl-5 sm:pt-0">
+                    <span className="text-sm font-semibold text-[#16352a]">{metric as string}</span>
+                    <span className="mt-1 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700"><span className="size-1.5 rounded-full bg-emerald-500" />{status as string}</span>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className={`${styles.closeSection} border-b border-[#193f31] px-5 py-20 sm:px-8 sm:py-24 lg:px-10`}>
+        <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[1fr_0.9fr] lg:gap-20">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">Your next prospect is enough</p>
+            <h2 className={`${styles.displayFont} mt-5 max-w-3xl text-5xl font-semibold leading-[0.94] tracking-[-0.06em] text-white sm:text-7xl`}>Bring the URL.<br /><span className="text-emerald-300">We&apos;ll find the angle.</span></h2>
+            <p className="mt-6 max-w-xl text-lg leading-8 text-[#b8d1c3]">Build a research-backed starting point your agency can edit, defend, and use.</p>
+          </div>
+
+          <form action="/register" method="GET" className={styles.closeForm}>
+            <div className="flex items-center justify-between border-b border-[#dce9e0] pb-5">
+              <div><p className="text-sm font-semibold text-[#10251d]">Start with a real prospect</p><p className="mt-1 text-xs text-[#6c8177]">Public website data only</p></div>
+              <span className="grid size-10 place-items-center rounded-full bg-emerald-50 text-emerald-700"><Globe2 className="size-4" /></span>
+            </div>
+            <label htmlFor="closing-url" className="mt-7 block text-xs font-bold uppercase tracking-[0.14em] text-[#60766b]">Prospect website</label>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+              <input id="closing-url" type="url" name="url" required inputMode="url" placeholder="https://prospect.com" className="h-12 min-w-0 flex-1 rounded-xl border border-[#cad9cf] bg-[#f8fbf8] px-4 text-sm text-[#10251d] outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100" />
+              <button type="submit" className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#166534] px-5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[#14532d]">Build my brief <ArrowRight className="size-4" /></button>
+            </div>
+            <div className="mt-6 grid grid-cols-3 gap-2 text-center">
+              {['Source linked', 'Fully editable', 'Free to start'].map((item) => <span key={item} className="rounded-lg bg-[#f1f7f2] px-2 py-2 text-[10px] font-semibold text-[#52675e]">{item}</span>)}
             </div>
           </form>
         </div>
       </section>
-      
     </div>
   );
 }

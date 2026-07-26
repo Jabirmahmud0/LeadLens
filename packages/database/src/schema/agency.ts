@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, jsonb, bigint, boolean, integer } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, jsonb, bigint, boolean, integer, index, unique } from 'drizzle-orm/pg-core';
 import { organizations } from './org';
 
 export const agencyProfiles = pgTable('agency_profiles', {
@@ -19,10 +19,12 @@ export const agencyProfiles = pgTable('agency_profiles', {
   technicalDetailLevel: text('technical_detail_level'),
   preferredChannels: jsonb('preferred_channels'),
   avoidedPhrases: jsonb('avoided_phrases'),
+  proposalStyle: text('proposal_style'),
+  ctaPreference: text('cta_preference'),
   setupCompletedAt: timestamp('setup_completed_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-});
+}, (table) => ({ organizationUnique: unique('agency_profiles_organization_unique').on(table.organizationId) }));
 
 export const agencyServices = pgTable('agency_services', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -41,7 +43,7 @@ export const agencyServices = pgTable('agency_services', {
   isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-});
+}, (table) => ({ orgActiveIdx: index('agency_services_org_active_idx').on(table.organizationId, table.isActive), orgSlugUnique: unique('agency_services_org_slug_unique').on(table.organizationId, table.slug) }));
 
 export const idealCustomerProfiles = pgTable('ideal_customer_profiles', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -53,13 +55,14 @@ export const idealCustomerProfiles = pgTable('ideal_customer_profiles', {
   budgetMinCents: bigint('budget_min_cents', { mode: 'number' }),
   budgetMaxCents: bigint('budget_max_cents', { mode: 'number' }),
   preferredSignals: jsonb('preferred_signals'),
+  preferredWebsiteConditions: jsonb('preferred_website_conditions'),
   disqualifyingSignals: jsonb('disqualifying_signals'),
   commonProblems: jsonb('common_problems'),
   decisionMakerRoles: jsonb('decision_maker_roles'),
   isDefault: boolean('is_default').default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-});
+}, (table) => ({ orgDefaultIdx: index('ideal_customer_profiles_org_default_idx').on(table.organizationId, table.isDefault) }));
 
 export const caseStudies = pgTable('case_studies', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -78,7 +81,7 @@ export const caseStudies = pgTable('case_studies', {
   isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-});
+}, (table) => ({ orgActiveIdx: index('case_studies_org_active_idx').on(table.organizationId, table.isActive) }));
 
 export const caseStudyServices = pgTable('case_study_services', {
   caseStudyId: uuid('case_study_id').references(() => caseStudies.id, { onDelete: 'cascade' }).notNull(),

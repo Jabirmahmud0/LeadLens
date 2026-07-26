@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, index, boolean } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -11,6 +11,8 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
+  reportCompletionEmails: boolean('report_completion_emails').default(true).notNull(),
+  productUpdateEmails: boolean('product_update_emails').default(false).notNull(),
 }, (table) => {
   return {
     emailIdx: index('users_email_idx').on(table.email), // actually lower(email) in real pg index but text handles it
@@ -28,7 +30,7 @@ export const sessions = pgTable('sessions', {
   lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).defaultNow().notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   revokedAt: timestamp('revoked_at', { withTimezone: true }),
-});
+}, (table) => ({ userExpiryIdx: index('sessions_user_expiry_idx').on(table.userId, table.expiresAt) }));
 
 export const emailVerificationTokens = pgTable('email_verification_tokens', {
   id: uuid('id').primaryKey().defaultRandom(),

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { runAI, RunAIOptions } from '../run';
 import { Stage5Output } from './stage5-agency-match';
+import { calculateWeightedFitScore } from '../fit-scoring';
 
 export const Stage6BreakdownSchema = z.object({
   agencyServiceFit: z.number().min(0).max(100),
@@ -13,7 +14,7 @@ export const Stage6BreakdownSchema = z.object({
 
 export const Stage6Schema = z.object({
   overallScore: z.number().min(0).max(100).describe('Overall 0-100 score of how good a lead this is'),
-  scoreLabel: z.enum(['Excellent', 'Good', 'Fair', 'Poor']),
+  scoreLabel: z.enum(['High potential', 'Worth pursuing', 'Needs more research', 'Low fit']),
   confidence: z.number().min(0).max(100).describe('Confidence in this score based on evidence available'),
   scoreBreakdown: Stage6BreakdownSchema,
   positiveFactors: z.array(z.string()).describe('Strong reasons to pursue this lead'),
@@ -48,9 +49,13 @@ ${JSON.stringify(agencyIcp, null, 2)}
 Generate a detailed, objective fit score and breakdown.
 `;
 
-  return runAI(prompt, Stage6Schema, {
+  const result = await runAI(prompt, Stage6Schema, {
     ...options,
     purpose: 'stage6_fit_scoring',
     promptVersion: '1.0'
   });
+
+  const { overallScore, scoreLabel } = calculateWeightedFitScore(result.scoreBreakdown);
+
+  return { ...result, overallScore, scoreLabel };
 }

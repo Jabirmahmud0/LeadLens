@@ -1,0 +1,6 @@
+@echo off
+echo Syncing root .env to apps...
+copy /Y ".env" "apps\web\.env" > nul
+copy /Y ".env" "apps\worker\.env" > nul
+echo Starting LeadLens dev servers (web + worker)...
+pnpm dev

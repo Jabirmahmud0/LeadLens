@@ -20,7 +20,7 @@ export async function createSession(userId: string, ipHash?: string, userAgent?:
   const [session] = await db.insert(schema.sessions).values({
     userId,
     tokenHash: hashedToken,
-    ipHash,
+    ipHash: ipHash ? createHash('sha256').update(ipHash).digest('hex') : undefined,
     userAgent,
     expiresAt,
   }).returning();

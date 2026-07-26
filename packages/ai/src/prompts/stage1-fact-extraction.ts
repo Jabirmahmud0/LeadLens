@@ -29,7 +29,7 @@ ${extractedText.substring(0, 15000) /* truncate to fit context if needed */}
 Detected Technologies:
 ${JSON.stringify(technologies)}
 
-Extract the required facts. Do not invent information. If something is not found, leave it empty or provide a best guess based ONLY on the text.
+Extract only explicitly supported facts. Do not infer or guess. If something is not found, use an empty string or empty array.
 `;
 
   return runAI(prompt, Stage1Schema, {

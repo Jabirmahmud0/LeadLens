@@ -10,7 +10,7 @@ interface ClientEditorProps {
 }
 
 export function ClientEditor({ outreach }: ClientEditorProps) {
-  const [body, setBody] = React.useState(outreach.userEditedBody || outreach.generatedBody);
+  const [body, setBody] = React.useState(outreach.userEditedBody || outreach.body || '');
   const [isSaving, setIsSaving] = React.useState(false);
   const [saved, setSaved] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
@@ -33,8 +33,8 @@ export function ClientEditor({ outreach }: ClientEditorProps) {
 
   // Safe parse subject options
   let subjects: string[] = [];
-  if (Array.isArray(outreach.subjectOptions)) {
-    subjects = outreach.subjectOptions;
+  if (Array.isArray(outreach.subjectLines)) {
+    subjects = outreach.subjectLines;
   }
 
   return (

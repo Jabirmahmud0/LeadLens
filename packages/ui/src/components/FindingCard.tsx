@@ -36,9 +36,11 @@ export function FindingCard({
       {/* Left severity rail */}
       <div className={cn("absolute left-0 top-0 bottom-0 w-1", severityColor)} />
       
-      <div 
-        className="p-5 pl-6 cursor-pointer hover:bg-neutral-800/50 transition-colors flex items-start justify-between gap-4"
+      <button
+        type="button"
+        className="w-full p-5 pl-6 cursor-pointer hover:bg-neutral-800/50 transition-colors flex items-start justify-between gap-4 text-left"
         onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
       >
         <div className="space-y-1 flex-1">
           <h4 className="text-base font-medium text-white">{title}</h4>
@@ -46,11 +48,11 @@ export function FindingCard({
         </div>
         
         {evidence && (
-          <button className="text-neutral-500 hover:text-white mt-1 shrink-0">
+          <span className="text-neutral-500 mt-1 shrink-0" aria-hidden="true">
             {expanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-          </button>
+          </span>
         )}
-      </div>
+      </button>
 
       {expanded && evidence && (
         <div className="px-6 pb-5 pt-2 border-t border-neutral-800/50 bg-neutral-950/50">

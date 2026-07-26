@@ -13,7 +13,7 @@ describe('AI Zod Schemas Validation', () => {
     it('should validate a correct payload', () => {
       const validData = {
         overallScore: 85,
-        scoreLabel: 'Excellent',
+        scoreLabel: 'High potential',
         confidence: 90,
         scoreBreakdown: {
           agencyServiceFit: 95,
@@ -35,7 +35,7 @@ describe('AI Zod Schemas Validation', () => {
     it('should reject out of bounds scores', () => {
       const invalidData = {
         overallScore: 105, // > 100
-        scoreLabel: 'Excellent',
+        scoreLabel: 'High potential',
         confidence: 90,
         scoreBreakdown: {
           agencyServiceFit: 95,

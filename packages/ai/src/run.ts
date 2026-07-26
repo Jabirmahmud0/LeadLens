@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { db } from '@leadlens/database';
 import { aiRuns } from '@leadlens/database/src/schema/ai';
 import { AIOptions, AIProvider } from './providers';
+import { createHash } from 'node:crypto';
 
 export interface RunAIOptions extends AIOptions {
   jobId?: string;
@@ -28,14 +29,14 @@ export async function runAI<T>(
       const { data, tokens, latencyMs } = await options.primaryProvider.generate(prompt, schema, options);
       
       // Log run
-      await logRun(options, options.primaryProvider, tokens, latencyMs, attempt, false, 'success');
+      await logRun(options, options.primaryProvider, tokens, latencyMs, attempt, false, 'success', undefined, prompt);
       
       return data;
     } catch (e: any) {
       attempt++;
       console.warn(`Primary provider ${options.primaryProvider.name} failed (attempt ${attempt}):`, e.message);
       if (attempt > maxRetries) {
-        await logRun(options, options.primaryProvider, { input: 0, output: 0 }, 0, attempt - 1, false, 'failed', e.message);
+        await logRun(options, options.primaryProvider, { input: 0, output: 0 }, 0, attempt - 1, false, 'failed', e.message, prompt);
         break; // Drop to fallback
       }
     }
@@ -48,14 +49,14 @@ export async function runAI<T>(
       try {
         const { data, tokens, latencyMs } = await options.fallbackProvider.generate(prompt, schema, options);
         
-        await logRun(options, options.fallbackProvider, tokens, latencyMs, attempt, true, 'success');
+        await logRun(options, options.fallbackProvider, tokens, latencyMs, attempt, true, 'success', undefined, prompt);
         
         return data;
       } catch (e: any) {
         attempt++;
         console.warn(`Fallback provider ${options.fallbackProvider.name} failed (attempt ${attempt}):`, e.message);
         if (attempt > maxRetries) {
-          await logRun(options, options.fallbackProvider, { input: 0, output: 0 }, 0, attempt - 1, true, 'failed', e.message);
+          await logRun(options, options.fallbackProvider, { input: 0, output: 0 }, 0, attempt - 1, true, 'failed', e.message, prompt);
           throw new Error(`Both primary and fallback AI providers failed. Last error: ${e.message}`);
         }
       }
@@ -73,7 +74,8 @@ async function logRun(
   retryCount: number,
   fallbackUsed: boolean,
   status: string,
-  errorCode?: string
+  errorCode?: string,
+  prompt?: string,
 ) {
   try {
     await db.insert(aiRuns).values({
@@ -84,6 +86,7 @@ async function logRun(
       provider: provider.name,
       model: (provider as any).modelName || 'unknown',
       promptVersion: options.promptVersion,
+      inputHash: prompt ? createHash('sha256').update(prompt).digest('hex') : undefined,
       status,
       inputTokens: tokens.input,
       outputTokens: tokens.output,

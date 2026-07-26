@@ -12,12 +12,19 @@ export function ComposerClient({ services, caseStudies }: { services: { id: stri
   const [step, setStep] = React.useState(1);
   const [loading, setLoading] = React.useState(false);
   const [duplicateWarning, setDuplicateWarning] = React.useState<string | null>(null);
+  const [existingAnalysisId, setExistingAnalysisId] = React.useState<string | null>(null);
 
   const [formData, setFormData] = React.useState({
     url: '',
     companyName: '',
     contactName: '',
+    contactRole: '',
+    contactEmail: '',
+    contactProfileUrl: '',
     competitors: [''],
+    specificPages: [''],
+    language: 'English',
+    reason: '',
     notes: '',
     serviceIds: [] as string[],
     caseStudyIds: [] as string[],
@@ -26,7 +33,13 @@ export function ComposerClient({ services, caseStudies }: { services: { id: stri
     tone: 'professional',
     channels: ['email'],
     runPagespeed: true,
+    pagespeedStrategies: ['mobile'] as Array<'mobile' | 'desktop'>,
   });
+
+  React.useEffect(() => {
+    const initialUrl = window.localStorage.getItem('leadlens_initial_url');
+    if (initialUrl) setFormData(current => ({ ...current, url: current.url || initialUrl }));
+  }, []);
 
   const handleNext = () => setStep(s => Math.min(s + 1, 3));
   const handlePrev = () => setStep(s => Math.max(s - 1, 1));
@@ -37,20 +50,22 @@ export function ComposerClient({ services, caseStudies }: { services: { id: stri
     try {
       const data = {
         ...formData,
-        competitors: formData.competitors.filter(c => c.trim() !== '')
+        competitors: formData.competitors.filter(c => c.trim() !== ''),
+        specificPages: formData.specificPages.filter(page => page.trim() !== ''),
       };
       
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await submitAnalysis(data as any);
       
       if (result.isDuplicate) {
         setDuplicateWarning(result.existingId);
+        setExistingAnalysisId(result.existingAnalysisId || null);
         setLoading(false);
         return;
       }
       
       toast.success('Analysis started successfully');
-      router.push('/prospects');
+      window.localStorage.removeItem('leadlens_initial_url');
+      router.push(`/analyses/${result.analysisId}`);
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Failed to start analysis');
     } finally {
@@ -59,9 +74,23 @@ export function ComposerClient({ services, caseStudies }: { services: { id: stri
   };
 
   const handleForceRun = async () => {
-    // In a real app we'd pass a force flag. For now just redirect to prospects
-    toast.success('Forcing rerun...');
-    router.push('/prospects');
+    setLoading(true);
+    try {
+      const result = await submitAnalysis({
+        ...formData,
+        competitors: formData.competitors.filter(c => c.trim() !== ''),
+        specificPages: formData.specificPages.filter(page => page.trim() !== ''),
+        force: true,
+      } as Parameters<typeof submitAnalysis>[0]);
+      if (result.success && result.analysisId) {
+        toast.success('New analysis started');
+        router.push(`/analyses/${result.analysisId}`);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to rerun analysis');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -123,6 +152,39 @@ export function ComposerClient({ services, caseStudies }: { services: { id: stri
                     className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2.5 text-white focus:border-blue-500 transition-colors"
                   />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-300 mb-1.5">Contact Role</label>
+                  <input value={formData.contactRole} onChange={e => setFormData({ ...formData, contactRole: e.target.value })} placeholder="VP Marketing" className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2.5 text-white focus:border-blue-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-neutral-300 mb-1.5">Contact Email</label>
+                  <input type="email" value={formData.contactEmail} onChange={e => setFormData({ ...formData, contactEmail: e.target.value })} placeholder="jane@example.com" className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2.5 text-white focus:border-blue-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-neutral-300 mb-1.5">Profile URL</label>
+                  <input type="url" value={formData.contactProfileUrl} onChange={e => setFormData({ ...formData, contactProfileUrl: e.target.value })} placeholder="https://linkedin.com/in/..." className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2.5 text-white focus:border-blue-500" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-300 mb-1.5">Specific page to inspect</label>
+                  <input type="url" value={formData.specificPages[0]} onChange={e => setFormData({ ...formData, specificPages: [e.target.value] })} placeholder="https://example.com/pricing" className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2.5 text-white focus:border-blue-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-neutral-300 mb-1.5">Output language</label>
+                  <select value={formData.language} onChange={e => setFormData({ ...formData, language: e.target.value })} className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2.5 text-white focus:border-blue-500">
+                    <option>English</option><option>Spanish</option><option>French</option><option>German</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 mb-1.5">Why are you analyzing this prospect?</label>
+                <input value={formData.reason} onChange={e => setFormData({ ...formData, reason: e.target.value })} placeholder="Preparing targeted outreach after a referral" className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2.5 text-white focus:border-blue-500" />
               </div>
 
               <div>
@@ -188,6 +250,16 @@ export function ComposerClient({ services, caseStudies }: { services: { id: stri
                   </div>
                 )}
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 mb-1.5">Competitor URL</label>
+                <input type="url" value={formData.competitors[0]} onChange={e => setFormData({ ...formData, competitors: [e.target.value] })} placeholder="https://competitor.com" className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2.5 text-white focus:border-blue-500" />
+              </div>
+
+              {caseStudies.length > 0 && <div>
+                <label className="block text-sm font-medium text-neutral-300 mb-3">Relevant case studies</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{caseStudies.map(cs => <label key={cs.id} className="flex gap-3 p-3 bg-neutral-950 border border-neutral-800 rounded-lg"><input type="checkbox" checked={formData.caseStudyIds.includes(cs.id)} onChange={e => setFormData({ ...formData, caseStudyIds: e.target.checked ? [...formData.caseStudyIds, cs.id] : formData.caseStudyIds.filter(id => id !== cs.id) })} /><span className="text-sm text-neutral-300">{cs.title}</span></label>)}</div>
+              </div>}
             </div>
           )}
 
@@ -213,6 +285,11 @@ export function ComposerClient({ services, caseStudies }: { services: { id: stri
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div><label className="block text-sm font-medium text-neutral-300 mb-2">Tone</label><select value={formData.tone} onChange={e => setFormData({ ...formData, tone: e.target.value })} className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2.5 text-white"><option value="professional">Professional</option><option value="consultative">Consultative</option><option value="aggressive">Direct</option></select></div>
+                <fieldset><legend className="block text-sm font-medium text-neutral-300 mb-2">Channels</legend><div className="flex flex-wrap gap-3">{(['email','linkedin','whatsapp'] as const).map(channel => <label key={channel} className="flex items-center gap-2 text-sm text-neutral-300"><input type="checkbox" checked={formData.channels.includes(channel)} onChange={e => setFormData({ ...formData, channels: e.target.checked ? [...formData.channels, channel] : formData.channels.filter(c => c !== channel) })} />{channel}</label>)}</div></fieldset>
+              </div>
+
               <div className="pt-4 border-t border-neutral-800">
                 <label className="flex items-center gap-3 cursor-pointer p-4 bg-neutral-950 border border-neutral-800 rounded-lg">
                   <input
@@ -226,6 +303,7 @@ export function ComposerClient({ services, caseStudies }: { services: { id: stri
                     <span className="text-xs text-neutral-500">Runs real-browser performance tests (adds ~15s to analysis)</span>
                   </div>
                 </label>
+                {formData.runPagespeed && <div className="flex gap-4 mt-3 px-4">{(['mobile','desktop'] as const).map(strategy => <label key={strategy} className="flex items-center gap-2 text-sm text-neutral-300"><input type="checkbox" checked={formData.pagespeedStrategies.includes(strategy)} onChange={e => setFormData({ ...formData, pagespeedStrategies: e.target.checked ? [...formData.pagespeedStrategies, strategy] : formData.pagespeedStrategies.filter(s => s !== strategy) })} />{strategy}</label>)}</div>}
               </div>
 
               {duplicateWarning && (
@@ -235,7 +313,7 @@ export function ComposerClient({ services, caseStudies }: { services: { id: stri
                     <h4 className="text-sm font-medium text-yellow-500">Duplicate Analysis Detected</h4>
                     <p className="text-xs text-yellow-500/80 mt-1">This domain was analyzed recently. To save credits, you can view the existing report or force a new run.</p>
                     <div className="flex gap-3 mt-3">
-                      <button onClick={() => router.push('/prospects')} className="text-xs font-medium bg-yellow-500 text-black px-3 py-1.5 rounded hover:bg-yellow-400">View Existing</button>
+                      <button onClick={() => router.push(existingAnalysisId ? `/analyses/${existingAnalysisId}/report` : `/prospects/${duplicateWarning}`)} className="text-xs font-medium bg-yellow-500 text-black px-3 py-1.5 rounded hover:bg-yellow-400">View Existing</button>
                       <button onClick={handleForceRun} className="text-xs font-medium border border-yellow-500/50 text-yellow-500 px-3 py-1.5 rounded hover:bg-yellow-500/10">Force Rerun</button>
                     </div>
                   </div>
@@ -296,7 +374,7 @@ export function ComposerClient({ services, caseStudies }: { services: { id: stri
           <div>
             <span className="text-xs text-neutral-500 block">Services</span>
             <span className="text-sm text-white font-medium">
-              {formData.serviceIds.length === 0 ? 'None selected' : `\${formData.serviceIds.length} selected`}
+              {formData.serviceIds.length === 0 ? 'None selected' : `${formData.serviceIds.length} selected`}
             </span>
           </div>
 

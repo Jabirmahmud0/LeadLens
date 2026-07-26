@@ -2,8 +2,11 @@ import { z } from 'zod';
 import { runAI, RunAIOptions } from '../run';
 
 export const Stage10VerifiedFindingSchema = z.object({
-  findingId: z.string().describe('An identifier for the finding being verified'),
-  sourceUrls: z.array(z.string().url()).describe('The exact URLs where evidence for this finding was found'),
+  findingIndex: z.number().int().nonnegative().describe('The zero-based index of the finding being verified'),
+  citations: z.array(z.object({
+    sourcePageId: z.string().uuid(),
+    evidenceExcerpt: z.string().max(500),
+  })).describe('Evidence selected only from the supplied source page IDs'),
   confidence: z.number().min(0).max(100).describe('Confidence in this finding based on the sources'),
   isFactOrInference: z.enum(['fact', 'inference']).describe('Whether this is a hard fact stated on the site or an inference made by the AI')
 });
@@ -21,16 +24,27 @@ export async function runStage10SourceVerification(
   sourcePages: any[],
   options: Omit<RunAIOptions, 'purpose' | 'promptVersion'>
 ): Promise<Stage10Output> {
+  const boundedSources = sourcePages.map((source) => ({
+    id: source.id,
+    url: source.url,
+    title: source.title,
+    extractedText: typeof source.extractedText === 'string' ? source.extractedText.slice(0, 4_000) : '',
+    errorMessage: source.errorMessage,
+  }));
+  const indexedFindings = Array.isArray(allFindings)
+    ? allFindings.map((finding, findingIndex) => ({ findingIndex, ...finding }))
+    : [];
+
   const prompt = `
 You are an expert fact-checker and QA auditor. Review the AI-generated findings and verify them against the provided source pages.
 
 All Findings to Verify:
-${JSON.stringify(allFindings, null, 2)}
+${JSON.stringify(indexedFindings, null, 2)}
 
 Source Pages:
-${JSON.stringify(sourcePages, null, 2)}
+${JSON.stringify(boundedSources, null, 2)}
 
-Ensure every claim is backed by a source URL. Label inferences clearly so they are not presented as facts. Identify any limitations or unsupported claims.
+Use only the supplied findingIndex and source page id values. Include a short exact evidence excerpt for every citation. Label inferences clearly and identify unsupported claims.
 `;
 
   return runAI(prompt, Stage10Schema, {

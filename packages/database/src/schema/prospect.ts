@@ -19,6 +19,7 @@ export const prospects = pgTable('prospects', {
   notes: text('notes'),
   status: text('status').default('new').notNull(),
   archivedAt: timestamp('archived_at', { withTimezone: true }),
+  pinnedAt: timestamp('pinned_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => {

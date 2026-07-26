@@ -1,0 +1,334 @@
+.page {
+  font-family: "Segoe UI Variable Text", "Aptos", "Segoe UI", Arial, sans-serif;
+  font-style: normal;
+}
+
+.page h1, .page h2, .page h3, .displayFont {
+  font-family: "Segoe UI Variable Display", "Aptos Display", "Segoe UI", Arial, sans-serif;
+  font-style: normal;
+}
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 72% 24%, rgba(187, 247, 208, 0.65), transparent 27rem),
+    linear-gradient(180deg, #f7fbf6 0%, #fbfcf8 72%);
+}
+
+.heroGrid {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.55;
+  background-image:
+    linear-gradient(rgba(22, 101, 52, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22, 101, 52, 0.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, black, transparent 72%);
+}
+
+.accentText {
+  color: transparent;
+  background: linear-gradient(90deg, #15803d, #0f766e 58%, #166534);
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.reveal {
+  opacity: 0;
+  animation: reveal 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.delayOne { animation-delay: 80ms; }
+.delayTwo { animation-delay: 160ms; }
+.delayThree { animation-delay: 240ms; }
+.delayFour { animation-delay: 320ms; }
+
+.pulseDot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: #16a34a;
+  box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4);
+  animation: pulse 2.4s ease-out infinite;
+}
+
+.stageWrap {
+  position: relative;
+  margin-inline: auto;
+  max-width: 1180px;
+  padding: 0 1rem 2.5rem;
+}
+
+.productWindow {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.38);
+  border-radius: 1.5rem;
+  background: white;
+  text-align: left;
+  box-shadow: 0 48px 100px -52px rgba(30, 41, 59, 0.65), 0 0 0 8px rgba(255, 255, 255, 0.5);
+  animation: floatWindow 7s ease-in-out infinite;
+}
+
+.orbOne, .orbTwo {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(40px);
+  opacity: 0.55;
+  z-index: -1;
+  animation: drift 10s ease-in-out infinite alternate;
+}
+
+.orbOne { width: 17rem; height: 17rem; left: -4rem; top: 15%; background: #bbf7d0; }
+.orbTwo { width: 15rem; height: 15rem; right: -3rem; bottom: 0; background: #99f6e4; animation-delay: -4s; }
+
+.floatCard {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18px 45px -24px rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(10px);
+  animation: floatChip 5s ease-in-out infinite;
+}
+
+.floatLeft { left: -1.5rem; top: 22%; }
+.floatRight { right: -2rem; bottom: 18%; animation-delay: -2.5s; }
+
+.scanLine {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, rgba(22, 163, 74, 0.62), transparent);
+  animation: scan 6s ease-in-out infinite 1.5s;
+  pointer-events: none;
+}
+
+.feedRail {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  align-items: stretch;
+  overflow: hidden;
+  border-block: 1px solid #cfe0d3;
+  background: #edf6ef;
+}
+
+.feedStatus {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-right: 1px solid #cfe0d3;
+  background: #e3f1e6;
+  padding: 1rem 1.5rem;
+  box-shadow: 16px 0 30px -24px rgba(20, 83, 45, 0.5);
+}
+
+.feedStatus strong, .feedStatus small { display: block; }
+.feedStatus strong { color: #16352a; font-size: 0.75rem; letter-spacing: 0.02em; }
+.feedStatus small { margin-top: 0.15rem; color: #688075; font-size: 0.62rem; }
+
+.feedSignal {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid #a7d8b5;
+  border-radius: 999px;
+  background: white;
+}
+
+.ticker {
+  overflow: hidden;
+  padding-block: 0.75rem;
+  mask-image: linear-gradient(to right, transparent, black 7%, black 93%, transparent);
+}
+
+.tickerTrack {
+  display: flex;
+  width: max-content;
+  transform: translate3d(0, 0, 0);
+  animation-name: researchFeedScroll;
+  animation-duration: 34s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-play-state: running;
+  will-change: transform;
+}
+.tickerSet { display: flex; flex-shrink: 0; align-items: center; }
+.feedCard {
+  display: grid;
+  width: 260px;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.7rem;
+  margin-right: 0.65rem;
+  border: 1px solid #d6e3d9;
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 0.7rem 0.75rem;
+  box-shadow: 0 12px 24px -22px rgba(20, 83, 45, 0.5);
+}
+
+.feedIcon { display: grid; width: 2.15rem; height: 2.15rem; place-items: center; border-radius: 0.7rem; }
+.toneEmerald { background: #dcfce7; color: #15803d; }
+.toneForest { background: #16352a; color: #a7f3d0; }
+.toneMint { background: #ccfbf1; color: #0f766e; }
+.toneAmber { background: #fef3c7; color: #b45309; }
+.toneTeal { background: #d8f3ea; color: #0f766e; }
+.toneLime { background: #ecfccb; color: #4d7c0f; }
+
+.feedCopy { min-width: 0; }
+.feedCopy > span, .feedCopy strong, .feedCopy small { display: block; white-space: nowrap; }
+.feedLabel { color: #789084; font-size: 0.52rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+.feedCopy strong { margin-top: 0.15rem; overflow: hidden; color: #16352a; font-size: 0.75rem; text-overflow: ellipsis; }
+.feedCopy small { margin-top: 0.1rem; color: #789084; font-size: 0.58rem; }
+.feedCheck { display: grid; width: 1.25rem; height: 1.25rem; place-items: center; border-radius: 999px; background: #ecfdf5; color: #059669; }
+
+.bentoCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 1.5rem;
+  box-shadow: 0 18px 45px -38px rgba(15, 23, 42, 0.35);
+  transition: transform 300ms ease, box-shadow 300ms ease, border-color 300ms ease;
+}
+.bentoCard:hover { transform: translateY(-4px); border-color: #a7f3d0; box-shadow: 0 28px 60px -38px rgba(20, 83, 45, 0.34); }
+
+.evidenceMap {
+  position: relative;
+  overflow: hidden;
+}
+
+.evidenceMap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgba(187, 247, 208, 0.3) 50%, transparent 65%);
+  transform: translateX(-110%);
+  animation: mapSweep 5.5s ease-in-out infinite 1s;
+}
+
+.sourceNode {
+  animation: nodeBreathe 4s ease-in-out infinite;
+}
+
+.workflowSection {
+  background: linear-gradient(135deg, #f5f9f4 0%, #edf6ef 100%);
+}
+
+.processStack {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.processStack::before {
+  content: "";
+  position: absolute;
+  left: 1.5rem;
+  top: 3rem;
+  bottom: 3rem;
+  width: 1px;
+  background: linear-gradient(#86efac, #059669, #86efac);
+  opacity: 0.55;
+}
+
+.processCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid #d8e5dc;
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 1.25rem;
+  box-shadow: 0 20px 50px -42px rgba(20, 83, 45, 0.45);
+  transition: transform 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
+}
+
+.processCard:hover { transform: translateX(-5px); border-color: #86efac; box-shadow: 0 26px 54px -40px rgba(20, 83, 45, 0.5); }
+
+.closeSection {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 15%, rgba(52, 211, 153, 0.18), transparent 24rem),
+    #102f24;
+}
+
+.closeSection::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.13;
+  background-image: linear-gradient(rgba(255,255,255,.18) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.18) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(90deg, black, transparent 75%);
+}
+
+.closeForm {
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 1.5rem;
+  background: #fff;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  box-shadow: 0 32px 80px -42px rgba(0, 0, 0, 0.65);
+  animation: formFloat 6s ease-in-out infinite;
+}
+
+@keyframes reveal { from { opacity: 0; transform: translateY(24px); filter: blur(5px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
+@keyframes pulse { 70% { box-shadow: 0 0 0 8px rgba(22, 163, 74, 0); } 100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); } }
+@keyframes floatWindow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+@keyframes floatChip { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-9px) rotate(1deg); } }
+@keyframes drift { from { transform: translate3d(-4%, -3%, 0) scale(0.95); } to { transform: translate3d(7%, 5%, 0) scale(1.08); } }
+@keyframes scan { 0% { top: 8%; opacity: 0; } 15% { opacity: 1; } 75% { opacity: 0.65; } 100% { top: 92%; opacity: 0; } }
+@keyframes researchFeedScroll {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+@keyframes mapSweep { 0%, 55% { transform: translateX(-110%); } 85%, 100% { transform: translateX(110%); } }
+@keyframes nodeBreathe { 0%, 100% { border-color: #dce9e0; transform: translateY(0); } 50% { border-color: #86efac; transform: translateY(-2px); } }
+@keyframes formFloat { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-6px) rotate(-0.35deg); } }
+
+@media (max-width: 1100px) {
+  .floatLeft { left: 0; }
+  .floatRight { right: 0; }
+}
+
+@media (max-width: 700px) {
+  .stageWrap { padding-inline: 0; }
+  .floatCard { display: none; }
+  .productWindow { border-radius: 1.15rem; }
+  .feedRail { grid-template-columns: 1fr; }
+  .feedStatus { border-bottom: 1px solid #cfe0d3; border-right: 0; padding: 0.75rem 1rem; }
+  .feedCard { width: 235px; }
+}
+
+@media (min-width: 640px) {
+  .processCard { flex-direction: row; align-items: stretch; padding: 1.5rem; }
+}
+
+@media (min-width: 1024px) {
+  .processOffset { transform: translateX(2.5rem); }
+  .processOffset:hover { transform: translateX(2rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .pulseDot, .productWindow, .orbOne, .orbTwo, .floatCard, .scanLine, .evidenceMap::after, .sourceNode, .closeForm { animation: none; }
+  .tickerTrack { animation-duration: 70s; }
+  .reveal { opacity: 1; }
+  .bentoCard { transition: none; }
+}

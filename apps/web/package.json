@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.3",
@@ -14,6 +15,7 @@
     "@leadlens/analysis": "workspace:*",
     "@leadlens/auth": "workspace:*",
     "@leadlens/database": "workspace:*",
+    "@leadlens/orchestration": "workspace:*",
     "@leadlens/shared": "workspace:*",
     "@leadlens/ui": "workspace:*",
     "@sentry/nextjs": "^10.68.0",

@@ -2,14 +2,18 @@
   "name": "leadlens",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
     "dev": "pnpm --filter web dev & pnpm --filter worker dev",
     "build": "pnpm -r build",
-    "lint": "pnpm -r lint",
+    "lint": "eslint apps packages --max-warnings=0",
     "typecheck": "pnpm -r typecheck",
-    "test": "pnpm -r test"
+    "test": "vitest run",
+    "db:check": "pnpm --dir packages/database exec drizzle-kit check"
   },
   "devDependencies": {
+    "eslint": "^9.39.5",
+    "typescript-eslint": "^8.46.1",
     "typescript": "^5.0.0",
     "vitest": "^4.1.10"
   },

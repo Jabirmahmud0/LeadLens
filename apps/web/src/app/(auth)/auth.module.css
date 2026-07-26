@@ -1,0 +1,17 @@
+.shell { position:relative; overflow:hidden; font-family:"Segoe UI Variable Text","Aptos","Segoe UI",Arial,sans-serif; font-style:normal; }
+.shell::before,.shell::after { content:""; position:fixed; z-index:0; border-radius:999px; filter:blur(80px); opacity:.55; pointer-events:none; animation:drift 10s ease-in-out infinite alternate; }
+.shell::before { width:28rem; height:28rem; right:-8rem; top:-10rem; background:#bbf7d0; }
+.shell::after { width:23rem; height:23rem; left:-7rem; bottom:-9rem; background:#ccfbf1; animation-delay:-4s; }
+.grid { position:fixed; inset:0; opacity:.42; pointer-events:none; background-image:linear-gradient(rgba(22,101,52,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(22,101,52,.05) 1px,transparent 1px); background-size:44px 44px; mask-image:linear-gradient(to bottom,black,transparent 82%); }
+.display { font-family:"Segoe UI Variable Display","Aptos Display","Segoe UI",Arial,sans-serif; font-style:normal; }
+.enter { opacity:0; animation:enter .8s cubic-bezier(.22,1,.36,1) forwards; }
+.delay { animation-delay:120ms; }
+.float { animation:float 6s ease-in-out infinite; }
+.scan { position:absolute; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(22,163,74,.58),transparent); animation:scan 5s ease-in-out infinite; }
+.progress { transform-origin:left; animation:progress 4s linear infinite; }
+@keyframes enter { from { opacity:0; transform:translateY(22px); filter:blur(5px); } to { opacity:1; transform:translateY(0); filter:blur(0); } }
+@keyframes drift { from { transform:translate3d(-4%,-3%,0) scale(.95); } to { transform:translate3d(6%,5%,0) scale(1.08); } }
+@keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-7px); } }
+@keyframes scan { 0% { top:8%; opacity:0; } 15% { opacity:1; } 85% { opacity:.65; } 100% { top:92%; opacity:0; } }
+@keyframes progress { from { transform:scaleX(0); } to { transform:scaleX(1); } }
+@media (prefers-reduced-motion:reduce) { .shell::before,.shell::after,.enter,.float,.scan,.progress { animation:none; } .enter { opacity:1; } }

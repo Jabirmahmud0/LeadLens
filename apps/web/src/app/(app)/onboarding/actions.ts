@@ -1,7 +1,7 @@
 'use server';
 
 import { db, schema } from '@leadlens/database';
-import { eq } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 import { getSession } from '@/lib/auth/session';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
@@ -56,17 +56,20 @@ export async function saveAgencyServices(data: Array<z.infer<typeof serviceSchem
   const session = await getSession();
   if (!session || !session.organization) throw new Error('Unauthorized');
   const orgId = session.organization.id;
-  await db.delete(schema.agencyServices).where(eq(schema.agencyServices.organizationId, orgId));
-  if (data.length > 0) {
-    await db.insert(schema.agencyServices).values(
-      data.map(svc => ({
-        organizationId: orgId, name: svc.name, slug: svc.name.toLowerCase().replace(/\s+/g, '-'), summary: svc.description, problemSolved: svc.problemSolved,
-        deliverables: svc.deliverables || [], priceMinCents: svc.priceMin ? svc.priceMin * 100 : null,
-        priceMaxCents: svc.priceMax ? svc.priceMax * 100 : null, industries: svc.preferredIndustries || [],
-        disqualifiers: svc.disqualifiers || [], priority: svc.priority, isActive: svc.isActive,
-      }))
-    );
-  }
+  const parsed = z.array(serviceSchema).parse(data);
+  await db.transaction(async (tx) => {
+    const retainedIds: string[] = [];
+    for (const svc of parsed) {
+      const slug = svc.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      const values = { name: svc.name, slug, summary: svc.description, problemSolved: svc.problemSolved, deliverables: svc.deliverables || [], priceMinCents: svc.priceMin ? svc.priceMin * 100 : null, priceMaxCents: svc.priceMax ? svc.priceMax * 100 : null, industries: svc.preferredIndustries || [], disqualifiers: svc.disqualifiers || [], priority: svc.priority, isActive: svc.isActive, updatedAt: new Date() };
+      const [existing] = await tx.select({ id: schema.agencyServices.id }).from(schema.agencyServices).where(and(eq(schema.agencyServices.organizationId, orgId), eq(schema.agencyServices.slug, slug))).limit(1);
+      if (existing) { await tx.update(schema.agencyServices).set(values).where(eq(schema.agencyServices.id, existing.id)); retainedIds.push(existing.id); }
+      else { const [created] = await tx.insert(schema.agencyServices).values({ organizationId: orgId, ...values }).returning({ id: schema.agencyServices.id }); retainedIds.push(created.id); }
+    }
+    const current = await tx.select({ id: schema.agencyServices.id }).from(schema.agencyServices).where(eq(schema.agencyServices.organizationId, orgId));
+    const removedIds = current.map(item => item.id).filter(id => !retainedIds.includes(id));
+    if (removedIds.length) await tx.update(schema.agencyServices).set({ isActive: false, updatedAt: new Date() }).where(inArray(schema.agencyServices.id, removedIds));
+  });
   revalidatePath('/onboarding');
   redirect('/onboarding/icp');
 }
@@ -85,13 +88,13 @@ export async function saveAgencyICP(data: z.infer<typeof icpSchema>) {
   if (existing.length > 0) {
     await db.update(schema.idealCustomerProfiles).set({
       companySizeRanges: data.companySizeRange, industries: data.targetIndustries, locations: data.targetLocations,
-      budgetMinCents: data.minBudget ? data.minBudget * 100 : null, preferredSignals: data.buyingSignals,
+      budgetMinCents: data.minBudget ? data.minBudget * 100 : null, preferredSignals: data.buyingSignals, preferredWebsiteConditions: data.preferredWebsiteCondition,
       disqualifyingSignals: data.disqualifyingFactors, commonProblems: data.commonProblems, decisionMakerRoles: data.decisionMakers
     }).where(eq(schema.idealCustomerProfiles.organizationId, orgId));
   } else {
     await db.insert(schema.idealCustomerProfiles).values({
       organizationId: orgId, companySizeRanges: data.companySizeRange, industries: data.targetIndustries, locations: data.targetLocations,
-      budgetMinCents: data.minBudget ? data.minBudget * 100 : null, preferredSignals: data.buyingSignals,
+      budgetMinCents: data.minBudget ? data.minBudget * 100 : null, preferredSignals: data.buyingSignals, preferredWebsiteConditions: data.preferredWebsiteCondition,
       disqualifyingSignals: data.disqualifyingFactors, commonProblems: data.commonProblems, decisionMakerRoles: data.decisionMakers
     });
   }
@@ -110,16 +113,24 @@ export async function saveAgencyCaseStudies(data: Array<z.infer<typeof caseStudy
   const session = await getSession();
   if (!session || !session.organization) throw new Error('Unauthorized');
   const orgId = session.organization.id;
-  await db.delete(schema.caseStudies).where(eq(schema.caseStudies.organizationId, orgId));
-  if (data.length > 0) {
-    await db.insert(schema.caseStudies).values(
-      data.map(cs => ({
-        organizationId: orgId, title: cs.title, clientIndustry: cs.clientIndustry, clientType: cs.clientType,
-        problem: cs.problem, solution: cs.solution, deliverables: cs.deliverables || [], results: cs.results,
-        metrics: cs.metrics || {}, publicUrl: cs.caseStudyUrl, isActive: cs.isPublic,
-      }))
-    );
-  }
+  const parsed = z.array(caseStudySchema).parse(data);
+  await db.transaction(async (tx) => {
+    const services = await tx.select({ id: schema.agencyServices.id, name: schema.agencyServices.name }).from(schema.agencyServices).where(eq(schema.agencyServices.organizationId, orgId));
+    const retainedIds: string[] = [];
+    for (const cs of parsed) {
+      const values = { clientIndustry: cs.clientIndustry, clientType: cs.clientType, problem: cs.problem, solution: cs.solution, deliverables: cs.deliverables || [], results: cs.results, metrics: cs.metrics || {}, publicUrl: cs.caseStudyUrl || null, visibility: cs.isPublic ? 'public' : 'private', isActive: true, updatedAt: new Date() };
+      const [existing] = await tx.select({ id: schema.caseStudies.id }).from(schema.caseStudies).where(and(eq(schema.caseStudies.organizationId, orgId), eq(schema.caseStudies.title, cs.title))).limit(1);
+      const caseStudyId = existing ? existing.id : (await tx.insert(schema.caseStudies).values({ organizationId: orgId, title: cs.title, ...values }).returning({ id: schema.caseStudies.id }))[0].id;
+      if (existing) await tx.update(schema.caseStudies).set(values).where(eq(schema.caseStudies.id, caseStudyId));
+      retainedIds.push(caseStudyId);
+      await tx.delete(schema.caseStudyServices).where(eq(schema.caseStudyServices.caseStudyId, caseStudyId));
+      const taggedIds = services.filter(service => (cs.serviceTags || []).includes(service.name)).map(service => service.id);
+      if (taggedIds.length) await tx.insert(schema.caseStudyServices).values(taggedIds.map(serviceId => ({ caseStudyId, serviceId })));
+    }
+    const current = await tx.select({ id: schema.caseStudies.id }).from(schema.caseStudies).where(eq(schema.caseStudies.organizationId, orgId));
+    const removedIds = current.map(item => item.id).filter(id => !retainedIds.includes(id));
+    if (removedIds.length) await tx.update(schema.caseStudies).set({ isActive: false, updatedAt: new Date() }).where(inArray(schema.caseStudies.id, removedIds));
+  });
   revalidatePath('/onboarding');
   redirect('/onboarding/preferences');
 }
@@ -147,6 +158,8 @@ export async function saveOutputPreferences(data: z.infer<typeof preferencesSche
     reportDepth: data.reportDepth,
     technicalDetailLevel: data.technicalDetailLevel,
     avoidedPhrases: data.avoidedPhrases || [],
+    proposalStyle: data.proposalStyle,
+    ctaPreference: data.ctaPreference,
     setupCompletedAt: new Date(),
   }).where(eq(schema.agencyProfiles.organizationId, orgId));
 

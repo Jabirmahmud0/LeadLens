@@ -14,6 +14,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect('/login');
   }
 
+  if (!session.user.emailVerifiedAt) {
+    redirect(`/verify-email?email=${encodeURIComponent(session.user.email)}`);
+  }
+
   const agencyName = session.organization.name || 'Your Agency';
 
   const navGroups = [
@@ -46,7 +50,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-white truncate">{session.user.email}</p>
-        <Link href="/logout" className="text-xs text-neutral-500 hover:text-white transition-colors">Sign out</Link>
+        <form action="/api/auth/logout" method="post">
+          <button type="submit" className="text-xs text-neutral-500 hover:text-white transition-colors">Sign out</button>
+        </form>
       </div>
     </div>
   );

@@ -16,7 +16,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 
-type StepStatus = 'queued' | 'processing' | 'completed' | 'failed' | 'partial';
+type StepStatus = 'queued' | 'processing' | 'completed' | 'skipped' | 'failed' | 'partial';
 
 interface JobStep {
   key: string;
@@ -34,6 +34,8 @@ interface JobProgress {
   currentStep: string | null;
   startedAt: string | null;
   completedAt: string | null;
+  failureCode?: string | null;
+  failureMessage?: string | null;
   steps: JobStep[];
   error?: string;
 }
@@ -52,6 +54,7 @@ export default function AnalysisProcessingPage() {
   const router = useRouter();
   const [data, setData] = useState<JobProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isRetrying, setIsRetrying] = useState(false);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -100,7 +103,8 @@ export default function AnalysisProcessingPage() {
     );
   }
 
-  const isFinished = data.status === 'completed' || data.status === 'failed' || data.status === 'partial';
+  const hasReport = data.status === 'completed' || data.status === 'partial';
+  const isFinished = hasReport || data.status === 'failed';
 
   // Helper to determine stage status
   const getStageStatus = (stageId: string) => {
@@ -165,7 +169,7 @@ export default function AnalysisProcessingPage() {
           </div>
         </div>
 
-        {isFinished && (
+        {hasReport && (
           <div className="mt-8 pt-6 border-t border-neutral-800 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <button
               onClick={() => router.push(`/analyses/${data.id}/report`)}
@@ -176,6 +180,36 @@ export default function AnalysisProcessingPage() {
             </button>
           </div>
         )}
+        {(data.status === 'failed' || data.status === 'partial') && (
+          <div className="mt-8 rounded-xl border border-red-900/60 bg-red-950/30 p-4">
+            <p className="text-sm font-medium text-red-300">{data.status === 'partial' ? 'Report is partial' : 'Analysis could not create a report'}</p>
+            <p className="mt-1 text-xs text-red-200/70">{data.failureMessage || `Missing or skipped: ${data.steps.filter(step => step.status === 'failed' || step.status === 'skipped').map(step => step.key.replaceAll('_', ' ')).join(', ') || 'unknown sections'}.`}</p>
+            <button
+              type="button"
+              disabled={isRetrying}
+              onClick={async () => {
+                setIsRetrying(true);
+                try {
+                  const response = await fetch(`/api/analyses/${data.id}`, {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify({ action: 'retry' }),
+                  });
+                  if (!response.ok) throw new Error('Unable to retry analysis');
+                  window.location.reload();
+                } catch (retryError) {
+                  setError(retryError instanceof Error ? retryError.message : 'Unable to retry analysis');
+                } finally {
+                  setIsRetrying(false);
+                }
+              }}
+              className="mt-3 rounded-lg bg-red-200 px-3 py-2 text-xs font-semibold text-red-950 disabled:opacity-50"
+            >
+              {isRetrying ? 'Retrying…' : 'Retry failed stages'}
+            </button>
+          </div>
+        )}
+        {(data.status === 'queued' || data.status === 'processing') && <button type="button" onClick={async () => { if (!window.confirm('Cancel this analysis?')) return; const response = await fetch(`/api/analyses/${data.id}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'cancel' }) }); if (response.ok) window.location.reload(); else setError('Unable to cancel analysis'); }} className="mt-6 rounded-lg border border-neutral-700 px-3 py-2 text-xs font-semibold text-neutral-300 hover:bg-neutral-800">Cancel analysis</button>}
       </div>
 
       {/* Right Panel: Live Evidence */}
@@ -208,8 +242,10 @@ export default function AnalysisProcessingPage() {
             {/* Performance Score */}
             {(() => {
               const psStep = data.steps.find(s => s.key === 'pagespeed');
-              if (!psStep || !psStep.outputSummary?.performanceScore) return null;
-              const score = Math.round(psStep.outputSummary.performanceScore * 100);
+              const summary = psStep?.outputSummary?.primary || psStep?.outputSummary;
+              if (!summary?.scores?.performance && summary?.scores?.performance !== 0) return null;
+              const rawScore = summary.scores.performance;
+              const score = Math.round(rawScore);
               
               return (
                 <div className="bg-neutral-900/40 border border-neutral-800/60 p-5 rounded-2xl animate-in fade-in zoom-in-95 duration-500">

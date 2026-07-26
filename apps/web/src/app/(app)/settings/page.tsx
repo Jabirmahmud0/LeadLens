@@ -77,7 +77,7 @@ export default async function SettingsPage() {
           <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden border border-neutral-800">
             <div 
               className={cn("h-full transition-all duration-1000", completeness === 100 ? "bg-green-500" : "bg-blue-500")}
-              style={{ width: `\${completeness}%` }}
+              style={{ width: `${completeness}%` }}
             />
           </div>
           {completeness < 100 && (
@@ -100,7 +100,7 @@ export default async function SettingsPage() {
             <h3 className="text-base font-medium text-white">Brand Voice</h3>
           </div>
           <p className="text-sm text-neutral-400 mb-4 h-10">
-            {profile?.brandVoice ? `Your reports are generated with a \${profile.brandVoice} tone.` : 'Not configured yet.'}
+            {profile?.brandVoice ? `Your reports are generated with a ${profile.brandVoice} tone.` : 'Not configured yet.'}
           </p>
           <div className="flex flex-wrap gap-2">
             <Badge variant="neutral">{profile?.reportDepth || 'Standard'} Depth</Badge>

@@ -1,0 +1,1 @@
+ALTER TABLE "prospects" ADD COLUMN "pinned_at" timestamp with time zone;

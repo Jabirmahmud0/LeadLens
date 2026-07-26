@@ -2,13 +2,14 @@
  * Wraps email content in a standard branded HTML skeleton.
  */
 export function wrapBaseTemplate(title: string, preheader: string, content: string): string {
+  const escapeHtml = (value: string) => value.replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]!);
   return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>\${title}</title>
+  <title>${escapeHtml(title)}</title>
   <style>
     body {
       margin: 0;
@@ -83,7 +84,7 @@ export function wrapBaseTemplate(title: string, preheader: string, content: stri
 </head>
 <body>
   <span style="display:none !important; visibility:hidden; mso-hide:all; font-size:1px; color:#ffffff; line-height:1px; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">
-    ${preheader}
+    ${escapeHtml(preheader)}
   </span>
   <center class="wrapper">
     <table class="main" width="100%">

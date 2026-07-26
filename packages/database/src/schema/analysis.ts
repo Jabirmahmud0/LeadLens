@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, jsonb, integer, unique } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, jsonb, integer, unique, index } from 'drizzle-orm/pg-core';
 import { organizations } from './org';
 import { prospects } from './prospect';
 import { users } from './auth';
@@ -21,7 +21,10 @@ export const analysisJobs = pgTable('analysis_jobs', {
   workerId: text('worker_id'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-});
+}, (table) => ({
+  orgCreatedIdx: index('analysis_jobs_org_created_idx').on(table.organizationId, table.createdAt),
+  orgStatusIdx: index('analysis_jobs_org_status_idx').on(table.organizationId, table.status),
+}));
 
 export const analysisJobSteps = pgTable('analysis_job_steps', {
   id: uuid('id').primaryKey().defaultRandom(),

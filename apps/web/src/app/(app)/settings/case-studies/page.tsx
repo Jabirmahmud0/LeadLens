@@ -26,10 +26,10 @@ export default async function CaseStudiesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-medium text-white">Proof Library</h2>
-        <button className="bg-white text-black px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-200 transition-colors flex items-center gap-2">
+        <Link href="/onboarding/case-studies" className="bg-white text-black px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-200 transition-colors flex items-center gap-2">
           <Plus className="w-4 h-4" />
           Add Case Study
-        </button>
+        </Link>
       </div>
 
       {caseStudies.length === 0 ? (
@@ -38,9 +38,9 @@ export default async function CaseStudiesPage() {
           title="No case studies yet"
           description="Build your proof library so LeadLens can automatically cite past results in proposals."
           action={
-            <button className="bg-white text-black px-6 py-2 rounded-lg text-sm font-medium hover:bg-neutral-200 mt-4 inline-block">
+            <Link href="/onboarding/case-studies" className="bg-white text-black px-6 py-2 rounded-lg text-sm font-medium hover:bg-neutral-200 mt-4 inline-block">
               Add First Case Study
-            </button>
+            </Link>
           }
         />
       ) : (
@@ -56,9 +56,9 @@ export default async function CaseStudiesPage() {
                       <Badge variant="neutral" className="flex items-center gap-1"><Lock className="w-3 h-3" /> Private</Badge>
                     )}
                   </div>
-                  <button className="text-neutral-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100">
+                  <Link href="/onboarding/case-studies" className="text-neutral-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100">
                     Edit
-                  </button>
+                  </Link>
                 </div>
                 
                 <h3 className="text-lg font-medium text-white mb-2 line-clamp-2">{cs.title}</h3>
@@ -69,7 +69,7 @@ export default async function CaseStudiesPage() {
                 
                 <div className="pt-4 border-t border-neutral-800 flex items-center justify-between text-sm">
                   <div className="text-neutral-500 truncate max-w-[150px]">
-                    {cs.clientIndustry || 'General'} {cs.clientType && `• \${cs.clientType}`}
+                    {cs.clientIndustry || 'General'} {cs.clientType && `• ${cs.clientType}`}
                   </div>
                   {cs.publicUrl && (
                     <a href={cs.publicUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-blue-400 hover:text-blue-300 font-medium">

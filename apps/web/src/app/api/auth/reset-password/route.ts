@@ -4,7 +4,7 @@ import { resetPassword } from '@leadlens/auth';
 
 const resetPasswordSchema = z.object({
   token: z.string(),
-  password: z.string().min(8),
+  password: z.string().min(12),
 });
 
 export async function POST(req: NextRequest) {

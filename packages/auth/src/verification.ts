@@ -1,8 +1,9 @@
 import { db, schema } from '@leadlens/database';
-import { eq, and, gt, isNull } from 'drizzle-orm';
+import { eq, and, gt, isNull, or, lt, isNotNull } from 'drizzle-orm';
 import { generateToken, hashToken } from './session';
 
 export async function createVerificationToken(userId: string) {
+  await db.delete(schema.emailVerificationTokens).where(or(lt(schema.emailVerificationTokens.expiresAt, new Date()), isNotNull(schema.emailVerificationTokens.usedAt)));
   const token = generateToken();
   const hashedToken = hashToken(token);
   // 24h expiry
@@ -38,15 +39,11 @@ export async function verifyEmailToken(token: string): Promise<boolean> {
     return false;
   }
 
-  // Mark token as used
-  await db.update(schema.emailVerificationTokens)
-    .set({ usedAt: new Date() })
-    .where(eq(schema.emailVerificationTokens.id, verificationToken.id));
-
-  // Mark user as verified
-  await db.update(schema.users)
-    .set({ emailVerifiedAt: new Date() })
-    .where(eq(schema.users.id, verificationToken.userId));
+  await db.transaction(async (tx) => {
+    await tx.update(schema.emailVerificationTokens).set({ usedAt: new Date() }).where(eq(schema.emailVerificationTokens.id, verificationToken.id));
+    await tx.update(schema.users).set({ emailVerifiedAt: new Date() }).where(eq(schema.users.id, verificationToken.userId));
+    await tx.insert(schema.auditLogs).values({ userId: verificationToken.userId, action: 'email_verified' });
+  });
 
   return true;
 }
