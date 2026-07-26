@@ -1,11 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, after } from 'next/server';
 import { randomUUID, timingSafeEqual } from 'crypto';
 import { db, schema } from '@leadlens/database';
 import { sql } from 'drizzle-orm';
 import { runOrchestration } from '@leadlens/orchestration';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 function isAuthorized(req: Request): boolean {
   const secret = process.env.CRON_SECRET;
@@ -60,28 +60,22 @@ export async function POST(req: Request) {
 
   const jobId = String(job.id);
 
-  // Return immediately so cron-job.org sees a 200. 
-  // waitUntil keeps the serverless function alive to finish the job.
-  const ctx = (globalThis as any)[Symbol.for('waitUntil')] as ((p: Promise<unknown>) => void) | undefined;
-
-  const work = runOrchestration(job).catch(async (error: unknown) => {
-    console.error(`[cron] Job ${jobId} failed:`, error);
-    await db.update(schema.analysisJobs)
-      .set({
-        status: 'failed',
-        failureCode: 'CRON_WORKER_ERROR',
-        failureMessage: error instanceof Error ? error.message : 'Unknown error',
-        failedAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(sql`${schema.analysisJobs.id} = ${jobId}`);
+  after(async () => {
+    try {
+      await runOrchestration(job);
+    } catch (error: unknown) {
+      console.error(`[cron] Job ${jobId} failed:`, error);
+      await db.update(schema.analysisJobs)
+        .set({
+          status: 'failed',
+          failureCode: 'CRON_WORKER_ERROR',
+          failureMessage: error instanceof Error ? error.message : 'Unknown error',
+          failedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(sql`${schema.analysisJobs.id} = ${jobId}`);
+    }
   });
-
-  // Use Next.js waitUntil if available (Vercel Fluid Compute / Next 15+)
-  if (typeof ctx === 'function') {
-    ctx(work);
-  }
-  // else: fire-and-forget, function stays alive until work completes or maxDuration hits
 
   return NextResponse.json({ processed: true, jobId });
 }
