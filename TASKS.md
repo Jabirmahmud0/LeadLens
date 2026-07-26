@@ -683,10 +683,10 @@ Output schema: `{ verifiedFindings: [{ findingId, sourceUrls, confidence, isFact
 > **Goal:** Premium, multi-section report UI covering all 10 sections of §11.8.
 
 ### 10.1 Report overview (§15.17)
-- [ ] **Three-panel intelligence layout** on desktop:
-  - Left rail: sticky nav + prospect identity
-  - Main column: Opportunity Thesis (editorially styled block), recommended next action, key findings, service match
-  - Right rail: score ring, confidence, sources, notes, quick actions
+- [x] **Three-panel intelligence layout** on desktop:
+  - [x] Left rail: sticky nav + prospect identity
+  - [x] Main column: Opportunity Thesis (editorially styled block), recommended next action, key findings, service match
+  - [x] Right rail: score ring, confidence, sources, notes, quick actions
 - [ ] Mobile: sticky compact header, horizontal section nav, score summary, bottom sheet for quick actions
 
 > 📌 **Commit:** `feat(web): report overview — three-panel layout with opportunity thesis`
@@ -694,9 +694,9 @@ Output schema: `{ verifiedFindings: [{ findingId, sourceUrls, confidence, isFact
 ---
 
 ### 10.2 Findings page — Evidence map (§15.18)
-- [ ] Findings grouped by: Conversion, Performance, UX, Accessibility, SEO, Trust, Technology, Security Basics
-- [ ] Each finding card: left severity rail (color-coded), title, severity badge, evidence type, observation, business impact, recommendation, matched service, source, confidence, feedback buttons (useful / inaccurate)
-- [ ] Expanding a card shows full evidence section
+- [x] Findings grouped by: Conversion, Performance, UX, Accessibility, SEO, Trust, Technology, Security Basics
+- [x] Each finding card: left severity rail (color-coded), title, severity badge, evidence type, observation, business impact, recommendation, matched service, source, confidence, feedback buttons (useful / inaccurate)
+- [x] Expanding a card shows full evidence section
 - [ ] Desktop: selecting a finding opens source preview in a right side panel
 - [ ] Mobile: source preview opens as full-height sheet
 - [ ] Pin / hide / reorder findings

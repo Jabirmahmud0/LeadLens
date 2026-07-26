@@ -125,3 +125,66 @@ export const proposalStarters = pgTable('proposal_starters', {
   userEditedContent: text('user_edited_content'),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
+
+import { relations } from 'drizzle-orm';
+
+export const reportsRelations = relations(reports, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [reports.organizationId],
+    references: [organizations.id],
+  }),
+  prospect: one(prospects, {
+    fields: [reports.prospectId],
+    references: [prospects.id],
+  }),
+  analysisJob: one(analysisJobs, {
+    fields: [reports.analysisJobId],
+    references: [analysisJobs.id],
+  }),
+  primaryService: one(agencyServices, {
+    fields: [reports.primaryServiceId],
+    references: [agencyServices.id],
+  }),
+  secondaryService: one(agencyServices, {
+    fields: [reports.secondaryServiceId],
+    references: [agencyServices.id],
+  }),
+  scores: many(reportScores),
+  findings: many(reportFindings),
+  serviceRecommendations: many(serviceRecommendations),
+  outreach: many(reportOutreach),
+  callQuestions: many(reportCallQuestions),
+  objections: many(reportObjections),
+  proposalStarters: many(proposalStarters),
+}));
+
+export const reportScoresRelations = relations(reportScores, ({ one }) => ({
+  report: one(reports, {
+    fields: [reportScores.reportId],
+    references: [reports.id],
+  }),
+}));
+
+export const reportFindingsRelations = relations(reportFindings, ({ one, many }) => ({
+  report: one(reports, {
+    fields: [reportFindings.reportId],
+    references: [reports.id],
+  }),
+  matchedService: one(agencyServices, {
+    fields: [reportFindings.matchedServiceId],
+    references: [agencyServices.id],
+  }),
+  sources: many(findingSources),
+}));
+
+export const findingSourcesRelations = relations(findingSources, ({ one }) => ({
+  finding: one(reportFindings, {
+    fields: [findingSources.findingId],
+    references: [reportFindings.id],
+  }),
+  sourcePage: one(sourcePages, {
+    fields: [findingSources.sourcePageId],
+    references: [sourcePages.id],
+  }),
+}));
+
