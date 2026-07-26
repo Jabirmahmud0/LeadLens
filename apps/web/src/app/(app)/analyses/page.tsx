@@ -11,14 +11,15 @@ export const metadata = {
 };
 
 async function getAnalyses(orgId: string) {
-  // We'll mock this for now since we don't have an activity_logs table in the schema
-  // We will map prospects to "analyses" events for MVP
-  const prospects = await db.query.prospects.findMany({
-    where: eq(schema.prospects.organizationId, orgId),
-    orderBy: [desc(schema.prospects.createdAt)],
+  const jobs = await db.query.analysisJobs.findMany({
+    where: eq(schema.analysisJobs.organizationId, orgId),
+    orderBy: [desc(schema.analysisJobs.createdAt)],
+    with: {
+      prospect: true
+    }
   });
   
-  return prospects;
+  return jobs;
 }
 
 export default async function AnalysesPage() {
@@ -57,11 +58,16 @@ export default async function AnalysesPage() {
       <div className="flex-1 overflow-y-auto min-h-0 pb-20">
         {analyses.length === 0 ? (
           <div className="h-full flex items-center justify-center">
-            <EmptyState
-              icon={Activity}
-              title="No activity yet"
-              description="Run your first analysis to populate this journal."
-            />
+              <EmptyState
+                icon={Activity}
+                title="No analysis jobs yet"
+                description="Run your first analysis to populate this journal."
+                action={
+                  <a href="/new" className="bg-white text-black px-6 py-2 rounded-lg text-sm font-medium hover:bg-neutral-200 mt-4 inline-block">
+                    Start Analysis
+                  </a>
+                }
+              />
           </div>
         ) : (
           <div className="space-y-6 relative before:absolute before:inset-y-0 before:left-6 before:w-px before:bg-neutral-800">
@@ -89,19 +95,25 @@ export default async function AnalysesPage() {
                         <span className="text-xs text-neutral-500">{new Date(a.createdAt).toLocaleString()}</span>
                       </div>
                       <h4 className="text-white font-medium text-base truncate mt-1">
-                        {a.companyName || a.domain}
+                        {a.prospect?.companyName || a.prospect?.normalizedDomain || 'Unknown'}
                       </h4>
                       <p className="text-sm text-neutral-400 mt-1">
                         {a.status === 'completed' 
-                          ? `Successfully extracted \${Math.floor(Math.random() * 5) + 3} technical issues and generated Opportunity Brief.`
-                          : `Started deep scan on \${a.domain}...`}
+                          ? `Successfully extracted technical issues and generated Opportunity Brief.`
+                          : a.status === 'failed' 
+                          ? `Failed: ${a.failureMessage || 'Unknown error'}`
+                          : `Status: ${a.currentStep || a.status}`}
                       </p>
                     </div>
                     
                     {a.status === 'completed' && (
-                      <button className="p-2 text-neutral-500 hover:text-white rounded-lg hover:bg-neutral-800 transition-colors shrink-0">
+                      <a 
+                        href={`/analyses/${a.id}/report/executive-summary`}
+                        className="p-2 text-neutral-500 hover:text-white rounded-lg hover:bg-neutral-800 transition-colors shrink-0 bg-neutral-800/50"
+                        title="View Report"
+                      >
                         <Download className="w-4 h-4" />
-                      </button>
+                      </a>
                     )}
                   </div>
                 </div>

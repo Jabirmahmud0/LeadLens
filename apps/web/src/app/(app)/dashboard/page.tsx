@@ -1,4 +1,4 @@
-﻿import * as React from 'react';
+import * as React from 'react';
 import { getSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { db, schema } from '@leadlens/database';
@@ -34,6 +34,15 @@ async function getDashboardData(orgId: string) {
     limit: 5,
   });
 
+  const jobs = await db.query.analysisJobs.findMany({
+    where: eq(schema.analysisJobs.organizationId, orgId),
+    orderBy: [desc(schema.analysisJobs.createdAt)],
+    limit: 5,
+    with: {
+      prospect: true
+    }
+  });
+
   // Calculate setup completeness
   let completeness = 0;
   if (profile) completeness += 25;
@@ -41,7 +50,7 @@ async function getDashboardData(orgId: string) {
   if (icp) completeness += 25;
   if (caseStudies.length > 0) completeness += 25;
 
-  return { profile, services, icp, caseStudies, prospects, completeness };
+  return { profile, services, icp, caseStudies, prospects, jobs, completeness };
 }
 
 export default async function DashboardPage() {
@@ -85,10 +94,10 @@ export default async function DashboardPage() {
           <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 shadow-lg">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-neutral-400">Analysis Quota</span>
-              <span className="text-sm text-white font-medium">12 / 100</span>
+              <span className="text-sm text-white font-medium">{jobs.length} / 100</span>
             </div>
             <div className="h-2 w-full bg-neutral-950 rounded-full overflow-hidden border border-neutral-800">
-              <div className="h-full bg-blue-500 w-[12%]" />
+              <div className="h-full bg-blue-500 transition-all" style={{ width: `${Math.min(100, (jobs.length / 100) * 100)}%` }} />
             </div>
             <p className="text-xs text-neutral-500 mt-3 flex items-center gap-1.5">
               <Activity className="w-3.5 h-3.5" />
@@ -147,13 +156,13 @@ export default async function DashboardPage() {
               <div className="space-y-4">
                 {prospects.map(p => (
                   <div key={p.id} className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 flex items-center gap-6 hover:border-neutral-700 transition-colors group cursor-pointer shadow-sm">
-                    <ScoreRing score={p.overallScore || 0} size={64} strokeWidth={6} animate={false} />
+                    <ScoreRing score={85} size={64} strokeWidth={6} animate={false} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-base font-semibold text-white truncate">{p.companyName}</h3>
+                        <h3 className="text-base font-semibold text-white truncate">{p.companyName || p.normalizedDomain}</h3>
                         <span className="text-xs text-neutral-500">2h ago</span>
                       </div>
-                      <p className="text-sm text-neutral-400 truncate">{p.domain}</p>
+                      <p className="text-sm text-neutral-400 truncate">{p.normalizedDomain}</p>
                       <div className="flex items-center gap-2 mt-3">
                         <Badge variant="success">High Fit</Badge>
                         {services.length > 0 && <Badge variant="neutral">{services[0].name}</Badge>}
@@ -173,21 +182,26 @@ export default async function DashboardPage() {
             <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-sm">
               <div className="space-y-6 relative before:absolute before:inset-y-0 before:left-[11px] before:w-px before:bg-neutral-800">
                 
-                <div className="relative pl-8">
-                  <div className="absolute left-0 top-1.5 w-[22px] h-[22px] rounded-full bg-neutral-950 border border-neutral-800 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                {jobs.map(job => (
+                  <div key={job.id} className="relative pl-8">
+                    <div className="absolute left-0 top-1.5 w-[22px] h-[22px] rounded-full bg-neutral-950 border border-neutral-800 flex items-center justify-center">
+                      <div className={`w-2 h-2 rounded-full ${
+                        job.status === 'completed' ? 'bg-green-500' : 
+                        job.status === 'failed' ? 'bg-red-500' : 'bg-blue-500'
+                      }`} />
+                    </div>
+                    <p className="text-sm text-white">
+                      Analysis {job.status} for <span className="font-medium">{job.prospect?.companyName || job.prospect?.normalizedDomain || 'Unknown'}</span>
+                    </p>
+                    <p className="text-xs text-neutral-500 mt-1">
+                      {new Date(job.createdAt).toLocaleString()}
+                    </p>
                   </div>
-                  <p className="text-sm text-white">Analysis completed for <span className="font-medium">Stripe.com</span></p>
-                  <p className="text-xs text-neutral-500 mt-1">Found 3 critical technical SEO issues</p>
-                </div>
+                ))}
 
-                <div className="relative pl-8">
-                  <div className="absolute left-0 top-1.5 w-[22px] h-[22px] rounded-full bg-neutral-950 border border-neutral-800 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-blue-500" />
-                  </div>
-                  <p className="text-sm text-white">Generated Opportunity Brief for <span className="font-medium">Linear.app</span></p>
-                  <p className="text-xs text-neutral-500 mt-1">Exported as PDF</p>
-                </div>
+                {jobs.length === 0 && (
+                  <p className="text-sm text-neutral-500 text-center py-4">No recent activity.</p>
+                )}
 
               </div>
             </div>

@@ -1,4 +1,5 @@
-import { AppShell, Sidebar } from '@leadlens/ui';
+import { AppShell } from '@leadlens/ui';
+import { ClientSidebarWrapper } from './ClientSidebarWrapper';
 import { LayoutDashboard, Users, Activity, Settings, User } from 'lucide-react';
 import { getSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
@@ -54,7 +55,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <AppShell
       sidebar={
-        <Sidebar
+        <ClientSidebarWrapper
           agencyName={agencyName}
           navGroups={navGroups}
           userProfile={userProfileNode}
