@@ -40,3 +40,20 @@ export const analysisJobSteps = pgTable('analysis_job_steps', {
     jobStepUnique: unique('job_step_unique').on(table.analysisJobId, table.stepKey),
   };
 });
+
+import { relations } from 'drizzle-orm';
+
+export const analysisJobsRelations = relations(analysisJobs, ({ one }) => ({
+  prospect: one(prospects, {
+    fields: [analysisJobs.prospectId],
+    references: [prospects.id],
+  }),
+  organization: one(organizations, {
+    fields: [analysisJobs.organizationId],
+    references: [organizations.id],
+  }),
+  createdBy: one(users, {
+    fields: [analysisJobs.createdBy],
+    references: [users.id],
+  }),
+}));
