@@ -35,6 +35,10 @@ vi.mock('@/lib/auth-cookies', () => ({
   setSessionCookie: vi.fn(),
 }));
 
+vi.mock('@/lib/auth/admin', () => ({
+  ensureBootstrapPlatformOwner: vi.fn().mockResolvedValue(false),
+}));
+
 describe('Authentication Security Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();

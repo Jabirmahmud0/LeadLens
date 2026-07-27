@@ -3,8 +3,10 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { z } from 'zod';
 import { db, schema } from '@leadlens/database';
 import { getSession } from '@/lib/auth/session';
+import { dispatchAnalysisJob } from '@/lib/analysis/dispatch';
 
 const Input = z.object({ section: z.enum(['all', 'summary', 'outreach', 'proposal']), tone: z.enum(['professional', 'consultative', 'aggressive']).optional(), length: z.enum(['quick', 'standard', 'deep']).optional() });
+export const maxDuration = 300;
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
@@ -24,6 +26,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     await tx.update(schema.analysisJobs).set({ status: 'queued', progressPercent: 0, currentStep: null, completedAt: null, failedAt: null, failureCode: null, failureMessage: null, requestedOptions: { ...((job.requestedOptions as object) || {}), ...(parsed.data.tone ? { tone: parsed.data.tone } : {}), ...(parsed.data.length ? { reportDepth: parsed.data.length } : {}) }, updatedAt: new Date() }).where(eq(schema.analysisJobs.id, report.analysisJobId));
     await tx.update(schema.reports).set({ version: nextVersion, updatedAt: new Date() }).where(eq(schema.reports.id, report.id));
     await tx.insert(schema.usageEvents).values({ organizationId: session.organization!.id, userId: session.user.id, eventName: 'report_regenerated', properties: { analysisId: report.analysisJobId, section: parsed.data.section } });
+  });
+  await dispatchAnalysisJob(report.analysisJobId).catch((dispatchError) => {
+    console.error(`[report-regenerate] Immediate dispatch failed for ${report.analysisJobId}:`, dispatchError);
   });
   return NextResponse.json({ success: true, analysisId: report.analysisJobId });
 }

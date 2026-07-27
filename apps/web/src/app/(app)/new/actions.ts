@@ -5,6 +5,7 @@ import { db, schema } from '@leadlens/database';
 import { validateAndNormalizeUrl } from '@leadlens/analysis';
 import { eq, and, inArray, gte, count } from 'drizzle-orm';
 import { z } from 'zod';
+import { dispatchAnalysisJob } from '@/lib/analysis/dispatch';
 
 const ComposerSchema = z.object({
   url: z.string().url(),
@@ -154,6 +155,10 @@ export async function submitAnalysis(data: z.infer<typeof ComposerSchema>) {
     userId: session.user.id,
     eventName: 'prospect_submitted',
     properties: { analysisId: job.id, goal: rest.goal, reportDepth: rest.reportDepth },
+  });
+
+  await dispatchAnalysisJob(job.id).catch((dispatchError) => {
+    console.error(`[submit-analysis] Immediate dispatch failed for ${job.id}:`, dispatchError);
   });
 
   // Return success

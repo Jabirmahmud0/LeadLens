@@ -4,6 +4,7 @@ import { db, schema } from '@leadlens/database';
 import { eq } from 'drizzle-orm';
 import { verifyPassword, createSession, checkRateLimit, RATE_LIMITS, hashToken } from '@leadlens/auth';
 import { setSessionCookie } from '@/lib/auth-cookies';
+import { ensureBootstrapPlatformOwner } from '@/lib/auth/admin';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -41,6 +42,10 @@ export async function POST(req: NextRequest) {
       try { await db.insert(schema.auditLogs).values({ userId: user.id, action: 'login_failed', ipHash: hashToken(ip) }); } catch (auditError) { console.error('Unable to write login audit:', auditError); }
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
+
+    // ADMIN_EMAILS can only create the first database assignment after the
+    // account has successfully authenticated. Authorization itself reads DB roles.
+    await ensureBootstrapPlatformOwner({ id: user.id, email: user.email });
 
     // Create session
     const userAgent = req.headers.get('user-agent') || undefined;

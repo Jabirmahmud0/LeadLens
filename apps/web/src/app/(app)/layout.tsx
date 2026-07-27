@@ -16,7 +16,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   const agencyName = session.organization.name || 'Your Agency';
-  const isAdmin = isPlatformAdmin(session.user.email);
+  const isAdmin = await isPlatformAdmin(session.user.id);
 
   return (
     <ClientAppShell

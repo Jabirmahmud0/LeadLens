@@ -4,12 +4,10 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { 
   CheckCircle2, 
-  Circle, 
   Loader2, 
   AlertCircle,
   Globe,
   FileText,
-  Search,
   Zap,
   Server,
   ArrowRight,
@@ -17,6 +15,7 @@ import {
 } from 'lucide-react';
 
 type StepStatus = 'queued' | 'processing' | 'completed' | 'skipped' | 'failed' | 'partial';
+type JobStatus = StepStatus | 'cancelled';
 
 interface JobStep {
   key: string;
@@ -29,11 +28,14 @@ interface JobStep {
 
 interface JobProgress {
   id: string;
-  status: StepStatus;
+  status: JobStatus;
   progressPercent: number;
   currentStep: string | null;
   startedAt: string | null;
   completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  isStalled: boolean;
   failureCode?: string | null;
   failureMessage?: string | null;
   steps: JobStep[];
@@ -49,6 +51,10 @@ const UI_STAGES = [
   { id: 'save_report', label: 'Finalizing Report', icon: CheckCircle2 },
 ];
 
+const TERMINAL_STATUSES = new Set<JobStatus>(['completed', 'failed', 'partial', 'cancelled']);
+const POLL_INTERVAL_MS = 3000;
+const REQUEST_TIMEOUT_MS = 12000;
+
 export default function AnalysisProcessingPage() {
   const params = useParams();
   const router = useRouter();
@@ -57,30 +63,46 @@ export default function AnalysisProcessingPage() {
   const [isRetrying, setIsRetrying] = useState(false);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let stopped = false;
+    let controller: AbortController | undefined;
     
     const fetchProgress = async () => {
+      controller = new AbortController();
+      const requestTimeout = setTimeout(() => controller?.abort(), REQUEST_TIMEOUT_MS);
       try {
-        const res = await fetch(`/api/analyses/${params.id}`);
+        const res = await fetch(`/api/analyses/${params.id}`, {
+          cache: 'no-store',
+          signal: controller.signal,
+        });
         if (!res.ok) {
           throw new Error(await res.text());
         }
         const json: JobProgress = await res.json();
+        if (stopped) return;
         setData(json);
+        setError(null);
 
-        if (json.status === 'completed' || json.status === 'failed' || json.status === 'partial') {
-          clearInterval(interval);
+        if (!TERMINAL_STATUSES.has(json.status)) {
+          timer = setTimeout(fetchProgress, POLL_INTERVAL_MS);
         }
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch status');
-        clearInterval(interval);
+      } catch (fetchError: unknown) {
+        if (stopped) return;
+        setError(fetchError instanceof DOMException && fetchError.name === 'AbortError'
+          ? 'The status request timed out. Check your connection and try again.'
+          : fetchError instanceof Error ? fetchError.message : 'Failed to fetch analysis status');
+      } finally {
+        clearTimeout(requestTimeout);
       }
     };
 
-    fetchProgress(); // initial fetch
-    interval = setInterval(fetchProgress, 3000); // Poll every 3s
+    void fetchProgress();
 
-    return () => clearInterval(interval);
+    return () => {
+      stopped = true;
+      controller?.abort();
+      if (timer) clearTimeout(timer);
+    };
   }, [params.id]);
 
   if (error) {
@@ -104,8 +126,6 @@ export default function AnalysisProcessingPage() {
   }
 
   const hasReport = data.status === 'completed' || data.status === 'partial';
-  const isFinished = hasReport || data.status === 'failed';
-
   // Helper to determine stage status
   const getStageStatus = (stageId: string) => {
     const step = data.steps.find(s => s.key === stageId);
@@ -118,7 +138,7 @@ export default function AnalysisProcessingPage() {
       
       {/* Left Panel: Timeline */}
       <div className="w-full md:w-1/3 xl:w-1/4 bg-neutral-900/50 border-r border-neutral-800 p-6 md:p-10 flex flex-col overflow-y-auto">
-        <h1 className="text-2xl font-light text-white mb-2">Analysis in Progress</h1>
+        <h1 className="text-2xl font-light text-white mb-2">{data.status === 'cancelled' ? 'Analysis Cancelled' : hasReport ? 'Analysis Complete' : data.status === 'failed' ? 'Analysis Failed' : 'Analysis in Progress'}</h1>
         <p className="text-sm text-neutral-400 mb-8">
           We are analyzing the prospect's digital footprint to build your report.
         </p>
@@ -207,6 +227,30 @@ export default function AnalysisProcessingPage() {
             >
               {isRetrying ? 'Retrying…' : 'Retry failed stages'}
             </button>
+          </div>
+        )}
+        {data.status === 'cancelled' && (
+          <div className="mt-8 rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <p className="text-sm font-semibold text-amber-900">This analysis was cancelled.</p>
+            <p className="mt-1 text-xs leading-5 text-amber-800/80">Polling has stopped. Start a new analysis when you are ready to continue.</p>
+          </div>
+        )}
+        {data.isStalled && (data.status === 'queued' || data.status === 'processing') && (
+          <div className="mt-8 rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <p className="text-sm font-semibold text-amber-900">The worker has stopped responding</p>
+            <p className="mt-1 text-xs leading-5 text-amber-800/80">No progress was recorded for more than eight minutes. You can safely return this job to the queue.</p>
+            <button type="button" disabled={isRetrying} onClick={async () => {
+              setIsRetrying(true);
+              try {
+                const response = await fetch(`/api/analyses/${data.id}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'restart' }) });
+                if (!response.ok) throw new Error('Unable to restart the stalled analysis');
+                window.location.reload();
+              } catch (restartError) {
+                setError(restartError instanceof Error ? restartError.message : 'Unable to restart the stalled analysis');
+              } finally {
+                setIsRetrying(false);
+              }
+            }} className="mt-3 rounded-lg bg-amber-900 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">{isRetrying ? 'Restarting…' : 'Return to queue'}</button>
           </div>
         )}
         {(data.status === 'queued' || data.status === 'processing') && <button type="button" onClick={async () => { if (!window.confirm('Cancel this analysis?')) return; const response = await fetch(`/api/analyses/${data.id}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'cancel' }) }); if (response.ok) window.location.reload(); else setError('Unable to cancel analysis'); }} className="mt-6 rounded-lg border border-neutral-700 px-3 py-2 text-xs font-semibold text-neutral-300 hover:bg-neutral-800">Cancel analysis</button>}

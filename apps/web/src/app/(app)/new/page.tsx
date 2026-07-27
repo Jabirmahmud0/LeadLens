@@ -8,6 +8,8 @@ export const metadata = {
   title: 'New Analysis | LeadLens',
 };
 
+export const maxDuration = 300;
+
 export default async function NewAnalysisPage() {
   const session = await getSession();
   if (!session || !session.organization) redirect('/login');
