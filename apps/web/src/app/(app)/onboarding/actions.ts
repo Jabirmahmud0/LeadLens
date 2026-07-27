@@ -6,11 +6,17 @@ import { getSession } from '@/lib/auth/session';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { ISO_COUNTRY_CODES } from '@/lib/agency-profile-options';
 
 // ... existing actions ...
 const identitySchema = z.object({
-  name: z.string().min(2), website: z.string().url().or(z.literal('')), country: z.string(),
-  timezone: z.string(), description: z.string(), teamSize: z.string(), primaryCategory: z.string(),
+  name: z.string().trim().min(2).max(120),
+  website: z.string().trim().url().or(z.literal('')),
+  country: z.string().refine((value) => ISO_COUNTRY_CODES.includes(value as (typeof ISO_COUNTRY_CODES)[number]), 'Invalid country'),
+  timezone: z.string().min(1).max(100),
+  description: z.string().trim().max(500),
+  teamSize: z.string().min(1).max(50),
+  primaryCategory: z.string().min(1).max(120),
 });
 
 export async function saveAgencyIdentity(data: z.infer<typeof identitySchema>) {
@@ -22,7 +28,8 @@ export async function saveAgencyIdentity(data: z.infer<typeof identitySchema>) {
     name: parsed.data.name, 
     websiteUrl: parsed.data.website || null, 
     countryCode: parsed.data.country || null, 
-    timezone: parsed.data.timezone || null
+    timezone: parsed.data.timezone || null,
+    updatedAt: new Date(),
   }).where(eq(schema.organizations.id, session.organization.id));
 
   const existingProfile = await db.select().from(schema.agencyProfiles).where(eq(schema.agencyProfiles.organizationId, session.organization.id));
@@ -32,6 +39,7 @@ export async function saveAgencyIdentity(data: z.infer<typeof identitySchema>) {
       shortDescription: parsed.data.description, 
       teamSizeRange: parsed.data.teamSize, 
       primaryCategory: parsed.data.primaryCategory,
+      updatedAt: new Date(),
     }).where(eq(schema.agencyProfiles.organizationId, session.organization.id));
   } else {
     await db.insert(schema.agencyProfiles).values({

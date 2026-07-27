@@ -5,6 +5,7 @@ import { LucideIcon } from 'lucide-react';
 export interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   agencyName?: string;
   logo?: React.ReactNode;
+  tone?: 'dark' | 'light';
   navGroups: {
     label?: string;
     items: {
@@ -17,19 +18,20 @@ export interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   userProfile?: React.ReactNode;
 }
 
-export function Sidebar({ agencyName, logo, navGroups, userProfile, className, ...props }: SidebarProps) {
+export function Sidebar({ agencyName, logo, navGroups, userProfile, tone = 'dark', className, ...props }: SidebarProps) {
+  const isLight = tone === 'light';
   return (
-    <div className={cn("flex flex-col h-full bg-neutral-950", className)} {...props}>
+    <div className={cn("flex h-full flex-col", isLight ? "bg-[#fbfcf8]" : "bg-neutral-950", className)} {...props}>
       {/* Header */}
-      <div className="h-16 px-6 flex items-center gap-3 border-b border-neutral-800 shrink-0">
+      <div className={cn("flex h-16 shrink-0 items-center gap-3 border-b px-6", isLight ? "border-[#dce7df]" : "border-neutral-800")}>
         {logo ? (
           logo
         ) : (
-          <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center font-bold text-black text-sm shrink-0">
+          <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold", isLight ? "bg-[#166534] text-white" : "bg-white text-black")}>
             {agencyName ? agencyName.substring(0,2).toUpperCase() : 'LL'}
           </div>
         )}
-        <span className="font-semibold text-white truncate">
+        <span className={cn("truncate font-semibold", isLight ? "text-[#10251d]" : "text-white")}>
           {agencyName || 'LeadLens'}
         </span>
       </div>
@@ -39,7 +41,7 @@ export function Sidebar({ agencyName, logo, navGroups, userProfile, className, .
         {navGroups.map((group, i) => (
           <div key={i}>
             {group.label && (
-              <h3 className="px-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
+              <h3 className={cn("mb-2 px-2 text-[10px] font-bold uppercase tracking-[0.16em]", isLight ? "text-[#8ba096]" : "text-neutral-500")}>
                 {group.label}
               </h3>
             )}
@@ -50,14 +52,14 @@ export function Sidebar({ agencyName, logo, navGroups, userProfile, className, .
                     href={item.href}
                     className={cn(
                       "flex items-center gap-3 px-2 py-2 rounded-lg text-sm font-medium transition-colors group",
-                      item.isActive 
-                        ? "bg-neutral-800 text-white" 
-                        : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+                      item.isActive
+                        ? isLight ? "bg-[#e6f4e9] text-[#14532d] shadow-[inset_0_0_0_1px_#cce6d3]" : "bg-neutral-800 text-white"
+                        : isLight ? "text-[#60766b] hover:bg-[#f0f6f1] hover:text-[#16352a]" : "text-neutral-400 hover:bg-neutral-900 hover:text-white"
                     )}
                   >
                     <item.icon className={cn(
                       "w-5 h-5 shrink-0 transition-colors",
-                      item.isActive ? "text-white" : "text-neutral-500 group-hover:text-neutral-300"
+                      item.isActive ? isLight ? "text-emerald-700" : "text-white" : isLight ? "text-[#8ca096] group-hover:text-emerald-700" : "text-neutral-500 group-hover:text-neutral-300"
                     )} />
                     {item.label}
                   </a>
@@ -70,7 +72,7 @@ export function Sidebar({ agencyName, logo, navGroups, userProfile, className, .
 
       {/* Footer / User Profile */}
       {userProfile && (
-        <div className="p-4 border-t border-neutral-800 shrink-0">
+        <div className={cn("shrink-0 border-t p-4", isLight ? "border-[#dce7df]" : "border-neutral-800")}>
           {userProfile}
         </div>
       )}

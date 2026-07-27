@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm';
 import { Badge, SkeletonCard, EmptyState, cn } from '@leadlens/ui';
 import { CheckCircle2, User, Building, MapPin, Globe, LayoutTemplate, Briefcase, FileText, Zap } from 'lucide-react';
 import Link from 'next/link';
+import { getPrimaryServiceLabel, getTeamSizeLabel } from '@/lib/agency-profile-options';
 
 export const metadata = {
   title: 'Agency Profile | LeadLens',
@@ -58,12 +59,12 @@ export default async function SettingsPage() {
           <div className="flex flex-wrap gap-4 mt-6">
             <div className="flex items-center gap-1.5 text-xs text-neutral-500 bg-neutral-950 border border-neutral-800 px-3 py-1.5 rounded-lg">
               <User className="w-3.5 h-3.5" />
-              {profile?.teamSizeRange || 'Unknown'} Team Size
+              {getTeamSizeLabel(profile?.teamSizeRange)}
             </div>
             {profile?.primaryCategory && (
               <div className="flex items-center gap-1.5 text-xs text-neutral-500 bg-neutral-950 border border-neutral-800 px-3 py-1.5 rounded-lg">
                 <Briefcase className="w-3.5 h-3.5" />
-                {profile.primaryCategory}
+                {getPrimaryServiceLabel(profile.primaryCategory)}
               </div>
             )}
           </div>
@@ -156,7 +157,7 @@ export default async function SettingsPage() {
             <h3 className="text-lg font-medium text-white mb-2">How LeadLens Understands You</h3>
             <p className="text-sm text-neutral-400 max-w-3xl leading-relaxed">
               Based on your configuration, the AI recognizes you as a 
-              <span className="text-white font-medium mx-1">{profile?.primaryCategory || 'Digital Agency'}</span> 
+              <span className="text-white font-medium mx-1">{getPrimaryServiceLabel(profile?.primaryCategory || 'Full-Service Digital Agency')}</span> 
               targeting <span className="text-white font-medium mx-1">{icp ? 'specific criteria' : 'broad audiences'}</span>. 
               When analyzing prospects, it will actively search for opportunities that match your <span className="text-white font-medium">{servicesCount.length}</span> defined services, prioritizing issues you have a proven track record of solving in your case studies.
             </p>

@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { db, schema } from '@leadlens/database';
 import { eq, desc, asc, and, or, ilike, inArray, isNull, isNotNull } from 'drizzle-orm';
 import { ScoreRing, Badge, EmptyState } from '@leadlens/ui';
-import { Users, Search } from 'lucide-react';
+import { ArrowRight, Plus, Users, Search } from 'lucide-react';
 import Link from 'next/link';
 import { ProspectControls } from './ProspectControls';
 
@@ -47,16 +47,20 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
   const { rows: prospects, latestReportByProspect, pageSize } = await getProspects(session.organization.id, query, page, status, sort);
 
   return (
-    <div className="p-6 sm:p-8 max-w-7xl mx-auto space-y-8 flex flex-col h-[calc(100vh-4rem)] lg:h-screen">
+    <div className="app-page-enter mx-auto flex min-h-full max-w-7xl flex-col space-y-6 p-4 sm:p-7 lg:p-9">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between shrink-0">
+      <div className="relative shrink-0 overflow-hidden rounded-3xl border border-[#d4e5d8] bg-gradient-to-br from-[#eaf7ed] via-white to-[#fff7dd] p-6 shadow-[0_24px_60px_-48px_rgba(20,83,45,0.55)] sm:p-8">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white tracking-tight">Prospects</h1>
-          <p className="text-sm text-neutral-400 mt-1">Manage and review your analyzed leads.</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700">Prospect workspace</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-[#10251d]">Your opportunity pipeline</h1>
+          <p className="mt-2 text-sm text-[#60766b]">Review researched companies, compare fit, and move the right conversation forward.</p>
+        </div>
+        <Link href="/new" className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#166534] px-4 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[#14532d]"><Plus className="size-4" /> Analyze prospect <ArrowRight className="size-4" /></Link>
         </div>
         
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <form method="get" className="flex flex-1 flex-wrap gap-2"><div className="relative flex-1 sm:w-64">
+        <div className="mt-6 flex items-center gap-3 w-full">
+          <form method="get" className="flex w-full flex-1 flex-wrap gap-2 rounded-2xl border border-[#dce7df] bg-white/85 p-2 shadow-sm"><div className="relative min-w-[210px] flex-1 sm:w-64">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-neutral-500" />
             </div>
@@ -64,15 +68,15 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
               type="text"
               name="q"
               defaultValue={query}
-              className="block w-full pl-10 rounded-lg border border-neutral-800 bg-neutral-900 px-4 py-2 text-sm text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+              className="block h-10 w-full rounded-xl border border-[#d8e5dc] bg-[#fbfdfb] pl-10 pr-4 text-sm text-[#16352a] placeholder:text-[#8ca096] focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
               placeholder="Search prospects..."
             />
-          </div><select name="status" defaultValue={status} aria-label="Filter prospects" className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 text-sm text-neutral-300"><option value="">Active</option><option value="completed">Completed</option><option value="processing">Processing</option><option value="failed">Failed</option><option value="archived">Archived</option></select><select name="sort" defaultValue={sort} aria-label="Sort prospects" className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 text-sm text-neutral-300"><option value="newest">Newest</option><option value="oldest">Oldest</option></select><select name="view" defaultValue={view} aria-label="Prospect view" className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 text-sm text-neutral-300"><option value="cards">Cards</option><option value="table">Compact</option></select><button className="rounded-lg border border-neutral-800 px-3 text-sm text-neutral-300">Apply</button></form>
+          </div><select name="status" defaultValue={status} aria-label="Filter prospects" className="h-10 rounded-xl border border-[#d8e5dc] bg-white px-3 text-sm text-[#365246]"><option value="">Active</option><option value="completed">Completed</option><option value="processing">Processing</option><option value="failed">Failed</option><option value="archived">Archived</option></select><select name="sort" defaultValue={sort} aria-label="Sort prospects" className="h-10 rounded-xl border border-[#d8e5dc] bg-white px-3 text-sm text-[#365246]"><option value="newest">Newest</option><option value="oldest">Oldest</option></select><select name="view" defaultValue={view} aria-label="Prospect view" className="h-10 rounded-xl border border-[#d8e5dc] bg-white px-3 text-sm text-[#365246]"><option value="cards">Cards</option><option value="table">Compact</option></select><button className="h-10 rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white">Apply</button></form>
         </div>
       </div>
 
       {/* Main content */}
-      <div className="flex-1 overflow-y-auto min-h-0">
+      <div className="min-h-0 flex-1">
         {prospects.length === 0 ? (
           <div className="h-full flex items-center justify-center">
             <EmptyState
@@ -86,7 +90,7 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
             {prospects.map((p) => {
               const report = latestReportByProspect.get(p.id);
               const target = report ? `/analyses/${report.analysisJobId}/report` : '/analyses';
-              return <div key={p.id} className="bg-neutral-900 border border-neutral-800 rounded-2xl hover:border-neutral-700 transition-colors group flex flex-col h-full shadow-sm relative overflow-hidden"><ProspectControls id={p.id} pinned={Boolean(p.pinnedAt)} archived={Boolean(p.archivedAt)} /><Link href={target} className="flex h-full flex-col p-6 pr-24">
+              return <div key={p.id} className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-[#dce7df] bg-white shadow-[0_18px_48px_-42px_rgba(20,83,45,0.55)] transition-all duration-300 hover:-translate-y-1 hover:border-[#b9d4c0] hover:shadow-[0_28px_60px_-44px_rgba(20,83,45,0.48)]"><ProspectControls id={p.id} pinned={Boolean(p.pinnedAt)} archived={Boolean(p.archivedAt)} /><Link href={target} className="flex h-full flex-col p-6 pr-24">
                 <div className="flex items-start justify-between mb-4">
                   <div className="min-w-0 flex-1 pr-4">
                     <h3 className="text-lg font-semibold text-white truncate">{p.companyName}</h3>

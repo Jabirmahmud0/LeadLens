@@ -1,6 +1,5 @@
-import { AppShell } from '@leadlens/ui';
+import { ClientAppShell } from './ClientAppShell';
 import { ClientSidebarWrapper } from './ClientSidebarWrapper';
-import { LayoutDashboard, Users, Activity, Settings, ShieldCheck, User } from 'lucide-react';
 import { getSession } from '@/lib/auth/session';
 import { isPlatformAdmin } from '@/lib/auth/admin';
 import { redirect } from 'next/navigation';
@@ -17,64 +16,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   const agencyName = session.organization.name || 'Your Agency';
-
-  const navGroups = [
-    {
-      label: 'Main',
-      items: [
-        { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-        { label: 'Prospects', href: '/prospects', icon: Users },
-        { label: 'Analyses', href: '/analyses', icon: Activity },
-      ]
-    },
-    {
-      label: 'Configuration',
-      items: [
-        { label: 'Agency Profile', href: '/settings', icon: Settings },
-      ]
-    },
-    {
-      label: 'Account',
-      items: [
-        { label: 'My Account', href: '/account', icon: User },
-      ]
-    }
-  ];
-
-  if (isPlatformAdmin(session.user.email)) {
-    navGroups.push({
-      label: 'Administration',
-      items: [
-        { label: 'Admin diagnostics', href: '/admin', icon: ShieldCheck },
-      ],
-    });
-  }
-
-  const userProfileNode = (
-    <div className="flex items-center gap-3">
-      <div className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center shrink-0">
-        <User className="w-5 h-5 text-neutral-400" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-white truncate">{session.user.email}</p>
-        <form action="/api/auth/logout" method="post">
-          <button type="submit" className="text-xs text-neutral-500 hover:text-white transition-colors">Sign out</button>
-        </form>
-      </div>
-    </div>
-  );
+  const isAdmin = isPlatformAdmin(session.user.email);
 
   return (
-    <AppShell
+    <ClientAppShell
       sidebar={
         <ClientSidebarWrapper
           agencyName={agencyName}
-          navGroups={navGroups}
-          userProfile={userProfileNode}
+          email={session.user.email}
+          isAdmin={isAdmin}
         />
       }
     >
       {children}
-    </AppShell>
+    </ClientAppShell>
   );
 }

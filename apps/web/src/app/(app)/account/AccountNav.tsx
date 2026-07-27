@@ -15,8 +15,8 @@ export function AccountNav() {
   ];
 
   return (
-    <div className="border-b border-neutral-800 mb-8">
-      <nav className="-mb-px flex gap-6 overflow-x-auto">
+    <div className="mb-8 overflow-x-auto rounded-2xl border border-[#dce7df] bg-white p-1.5 shadow-sm">
+      <nav className="flex min-w-max gap-1">
         {tabs.map((tab) => {
           const isActive = pathname === tab.href;
           return (
@@ -24,10 +24,10 @@ export function AccountNav() {
               key={tab.href}
               href={tab.href}
               className={cn(
-                "whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors",
+                "whitespace-nowrap rounded-xl px-4 py-2.5 font-medium text-sm transition-colors",
                 isActive 
-                  ? "border-blue-500 text-blue-400"
-                  : "border-transparent text-neutral-400 hover:text-white hover:border-neutral-600"
+                  ? "bg-emerald-100 text-emerald-800 shadow-[inset_0_0_0_1px_#cce6d3]"
+                  : "text-[#60766b] hover:bg-[#f1f7f2] hover:text-[#16352a]"
               )}
             >
               {tab.label}

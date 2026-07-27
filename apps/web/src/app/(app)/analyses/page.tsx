@@ -34,12 +34,14 @@ export default async function AnalysesPage({ searchParams }: { searchParams: Pro
   const analyses = await getAnalyses(session.organization.id, query, status, page);
 
   return (
-    <div className="p-6 sm:p-8 max-w-5xl mx-auto space-y-8 flex flex-col h-[calc(100vh-4rem)] lg:h-screen">
+    <div className="app-page-enter mx-auto flex min-h-full max-w-6xl flex-col space-y-6 p-4 sm:p-7 lg:p-9">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between shrink-0">
+      <div className="shrink-0 rounded-3xl border border-[#d8e5dc] bg-gradient-to-br from-[#ecf8f0] via-white to-[#fff4e8] p-6 shadow-[0_24px_60px_-48px_rgba(20,83,45,0.55)] sm:p-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white tracking-tight">Analyses Journal</h1>
-          <p className="text-sm text-neutral-400 mt-1">A chronological log of all AI processing activity.</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-teal-700">Research operations</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-[#10251d]">Analysis journal</h1>
+          <p className="mt-2 text-sm text-[#60766b]">Follow every prospect from queued research to a finished opportunity brief.</p>
         </div>
         
         <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -51,15 +53,16 @@ export default async function AnalysesPage({ searchParams }: { searchParams: Pro
               type="text"
               name="q"
               defaultValue={query}
-              className="block w-full pl-10 rounded-lg border border-neutral-800 bg-neutral-900 px-4 py-2 text-sm text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+              className="block h-10 w-full rounded-xl border border-[#d8e5dc] bg-white pl-10 pr-4 text-sm text-[#16352a] placeholder:text-[#8ca096] focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
               placeholder="Search activity..."
             />
-          </div><select name="status" defaultValue={status} aria-label="Filter analyses by status" className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-neutral-300"><option value="">All statuses</option><option value="queued">Queued</option><option value="processing">Processing</option><option value="completed">Completed</option><option value="partial">Partial</option><option value="failed">Failed</option><option value="cancelled">Cancelled</option></select><button type="submit" aria-label="Apply filters" className="p-2 border border-neutral-800 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"><Filter className="w-4 h-4" /></button></form>
+          </div><select name="status" defaultValue={status} aria-label="Filter analyses by status" className="h-10 rounded-xl border border-[#d8e5dc] bg-white px-3 text-sm text-[#365246]"><option value="">All statuses</option><option value="queued">Queued</option><option value="processing">Processing</option><option value="completed">Completed</option><option value="partial">Partial</option><option value="failed">Failed</option><option value="cancelled">Cancelled</option></select><button type="submit" aria-label="Apply filters" className="grid size-10 place-items-center rounded-xl bg-emerald-700 text-white transition-colors hover:bg-emerald-800"><Filter className="w-4 h-4" /></button></form>
+        </div>
         </div>
       </div>
 
       {/* Main content */}
-      <div className="flex-1 overflow-y-auto min-h-0 pb-20">
+      <div className="min-h-0 flex-1 pb-20">
         {analyses.length === 0 ? (
           <div className="h-full flex items-center justify-center">
               <EmptyState
@@ -74,22 +77,22 @@ export default async function AnalysesPage({ searchParams }: { searchParams: Pro
               />
           </div>
         ) : (
-          <div className="space-y-6 relative before:absolute before:inset-y-0 before:left-6 before:w-px before:bg-neutral-800">
+          <div className="relative space-y-5 before:absolute before:inset-y-0 before:left-6 before:w-px before:bg-[#cfe0d3]">
             {analyses.map(a => (
               <div key={a.id} className="relative pl-16 pr-4">
                 {/* Timeline Icon */}
-                <div className="absolute left-2.5 top-1.5 w-7 h-7 rounded-full bg-neutral-950 border border-neutral-800 flex items-center justify-center shadow-sm">
+                <div className="absolute left-2.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full border border-[#cfe0d3] bg-white shadow-sm">
                   {a.status === 'completed' ? (
                     <CheckCircle2 className="w-4 h-4 text-green-500" />
                   ) : a.status === 'failed' ? (
                     <AlertTriangle className="w-4 h-4 text-red-500" />
                   ) : (
-                    <Play className="w-4 h-4 text-blue-500" />
+                    <Play className="w-4 h-4 text-amber-500" />
                   )}
                 </div>
                 
                 {/* Content */}
-                <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 hover:border-neutral-700 transition-colors shadow-sm group">
+                <div className="group rounded-2xl border border-[#dce7df] bg-white p-5 shadow-[0_18px_48px_-42px_rgba(20,83,45,0.55)] transition-all hover:-translate-y-0.5 hover:border-[#bcd5c2] hover:shadow-sm">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">

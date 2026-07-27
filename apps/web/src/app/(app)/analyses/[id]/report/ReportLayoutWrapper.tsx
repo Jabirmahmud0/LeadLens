@@ -1,6 +1,7 @@
 'use client';
 
-import { AppShell, Sidebar } from '@leadlens/ui';
+import { Sidebar } from '@leadlens/ui';
+import { AppShell } from '@leadlens/ui/client';
 import { usePathname } from 'next/navigation';
 import { 
   LayoutDashboard, 
