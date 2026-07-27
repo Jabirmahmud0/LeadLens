@@ -5,7 +5,8 @@ import { getSession } from '@/lib/auth/session';
 import { isPlatformAdmin, PLATFORM_OWNER_ROLE } from '@/lib/auth/admin';
 import { Activity, AlertTriangle, Building2, Gauge, KeyRound, MessageSquareText, ShieldAlert, Sparkles, UserPlus, Users } from 'lucide-react';
 import { grantPlatformOwner, revokePlatformOwner } from './actions';
-
+import Link from 'next/link';
+import { GrantOwnerForm, RevokeOwnerForm } from './PlatformOwnerForms';
 export const metadata = { title: 'Platform Administration | LeadLens' };
 
 export default async function AdminPage() {
@@ -39,13 +40,13 @@ export default async function AdminPage() {
 
   const totals = aiTotals[0];
   const metrics = [
-    { label: 'Users', value: users.length, icon: Users, tone: 'bg-emerald-50 text-emerald-700' },
-    { label: 'Organizations', value: organizations.length, icon: Building2, tone: 'bg-teal-50 text-teal-700' },
-    { label: 'Failed jobs', value: failedJobs.length, icon: AlertTriangle, tone: 'bg-rose-50 text-rose-700' },
-    { label: 'Provider failures', value: failedAiRuns.length, icon: Sparkles, tone: 'bg-amber-50 text-amber-700' },
-    { label: 'Usage events', value: usage.length, icon: Activity, tone: 'bg-lime-50 text-lime-700' },
-    { label: 'Feedback entries', value: feedback.length, icon: MessageSquareText, tone: 'bg-orange-50 text-orange-700' },
-    { label: 'Security events', value: securityEvents.length, icon: ShieldAlert, tone: 'bg-red-50 text-red-700' },
+    { label: 'Users', value: users.length, icon: Users, tone: 'bg-emerald-50 text-emerald-700', href: '/admin/users' },
+    { label: 'Organizations', value: organizations.length, icon: Building2, tone: 'bg-teal-50 text-teal-700', href: '/admin/organizations' },
+    { label: 'Failed jobs', value: failedJobs.length, icon: AlertTriangle, tone: 'bg-rose-50 text-rose-700', href: '/admin/failed-jobs' },
+    { label: 'Provider failures', value: failedAiRuns.length, icon: Sparkles, tone: 'bg-amber-50 text-amber-700', href: '/admin/provider-failures' },
+    { label: 'Usage events', value: usage.length, icon: Activity, tone: 'bg-lime-50 text-lime-700', href: '/admin/usage-events' },
+    { label: 'Feedback entries', value: feedback.length, icon: MessageSquareText, tone: 'bg-orange-50 text-orange-700', href: '/admin/feedback' },
+    { label: 'Security events', value: securityEvents.length, icon: ShieldAlert, tone: 'bg-red-50 text-red-700', href: '/admin/security-events' },
     { label: 'AI tokens', value: Number(totals?.inputTokens || 0) + Number(totals?.outputTokens || 0), icon: Gauge, tone: 'bg-cyan-50 text-cyan-700' },
   ];
 
@@ -72,11 +73,20 @@ export default async function AdminPage() {
       </header>
 
       <section className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {metrics.map(({ label, value, icon: Icon, tone }) => (
-          <article key={label} className="rounded-2xl border border-[#dce7df] bg-white p-5 shadow-[0_18px_48px_-42px_rgba(20,83,45,0.5)] transition-all hover:-translate-y-0.5 hover:border-[#bcd6c3]">
+        {metrics.map(({ label, value, icon: Icon, tone, href }) => {
+          const content = (
             <div className="flex items-start justify-between"><div><p className="text-xs font-medium text-[#789084]">{label}</p><p className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#16352a]">{value.toLocaleString()}</p></div><span className={`grid size-10 place-items-center rounded-xl ${tone}`}><Icon className="size-4.5" /></span></div>
-          </article>
-        ))}
+          );
+          return href ? (
+            <Link key={label} href={href} className="block rounded-2xl border border-[#dce7df] bg-white p-5 shadow-[0_18px_48px_-42px_rgba(20,83,45,0.5)] transition-all hover:-translate-y-0.5 hover:border-[#bcd6c3] cursor-pointer">
+              {content}
+            </Link>
+          ) : (
+            <article key={label} className="rounded-2xl border border-[#dce7df] bg-white p-5 shadow-[0_18px_48px_-42px_rgba(20,83,45,0.5)] transition-all hover:-translate-y-0.5 hover:border-[#bcd6c3]">
+              {content}
+            </article>
+          );
+        })}
       </section>
 
       <section className="mt-5 grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
@@ -93,11 +103,7 @@ export default async function AdminPage() {
                   {owner.userId === session.user.id ? (
                     <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">You</span>
                   ) : (
-                    <form action={revokePlatformOwner} className="flex w-full gap-2 sm:w-auto">
-                      <input type="hidden" name="userId" value={owner.userId} />
-                      <input required minLength={8} maxLength={300} name="reason" aria-label={`Reason to revoke ${owner.email}`} placeholder="Reason for revocation" className="h-9 min-w-0 flex-1 rounded-lg border border-[#d6e3da] px-3 text-xs text-[#16352a] outline-none focus:border-rose-400 sm:w-48" />
-                      <button className="h-9 rounded-lg border border-rose-200 bg-rose-50 px-3 text-xs font-semibold text-rose-700 transition hover:bg-rose-100">Revoke</button>
-                    </form>
+                    <RevokeOwnerForm userId={owner.userId} email={owner.email} />
                   )}
                 </div>
               </div>
@@ -109,11 +115,7 @@ export default async function AdminPage() {
           <span className="grid size-11 place-items-center rounded-2xl bg-emerald-50 text-emerald-700"><UserPlus className="size-5" /></span>
           <h2 className="mt-5 text-xl font-semibold text-[#16352a]">Grant platform-owner access</h2>
           <p className="mt-2 text-sm leading-6 text-[#60766b]">The person must already have a LeadLens account. Every grant is recorded in the audit log.</p>
-          <form action={grantPlatformOwner} className="mt-6 space-y-4">
-            <div><label htmlFor="owner-email" className="text-xs font-semibold text-[#365246]">Account email</label><input id="owner-email" name="email" type="email" required placeholder="owner@example.com" className="mt-2 h-11 w-full rounded-xl border border-[#d6e3da] px-3 text-sm text-[#16352a] outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" /></div>
-            <div><label htmlFor="owner-reason" className="text-xs font-semibold text-[#365246]">Reason</label><textarea id="owner-reason" name="reason" required minLength={8} maxLength={300} rows={3} placeholder="Why this person requires full platform access" className="mt-2 w-full resize-y rounded-xl border border-[#d6e3da] px-3 py-3 text-sm text-[#16352a] outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" /></div>
-            <button className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#166534] px-4 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#14532d]"><UserPlus className="size-4" /> Grant platform owner</button>
-          </form>
+          <GrantOwnerForm />
         </article>
       </section>
 
