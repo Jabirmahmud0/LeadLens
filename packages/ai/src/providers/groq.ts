@@ -2,6 +2,8 @@ import { Groq } from 'groq-sdk';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { AIProvider, AIOptions } from './index';
+import { normalizeAIError } from '../errors';
+import { DEFAULT_MAX_OUTPUT_TOKENS } from '../prompt-budget';
 
 export class GroqProvider implements AIProvider {
   name = 'groq';
@@ -22,13 +24,18 @@ export class GroqProvider implements AIProvider {
     
     const fullPrompt = `${prompt}\n\nYou MUST return ONLY valid JSON matching this schema:\n${JSON.stringify(jsonSchema, null, 2)}`;
     
-    const completion = await this.groq.chat.completions.create({
-      messages: [{ role: 'user', content: fullPrompt }],
-      model: this.modelName,
-      temperature: options?.temperature ?? 0.2,
-      max_completion_tokens: options?.maxTokens ?? 8192,
-      response_format: { type: 'json_object' }
-    });
+    let completion;
+    try {
+      completion = await this.groq.chat.completions.create({
+        messages: [{ role: 'user', content: fullPrompt }],
+        model: this.modelName,
+        temperature: options?.temperature ?? 0.2,
+        max_completion_tokens: options?.maxTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
+        response_format: { type: 'json_object' }
+      });
+    } catch (error) {
+      throw normalizeAIError(this.name, error);
+    }
 
     const choice = completion.choices[0];
     const text = choice?.message?.content || '';
@@ -46,9 +53,9 @@ export class GroqProvider implements AIProvider {
         },
         latencyMs
       };
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Failed to parse Groq output:', text);
-      throw new Error(`Groq parse error: ${e.message}`);
+      throw new Error(`Groq parse error: ${e instanceof Error ? e.message : 'Invalid structured output'}`);
     }
   }
 }

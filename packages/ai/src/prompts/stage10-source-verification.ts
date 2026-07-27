@@ -24,15 +24,17 @@ export async function runStage10SourceVerification(
   sourcePages: any[],
   options: Omit<RunAIOptions, 'purpose' | 'promptVersion'>
 ): Promise<Stage10Output> {
-  const boundedSources = sourcePages.map((source) => ({
+  const usableSources = sourcePages.filter((source) => typeof source.extractedText === 'string' && source.extractedText.length > 0).slice(0, 8);
+  const charactersPerSource = Math.max(700, Math.floor(7_000 / Math.max(1, usableSources.length)));
+  const boundedSources = usableSources.map((source) => ({
     id: source.id,
     url: source.url,
     title: source.title,
-    extractedText: typeof source.extractedText === 'string' ? source.extractedText.slice(0, 4_000) : '',
+    extractedText: source.extractedText.slice(0, charactersPerSource),
     errorMessage: source.errorMessage,
   }));
   const indexedFindings = Array.isArray(allFindings)
-    ? allFindings.map((finding, findingIndex) => ({ findingIndex, ...finding }))
+    ? allFindings.slice(0, 20).map((finding, findingIndex) => ({ findingIndex, ...finding }))
     : [];
 
   const prompt = `
@@ -50,6 +52,7 @@ Use only the supplied findingIndex and source page id values. Include a short ex
   return runAI(prompt, Stage10Schema, {
     ...options,
     purpose: 'stage10_source_verification',
-    promptVersion: '1.0'
+    promptVersion: '1.1',
+    maxTokens: 1_800,
   });
 }

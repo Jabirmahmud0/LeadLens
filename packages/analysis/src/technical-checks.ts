@@ -66,6 +66,6 @@ export function runTechnicalChecks(data: ExtractedData, html: string, rawHeaders
       missingAltImagesCount: data.images.missingAlt,
       totalImages: data.images.total,
     },
-    copyrightYear
+    ...(copyrightYear ? { copyrightYear } : {}),
   };
 }

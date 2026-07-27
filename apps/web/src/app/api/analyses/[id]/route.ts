@@ -41,11 +41,30 @@ export async function GET(
       return NextResponse.json({ error: 'Job not found' }, { status: 404 });
     }
 
-    // Fetch the steps for this job
-    const steps = await db.query.analysisJobSteps.findMany({
-      where: (jobSteps, { eq }) => eq(jobSteps.analysisJobId, analysisId),
-      orderBy: (jobSteps, { asc }) => [asc(jobSteps.startedAt)],
-    });
+    const [steps, prospect, sources] = await Promise.all([
+      db.query.analysisJobSteps.findMany({
+        where: (jobSteps, { eq }) => eq(jobSteps.analysisJobId, analysisId),
+        orderBy: (jobSteps, { asc }) => [asc(jobSteps.startedAt)],
+      }),
+      db.query.prospects.findFirst({
+        where: (candidate, { eq }) => eq(candidate.id, job.prospectId),
+        columns: { companyName: true, websiteUrl: true, normalizedDomain: true },
+      }),
+      db.query.sourcePages.findMany({
+        where: (source, { eq }) => eq(source.analysisJobId, analysisId),
+        columns: {
+          id: true,
+          url: true,
+          title: true,
+          statusCode: true,
+          isPrimary: true,
+          errorCode: true,
+          errorMessage: true,
+          fetchedAt: true,
+        },
+        orderBy: (source, { asc }) => [asc(source.fetchedAt)],
+      }),
+    ]);
 
     // Determine currently processing step if any
     const currentStep = steps.find(s => s.status === 'processing')?.stepKey || job.currentStep;
@@ -63,6 +82,8 @@ export async function GET(
         && job.updatedAt.getTime() < Date.now() - STALLED_AFTER_MS,
       failureCode: job.failureCode,
       failureMessage: job.failureMessage,
+      prospect,
+      sources,
       steps: steps.map(s => ({
         key: s.stepKey,
         status: s.status,
@@ -73,7 +94,7 @@ export async function GET(
       }))
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching analysis progress:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
@@ -165,6 +186,8 @@ export async function POST(
   await db.update(schema.analysisJobs).set({
     status: 'queued',
     workerId: null,
+    currentStep: null,
+    progressPercent: 0,
     failureCode: null,
     failureMessage: null,
     failedAt: null,

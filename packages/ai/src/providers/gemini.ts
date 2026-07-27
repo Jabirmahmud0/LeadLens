@@ -1,22 +1,28 @@
-import { GoogleGenerativeAI, Schema } from '@google/generative-ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { AIProvider, AIOptions } from './index';
+import { normalizeAIError } from '../errors';
+import { DEFAULT_MAX_OUTPUT_TOKENS } from '../prompt-budget';
 
 export class GeminiProvider implements AIProvider {
   name = 'gemini';
   readonly managesCredentialRotation = true;
-  readonly modelName: string;
   private readonly clients: GoogleGenerativeAI[];
+  private readonly modelCandidates: string[];
+  private activeModelName: string;
 
-  constructor(apiKeys?: string | string[], modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite') {
+  get modelName() { return this.activeModelName; }
+
+  constructor(apiKeys?: string | string[], modelName = process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite') {
     const keys = parseGeminiApiKeys(apiKeys);
     if (keys.length === 0) {
       throw new Error('GEMINI_API_KEYS or GEMINI_API_KEY is not set');
     }
 
     this.clients = keys.map((key) => new GoogleGenerativeAI(key));
-    this.modelName = modelName;
+    this.modelCandidates = getGeminiModelCandidates(modelName);
+    this.activeModelName = this.modelCandidates[0];
   }
 
   async generate<T>(prompt: string, schema: z.ZodSchema<T>, options?: AIOptions) {
@@ -36,30 +42,41 @@ export class GeminiProvider implements AIProvider {
 
     const startIndex = nextGeminiStartIndex(this.clients.length);
     let result: Awaited<ReturnType<ReturnType<GoogleGenerativeAI['getGenerativeModel']>['generateContent']>> | undefined;
+    let lastError: ReturnType<typeof normalizeAIError> | undefined;
 
-    for (let offset = 0; offset < this.clients.length; offset++) {
-      const clientIndex = (startIndex + offset) % this.clients.length;
-      const model = this.clients[clientIndex].getGenerativeModel({
-        model: this.modelName,
-        generationConfig: {
-          responseMimeType: 'application/json',
-          temperature: options?.temperature ?? 0.2,
-          maxOutputTokens: options?.maxTokens ?? 8192,
+    const orderedModels = [this.activeModelName, ...this.modelCandidates.filter((model) => model !== this.activeModelName)];
+    modelLoop: for (const modelName of orderedModels) {
+      let modelUnavailable = false;
+      for (let offset = 0; offset < this.clients.length; offset++) {
+        const clientIndex = (startIndex + offset) % this.clients.length;
+        const model = this.clients[clientIndex].getGenerativeModel({
+          model: modelName,
+          generationConfig: {
+            responseMimeType: 'application/json',
+            temperature: options?.temperature ?? 0.2,
+            maxOutputTokens: options?.maxTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
+          }
+        });
+
+        try {
+          result = await model.generateContent(fullPrompt);
+          this.activeModelName = modelName;
+          break modelLoop;
+        } catch (error) {
+          lastError = normalizeAIError(this.name, error);
+          console.warn(`Gemini ${modelName} credential slot ${clientIndex + 1}/${this.clients.length} failed${safeStatus(error)} (${lastError.code})`);
+          if (lastError.code === 'AI_MODEL_UNAVAILABLE') {
+            modelUnavailable = true;
+            break;
+          }
+          if (lastError.code === 'AI_INPUT_TOO_LARGE' || lastError.code === 'AI_BAD_REQUEST') throw lastError;
         }
-      });
-
-      try {
-        result = await model.generateContent(fullPrompt);
-        break;
-      } catch (error) {
-        console.warn(
-          `Gemini credential slot ${clientIndex + 1}/${this.clients.length} failed${safeStatus(error)}`
-        );
       }
+      if (!modelUnavailable && !result) throw lastError;
     }
 
     if (!result) {
-      throw new Error(`Gemini request failed across ${this.clients.length} configured credential slots`);
+      throw lastError || new Error(`Gemini request failed across ${this.clients.length} configured credential slots`);
     }
 
     const response = result.response;
@@ -79,9 +96,9 @@ export class GeminiProvider implements AIProvider {
         },
         latencyMs
       };
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Failed to parse Gemini output:', text);
-      throw new Error(`Gemini parse error: ${e.message}`);
+      throw new Error(`Gemini parse error: ${e instanceof Error ? e.message : 'Invalid structured output'}`);
     }
   }
 }
@@ -92,6 +109,10 @@ export function parseGeminiApiKeys(apiKeys?: string | string[]): string[] {
   const configured = apiKeys ?? process.env.GEMINI_API_KEYS ?? process.env.GEMINI_API_KEY ?? '';
   const values = Array.isArray(configured) ? configured : configured.split(',');
   return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+}
+
+export function getGeminiModelCandidates(configuredModel: string): string[] {
+  return [...new Set([configuredModel.trim(), 'gemini-3.1-flash-lite', 'gemini-flash-lite-latest'].filter(Boolean))];
 }
 
 export function nextGeminiStartIndex(poolSize: number): number {

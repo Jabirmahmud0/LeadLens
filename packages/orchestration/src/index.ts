@@ -37,6 +37,7 @@ import {
   sendEmail,
 } from '@leadlens/email';
 import { locateExactEvidence } from './evidence';
+import { toJsonValue } from './json';
 
 export type StepKey =
   | 'discover_pages'
@@ -258,10 +259,11 @@ export async function runOrchestration(job: any) {
   discoveredUrls = Array.isArray(discoveryOutput?.urls) ? discoveryOutput.urls : discoveredUrls;
   if (discoveredUrls[0]) normalizedUrl = discoveredUrls[0];
 
-  const persistedPrimarySource = await db.query.sourcePages.findFirst({
-    where: (source, { eq, and }) =>
-      and(eq(source.analysisJobId, job.id), eq(source.isPrimary, true)),
+  const persistedSources = await db.query.sourcePages.findMany({
+    where: (source, { eq }) => eq(source.analysisJobId, job.id),
   });
+  const persistedPrimarySource = persistedSources.find((source) => source.isPrimary && source.extractedData)
+    || persistedSources.find((source) => source.extractedData);
   if (persistedPrimarySource?.extractedData) {
     primaryExtractedData = persistedPrimarySource.extractedData;
     normalizedUrl = persistedPrimarySource.url;
@@ -344,6 +346,7 @@ export async function runOrchestration(job: any) {
               seenContentHashes.add(data.contentHash);
               const persistedData = data;
               // Save to source_pages
+              const isPrimaryEvidence = primaryExtractedData === null;
               await db.insert(sourcePages).values({
                 analysisJobId: job.id,
                 prospectId: prospect.id,
@@ -354,7 +357,9 @@ export async function runOrchestration(job: any) {
                 statusCode: data.statusCode,
                 contentType: data.contentType,
                 language: data.language || null,
-                isPrimary: url === discoveredUrls[0],
+                // Prefer the requested homepage, but gracefully promote the first
+                // successful public page when that homepage is too large or blocked.
+                isPrimary: isPrimaryEvidence,
                 extractedText: data.text,
                 extractedData: persistedData,
                 contentHash: data.contentHash,
@@ -362,7 +367,7 @@ export async function runOrchestration(job: any) {
                 fetchDurationMs: data.responseTimeMs,
               });
               
-              if (url === discoveredUrls[0]) {
+              if (isPrimaryEvidence) {
                 primaryExtractedData = persistedData;
                 primaryHtml = data.rawHtml;
                 primaryHeaders = new Headers(data.responseHeaders);
@@ -375,7 +380,7 @@ export async function runOrchestration(job: any) {
                 analysisJobId: job.id,
                 prospectId: prospect.id,
                 url,
-                isPrimary: url === discoveredUrls[0],
+                isPrimary: false,
                 fetchedAt: new Date(),
                 errorCode: 'FETCH_FAILED',
                 errorMessage: err instanceof Error ? err.message : 'Unable to fetch page',
@@ -386,7 +391,7 @@ export async function runOrchestration(job: any) {
           return { fetchedCount, attemptedCount, discoveredCount: discoveredUrls.length, durationLimitReached: attemptedCount < discoveredUrls.length };
 
         case 'technical_checks':
-          if (!primaryExtractedData) return { skipped: true };
+          if (!primaryExtractedData) return { skipped: true, reason: 'No successfully fetched page was available for technical checks.' };
           const checks: any = runTechnicalChecks(primaryExtractedData, primaryHtml, primaryHeaders);
           const crawledSources = await db.query.sourcePages.findMany({ where: (source, { eq }) => eq(source.analysisJobId, job.id) });
           const titleCounts = new Map<string, number>();
@@ -408,7 +413,7 @@ export async function runOrchestration(job: any) {
               prospectId: prospect.id,
               checkKey: key,
               status: explicitStatus,
-              value: JSON.parse(JSON.stringify(value)),
+              value: toJsonValue(value),
               sourceUrl: normalizedUrl
             });
           }
@@ -428,13 +433,13 @@ export async function runOrchestration(job: any) {
           return { primary: pagespeedResult, strategies: results };
 
         case 'technology_detection':
-          if (!primaryHtml) return { skipped: true };
+          if (!primaryHtml) return { skipped: true, reason: 'No successfully fetched HTML page was available for technology detection.' };
           const techs = detectTechnologies(primaryHtml, primaryHeaders);
           techDetectionResult = techs;
           return { detected: techs };
 
         case 'ai_extraction':
-          if (!primaryExtractedData) return { skipped: true };
+          if (!primaryExtractedData) return { skipped: true, reason: 'No successfully extracted page content was available for AI analysis.' };
           const extractionSources = await db.query.sourcePages.findMany({ where: (source, { eq }) => eq(source.analysisJobId, job.id) });
           const sourceAddressableText = extractionSources.filter(source => source.extractedText).map(source => `[SOURCE ${source.id} | ${source.url}]\n${source.extractedText!.slice(0, 4000)}`).join('\n\n');
           stage1Facts = await runStage1FactExtraction(

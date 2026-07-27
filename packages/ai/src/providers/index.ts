@@ -3,6 +3,7 @@ import { z } from 'zod';
 export interface AIOptions {
   temperature?: number;
   maxTokens?: number;
+  maxPromptChars?: number;
 }
 
 export interface AIProvider {

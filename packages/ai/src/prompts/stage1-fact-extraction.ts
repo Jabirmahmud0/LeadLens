@@ -24,7 +24,7 @@ export async function runStage1FactExtraction(
 You are an expert business analyst. Your task is to extract factual information about a company based solely on the provided website text and detected technologies.
 
 Website Text:
-${extractedText.substring(0, 15000) /* truncate to fit context if needed */}
+${extractedText.substring(0, 9000)}
 
 Detected Technologies:
 ${JSON.stringify(technologies)}
@@ -35,6 +35,7 @@ Extract only explicitly supported facts. Do not infer or guess. If something is 
   return runAI(prompt, Stage1Schema, {
     ...options,
     purpose: 'stage1_fact_extraction',
-    promptVersion: '1.0'
+    promptVersion: '1.1',
+    maxTokens: 1_200,
   });
 }

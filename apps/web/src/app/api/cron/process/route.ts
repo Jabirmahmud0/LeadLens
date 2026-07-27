@@ -8,6 +8,11 @@ import { verifyCronRequest } from '@/lib/auth/cron';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
+const CRON_RESPONSE_HEADERS = {
+  'Cache-Control': 'no-store, max-age=0',
+  'X-LeadLens-Cron-Version': '2',
+};
+
 async function claimNextJob(workerId: string): Promise<Record<string, unknown> | null> {
   // Reset stale processing jobs (stuck > 5 min)
   await db.execute(sql`
@@ -39,7 +44,13 @@ export async function POST(req: Request) {
   if (!authorization.authorized) {
     return NextResponse.json(
       { error: 'Unauthorized', reason: authorization.reason },
-      { status: 401, headers: { 'WWW-Authenticate': 'Bearer realm="LeadLens cron"' } },
+      {
+        status: 401,
+        headers: {
+          ...CRON_RESPONSE_HEADERS,
+          'WWW-Authenticate': 'Bearer realm="LeadLens cron"',
+        },
+      },
     );
   }
 
@@ -47,7 +58,10 @@ export async function POST(req: Request) {
   const job = await claimNextJob(workerId);
 
   if (!job) {
-    return NextResponse.json({ processed: false, message: 'No queued jobs' });
+    return NextResponse.json(
+      { processed: false, message: 'No queued jobs' },
+      { headers: CRON_RESPONSE_HEADERS },
+    );
   }
 
   const jobId = String(job.id);
@@ -69,5 +83,8 @@ export async function POST(req: Request) {
     }
   });
 
-  return NextResponse.json({ processed: true, jobId });
+  return NextResponse.json(
+    { processed: true, jobId },
+    { headers: CRON_RESPONSE_HEADERS },
+  );
 }
