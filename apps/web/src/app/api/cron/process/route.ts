@@ -1,24 +1,12 @@
 import { NextResponse, after } from 'next/server';
-import { randomUUID, timingSafeEqual } from 'crypto';
+import { randomUUID } from 'crypto';
 import { db, schema } from '@leadlens/database';
 import { sql } from 'drizzle-orm';
 import { runOrchestration } from '@leadlens/orchestration';
+import { verifyCronRequest } from '@/lib/auth/cron';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
-
-function isAuthorized(req: Request): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false;
-  const header = req.headers.get('x-cron-secret') ?? '';
-  try {
-    const a = Buffer.from(header);
-    const b = Buffer.from(secret);
-    return a.length === b.length && timingSafeEqual(a, b);
-  } catch {
-    return false;
-  }
-}
 
 async function claimNextJob(workerId: string): Promise<Record<string, unknown> | null> {
   // Reset stale processing jobs (stuck > 5 min)
@@ -47,8 +35,12 @@ async function claimNextJob(workerId: string): Promise<Record<string, unknown> |
 }
 
 export async function POST(req: Request) {
-  if (!isAuthorized(req)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const authorization = verifyCronRequest(req);
+  if (!authorization.authorized) {
+    return NextResponse.json(
+      { error: 'Unauthorized', reason: authorization.reason },
+      { status: 401, headers: { 'WWW-Authenticate': 'Bearer realm="LeadLens cron"' } },
+    );
   }
 
   const workerId = randomUUID();
