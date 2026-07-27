@@ -11,9 +11,11 @@
   "dependencies": {
     "clsx": "^2.1.1",
     "lucide-react": "^1.27.0",
-    "react": "19.0.0-rc-65a56d0e-20241020",
-    "react-dom": "19.0.0-rc-65a56d0e-20241020",
     "tailwind-merge": "^3.6.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@leadlens/config": "workspace:*",
