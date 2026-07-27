@@ -21,12 +21,16 @@ const webEnvSchema = commonEnvSchema.extend({
   SMTP_PASS: z.string().optional(),
   SMTP_FROM: z.string().optional(),
   MONTHLY_ANALYSIS_LIMIT: z.coerce.number().int().positive().optional(),
-  ADMIN_EMAILS: z.string().optional(),
+  ADMIN_EMAILS: z.string().refine(
+    (value) => value.split(',').every((email) => z.email().safeParse(email.trim()).success),
+    'ADMIN_EMAILS must be a comma-separated list of valid email addresses',
+  ).optional(),
 });
 
 const workerEnvSchema = commonEnvSchema.extend({
   WORKER_SECRET: z.string().min(16, 'WORKER_SECRET must be at least 16 characters'),
-  GEMINI_API_KEY: z.string().min(1, 'GEMINI_API_KEY is required'),
+  GEMINI_API_KEYS: z.string().min(1).optional(),
+  GEMINI_API_KEY: z.string().min(1).optional(),
   GEMINI_MODEL: z.string().optional(),
   GROQ_API_KEY: z.string().optional(),
   GROQ_MODEL: z.string().optional(),
@@ -41,7 +45,10 @@ const workerEnvSchema = commonEnvSchema.extend({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   SMTP_FROM: z.string().optional(),
-});
+}).refine(
+  (env) => Boolean(env.GEMINI_API_KEYS || env.GEMINI_API_KEY),
+  { message: 'GEMINI_API_KEYS or GEMINI_API_KEY is required', path: ['GEMINI_API_KEYS'] }
+);
 
 export type EnvironmentScope = 'common' | 'web' | 'worker';
 

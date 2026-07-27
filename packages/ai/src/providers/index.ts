@@ -7,6 +7,8 @@ export interface AIOptions {
 
 export interface AIProvider {
   name: string;
+  modelName: string;
+  managesCredentialRotation?: boolean;
   generate<T>(
     prompt: string,
     schema: z.ZodSchema<T>,

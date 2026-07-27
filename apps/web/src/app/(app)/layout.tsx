@@ -1,11 +1,9 @@
 import { AppShell } from '@leadlens/ui';
 import { ClientSidebarWrapper } from './ClientSidebarWrapper';
-import { LayoutDashboard, Users, Activity, Settings, User } from 'lucide-react';
+import { LayoutDashboard, Users, Activity, Settings, ShieldCheck, User } from 'lucide-react';
 import { getSession } from '@/lib/auth/session';
+import { isPlatformAdmin } from '@/lib/auth/admin';
 import { redirect } from 'next/navigation';
-import { db, schema } from '@leadlens/database';
-import { eq } from 'drizzle-orm';
-import Link from 'next/link';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -42,6 +40,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       ]
     }
   ];
+
+  if (isPlatformAdmin(session.user.email)) {
+    navGroups.push({
+      label: 'Administration',
+      items: [
+        { label: 'Admin diagnostics', href: '/admin', icon: ShieldCheck },
+      ],
+    });
+  }
 
   const userProfileNode = (
     <div className="flex items-center gap-3">

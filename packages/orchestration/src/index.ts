@@ -235,7 +235,7 @@ export async function runOrchestration(job: any) {
   let stage10Verify: any = null;
 
   // Provider setup
-  const primaryProvider = new GeminiProvider(process.env.GEMINI_API_KEY);
+  const primaryProvider = new GeminiProvider();
   const fallbackProvider = process.env.GROQ_API_KEY ? new GroqProvider(process.env.GROQ_API_KEY) : undefined;
   
   const aiOptions = {

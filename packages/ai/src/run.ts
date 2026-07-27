@@ -22,9 +22,10 @@ export async function runAI<T>(
 ): Promise<T> {
   let attempt = 0;
   const maxRetries = options.maxRetries ?? 2;
+  const primaryMaxRetries = options.primaryProvider.managesCredentialRotation ? 0 : maxRetries;
   
   // Try primary provider
-  while (attempt <= maxRetries) {
+  while (attempt <= primaryMaxRetries) {
     try {
       const { data, tokens, latencyMs } = await options.primaryProvider.generate(prompt, schema, options);
       
@@ -35,7 +36,7 @@ export async function runAI<T>(
     } catch (e: any) {
       attempt++;
       console.warn(`Primary provider ${options.primaryProvider.name} failed (attempt ${attempt}):`, e.message);
-      if (attempt > maxRetries) {
+      if (attempt > primaryMaxRetries) {
         await logRun(options, options.primaryProvider, { input: 0, output: 0 }, 0, attempt - 1, false, 'failed', e.message, prompt);
         break; // Drop to fallback
       }
@@ -84,7 +85,7 @@ async function logRun(
       reportId: options.reportId,
       purpose: options.purpose,
       provider: provider.name,
-      model: (provider as any).modelName || 'unknown',
+      model: provider.modelName,
       promptVersion: options.promptVersion,
       inputHash: prompt ? createHash('sha256').update(prompt).digest('hex') : undefined,
       status,

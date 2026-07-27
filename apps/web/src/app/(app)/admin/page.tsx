@@ -2,13 +2,13 @@ import { desc, eq, sql } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import { db, schema } from '@leadlens/database';
 import { getSession } from '@/lib/auth/session';
+import { isPlatformAdmin } from '@/lib/auth/admin';
 
 export const metadata = { title: 'Admin Diagnostics | LeadLens' };
 export default async function AdminPage() {
   const session = await getSession();
-  const admins = (process.env.ADMIN_EMAILS || '').split(',').map((email) => email.trim().toLowerCase()).filter(Boolean);
   if (!session?.user) notFound();
-  if (!admins.includes(session.user.email.toLowerCase())) {
+  if (!isPlatformAdmin(session.user.email)) {
     await db.insert(schema.auditLogs).values({ organizationId: session.organization?.id, userId: session.user.id, action: 'admin_access_denied' });
     notFound();
   }

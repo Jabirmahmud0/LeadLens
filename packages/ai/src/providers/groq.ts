@@ -6,9 +6,9 @@ import { AIProvider, AIOptions } from './index';
 export class GroqProvider implements AIProvider {
   name = 'groq';
   private groq: Groq;
-  private modelName: string;
+  readonly modelName: string;
 
-  constructor(apiKey?: string, modelName = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile') {
+  constructor(apiKey?: string, modelName = process.env.GROQ_MODEL || 'openai/gpt-oss-20b') {
     const key = apiKey || process.env.GROQ_API_KEY;
     if (!key) throw new Error('GROQ_API_KEY is not set');
     
