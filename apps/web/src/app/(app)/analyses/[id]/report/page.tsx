@@ -66,13 +66,13 @@ export default async function ReportOverviewPage({ params }: { params: Promise<{
 
       <div className="mt-8 grid items-start gap-7 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-7">
-          <section className="report-reveal relative overflow-hidden rounded-[1.75rem] bg-[#123c2c] p-7 text-white shadow-[0_24px_70px_rgba(18,60,44,0.2)] sm:p-9">
-            <div aria-hidden="true" className="absolute -right-16 -top-20 size-64 rounded-full border border-white/10 bg-emerald-300/10 blur-2xl" />
+          <section className="report-reveal relative overflow-hidden rounded-[1.75rem] border border-[#c8ddcd] bg-[#e4f2e7] p-7 text-[#10251d] shadow-[0_24px_70px_rgba(31,67,46,0.06)] sm:p-9">
+            <div aria-hidden="true" className="absolute -right-16 -top-20 size-64 rounded-full border border-white/40 bg-emerald-300/30 blur-2xl" />
             <div className="relative">
-              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-200">
+              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-800">
                 <Target className="size-4" />Opportunity thesis
               </div>
-              <p className="mt-6 max-w-4xl text-xl font-medium leading-relaxed tracking-[-0.015em] text-white sm:text-2xl">
+              <p className="mt-6 max-w-4xl text-xl font-medium leading-relaxed tracking-[-0.015em] text-[#16352a] sm:text-2xl">
                 {report.opportunityThesis || 'The strongest opportunity will become clearer as more evidence is verified.'}
               </p>
             </div>

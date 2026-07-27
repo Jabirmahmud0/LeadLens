@@ -48,8 +48,8 @@ export function ReportLayoutWrapper({ children, analysisId, reportId }: ReportLa
           </NextLink>
           <ReportActions reportId={reportId} analysisId={analysisId} />
         </div>
-        <nav aria-label="Report sections" className="mx-auto max-w-[1500px] overflow-x-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex min-w-max items-center gap-1 pb-2">
+        <nav aria-label="Report sections" className="mx-auto mt-6 max-w-[1500px] overflow-x-auto px-4 pb-6 sm:px-6 lg:px-8">
+          <div className="inline-flex min-w-max items-center gap-1 rounded-full border border-white/60 bg-white/40 p-1.5 shadow-[0_8px_32px_rgba(31,67,46,0.05)] backdrop-blur-2xl">
             {items.map((item) => {
               const active = pathname === item.href;
               return (
@@ -57,9 +57,13 @@ export function ReportLayoutWrapper({ children, analysisId, reportId }: ReportLa
                   key={item.href}
                   href={item.href}
                   aria-current={active ? 'page' : undefined}
-                  className={`flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 ${active ? 'bg-white text-[#14532d] shadow-[0_8px_24px_rgba(32,72,50,0.09)] ring-1 ring-[#dbe9de]' : 'text-[#60766b] hover:bg-white/70 hover:text-[#16352a]'}`}
+                  className={`group relative flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-semibold tracking-[-0.01em] transition-all duration-500 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 ${
+                    active 
+                      ? 'bg-white text-[#10251d] shadow-[0_2px_16px_rgba(31,67,46,0.08)] ring-1 ring-black/[0.03]' 
+                      : 'text-[#60766b] hover:bg-white/50 hover:text-[#16352a]'
+                  }`}
                 >
-                  <item.icon className={`size-3.5 ${active ? 'text-emerald-700' : 'text-[#8ca096]'}`} />
+                  <item.icon className={`size-4 transition-colors duration-500 ${active ? 'text-emerald-600' : 'text-[#8ca096] group-hover:text-emerald-600/70'}`} />
                   {item.label}
                 </NextLink>
               );

@@ -7,6 +7,7 @@ import { FindingCard } from '@leadlens/ui/client';
 import { ExternalLink, ShieldAlert, BarChart3, TrendingUp, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { FindingControls } from './FindingControls';
+import { FindingsConsole } from './FindingsConsole';
 
 export default async function ReportFindingsPage({
   params,
@@ -38,111 +39,24 @@ export default async function ReportFindingsPage({
     notFound();
   }
 
-  // Group findings by category
-  const groupedFindings: Record<string, typeof report.findings> = {};
-  report.findings.filter((finding) => !finding.isHidden).forEach(finding => {
-    const cat = finding.category || 'General';
-    if (!groupedFindings[cat]) {
-      groupedFindings[cat] = [];
-    }
-    groupedFindings[cat].push(finding);
-  });
-
   return (
-    <div className="flex-1 p-6 lg:p-10 overflow-y-auto bg-neutral-950">
-      <div className="max-w-5xl mx-auto space-y-10">
+    <div className="flex-1 px-4 py-8 sm:px-6 lg:px-8 lg:py-8 not-italic">
+      <div className="mx-auto max-w-[1600px] space-y-8">
         
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-light text-white tracking-tight mb-2">
+        <header className="report-reveal">
+          <h1 className="text-3xl font-semibold tracking-[-0.03em] text-[#10251d] sm:text-4xl not-italic">
             Evidence Map
           </h1>
-          <p className="text-neutral-400">
+          <p className="mt-3 text-base text-[#60766b] sm:text-lg not-italic">
             A detailed breakdown of all verified technical, strategic, and performance issues discovered.
           </p>
+        </header>
+
+        {/* Console Layout */}
+        <div className="report-reveal">
+          <FindingsConsole findings={report.findings} />
         </div>
-
-        {/* Findings by Category */}
-        <div className="space-y-12">
-          {Object.entries(groupedFindings).map(([category, findings]) => (
-            <section key={category} className="space-y-4">
-              <h2 className="text-xl font-medium text-white flex items-center gap-2 border-b border-neutral-800 pb-2">
-                {category}
-                <Badge variant="info">{findings.length}</Badge>
-              </h2>
-
-              <div className="space-y-3">
-                {findings.map(finding => (
-                  <FindingCard
-                    key={finding.id}
-                    title={finding.title}
-                    description={finding.observation || ''}
-                    severity={(finding.severity as any) || 'info'}
-                    evidence={
-                      <div className="space-y-6">
-                        {/* Details */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {finding.businessImpact && (
-                            <div>
-                              <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-                                <TrendingUp className="w-3.5 h-3.5" />
-                                Business Impact
-                              </div>
-                              <p className="text-sm text-neutral-300">
-                                {finding.businessImpact}
-                              </p>
-                            </div>
-                          )}
-                          {finding.recommendation && (
-                            <div>
-                              <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-                                <ShieldAlert className="w-3.5 h-3.5" />
-                                Recommendation
-                              </div>
-                              <p className="text-sm text-neutral-300">
-                                {finding.recommendation}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Metadata & Sources */}
-                        <div className="pt-4 border-t border-neutral-800 flex flex-wrap items-center gap-4">
-                          {finding.confidence && (
-                            <Badge variant="success" className="capitalize">
-                              {finding.confidence} Confidence
-                            </Badge>
-                          )}
-                          {finding.evidenceType && (
-                            <Badge variant="neutral" className="capitalize">
-                              Type: {finding.evidenceType}
-                            </Badge>
-                          )}
-                          
-                          {/* Sources */}
-                          {finding.sources.length > 0 && (
-                            <div className="flex flex-wrap items-center gap-2 ml-auto">
-                              <span className="text-xs text-neutral-500">Sources:</span>
-                              {finding.sources.map(s => (
-                                <SourceChip
-                                  key={s.sourcePageId}
-                                  url={s.sourcePage.url}
-                                  title={s.sourcePage.title || undefined}
-                                />
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        <FindingControls finding={finding} />
-                      </div>
-                    }
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-
       </div>
     </div>
   );
