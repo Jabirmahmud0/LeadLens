@@ -81,49 +81,47 @@ export default async function AdminPage() {
       <div className="mx-auto max-w-[1440px] space-y-6">
 
         {/* ── Hero Header ── */}
-        <header className="relative overflow-hidden rounded-[28px] border border-[#cfe0d3] bg-gradient-to-br from-[#e8f5ec] via-[#f2fbf4] to-[#fffbf0] px-8 py-8 shadow-[0_12px_40px_-20px_rgba(20,83,45,0.18)] sm:px-10 sm:py-10">
-          {/* Decorative dot grid */}
-          <div
-            className="pointer-events-none absolute inset-0 opacity-[0.35]"
-            style={{ backgroundImage: 'radial-gradient(circle, #c8e6d0 1px, transparent 1px)', backgroundSize: '24px 24px' }}
-          />
-          {/* Glow orbs */}
-          <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-emerald-200/40 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-8 left-1/3 h-48 w-48 rounded-full bg-teal-200/30 blur-3xl" />
+        <header className="relative overflow-hidden rounded-[28px] border border-white bg-white px-8 py-8 shadow-[0_2px_20px_-12px_rgba(0,0,0,0.1),0_12px_32px_-20px_rgba(20,83,45,0.15)] sm:px-10 sm:py-10">
+          {/* Subtle gradient wash */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-50/80 via-transparent to-teal-50/50" />
+          
+          {/* Decorative glow orbs */}
+          <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-emerald-100/40 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-12 left-1/4 h-64 w-64 rounded-full bg-teal-100/30 blur-3xl" />
 
           <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/70 px-3 py-1 backdrop-blur-sm">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-700">Platform Operations</span>
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50/50 px-3 py-1 shadow-sm backdrop-blur-sm">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-emerald-700">Platform Operations</span>
               </div>
-              <h1 className="mt-3 text-3xl font-bold tracking-[-0.03em] text-[#0f2318] sm:text-4xl">
+              <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-[#0f2318] sm:text-[2.5rem]">
                 Platform Administration
               </h1>
-              <p className="mt-2 max-w-lg text-sm leading-relaxed text-[#4a6b5a]">
-                Monitor product health, provider reliability, user activity, and privileged access.
+              <p className="mt-3 max-w-lg text-[15px] leading-relaxed text-[#4a6b5a]">
+                Monitor product health, provider reliability, user activity, and privileged access across the LeadLens ecosystem.
               </p>
             </div>
 
             {/* Stat pills */}
-            <div className="flex flex-wrap gap-3">
-              <div className="rounded-2xl border border-emerald-200/80 bg-white/80 px-5 py-3.5 shadow-sm backdrop-blur-sm">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#789084]">Your Role</p>
-                <p className="mt-1 flex items-center gap-1.5 text-sm font-bold text-[#0f2318]">
-                  <KeyRound className="size-3.5 text-emerald-600" /> Platform Owner
+            <div className="flex flex-wrap gap-4">
+              <div className="flex min-w-[140px] flex-col justify-center rounded-2xl border border-[#e8f0ec] bg-white px-5 py-4 shadow-[0_2px_12px_-4px_rgba(20,83,45,0.08)] transition-transform hover:-translate-y-0.5">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#789084]">Your Role</p>
+                <p className="mt-1.5 flex items-center gap-1.5 text-[15px] font-bold text-[#0f2318]">
+                  <KeyRound className="size-4 text-emerald-600" /> Platform Owner
                 </p>
               </div>
-              <div className="rounded-2xl border border-emerald-200/80 bg-white/80 px-5 py-3.5 shadow-sm backdrop-blur-sm">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#789084]">Avg AI Latency</p>
-                <p className="mt-1 text-2xl font-bold text-[#0f2318]">
-                  {avgLatency}<span className="ml-1 text-xs font-normal text-[#789084]">ms</span>
+              <div className="flex min-w-[140px] flex-col justify-center rounded-2xl border border-[#e8f0ec] bg-white px-5 py-4 shadow-[0_2px_12px_-4px_rgba(20,83,45,0.08)] transition-transform hover:-translate-y-0.5">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#789084]">Avg AI Latency</p>
+                <p className="mt-1.5 text-2xl font-black tracking-tight text-[#0f2318]">
+                  {avgLatency}<span className="ml-1 text-sm font-medium text-[#789084]">ms</span>
                 </p>
               </div>
-              <div className={`rounded-2xl border px-5 py-3.5 shadow-sm backdrop-blur-sm ${systemHealthy ? 'border-emerald-200 bg-emerald-50/80' : 'border-rose-200 bg-rose-50/80'}`}>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#789084]">System Health</p>
-                <p className={`mt-1 flex items-center gap-1.5 text-sm font-bold ${systemHealthy ? 'text-emerald-700' : 'text-rose-600'}`}>
-                  <CheckCircle2 className="size-3.5" />
-                  {systemHealthy ? 'All Systems Operational' : 'Issues Detected'}
+              <div className={`flex min-w-[160px] flex-col justify-center rounded-2xl border px-5 py-4 shadow-[0_2px_12px_-4px_rgba(20,83,45,0.08)] transition-transform hover:-translate-y-0.5 ${systemHealthy ? 'border-emerald-100 bg-emerald-50/50' : 'border-rose-100 bg-rose-50/50'}`}>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#789084]">System Health</p>
+                <p className={`mt-1.5 flex items-center gap-1.5 text-[15px] font-bold ${systemHealthy ? 'text-emerald-700' : 'text-rose-600'}`}>
+                  <CheckCircle2 className="size-4" />
+                  {systemHealthy ? 'All Operational' : 'Issues Detected'}
                 </p>
               </div>
             </div>

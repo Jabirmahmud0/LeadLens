@@ -206,6 +206,34 @@ export const serviceRecommendationsRelations = relations(serviceRecommendations,
   }),
 }));
 
+export const reportOutreachRelations = relations(reportOutreach, ({ one }) => ({
+  report: one(reports, {
+    fields: [reportOutreach.reportId],
+    references: [reports.id],
+  }),
+}));
+
+export const reportCallQuestionsRelations = relations(reportCallQuestions, ({ one }) => ({
+  report: one(reports, {
+    fields: [reportCallQuestions.reportId],
+    references: [reports.id],
+  }),
+}));
+
+export const reportObjectionsRelations = relations(reportObjections, ({ one }) => ({
+  report: one(reports, {
+    fields: [reportObjections.reportId],
+    references: [reports.id],
+  }),
+}));
+
+export const proposalStartersRelations = relations(proposalStarters, ({ one }) => ({
+  report: one(reports, {
+    fields: [proposalStarters.reportId],
+    references: [reports.id],
+  }),
+}));
+
 export const findingSourcesRelations = relations(findingSources, ({ one }) => ({
   finding: one(reportFindings, {
     fields: [findingSources.findingId],

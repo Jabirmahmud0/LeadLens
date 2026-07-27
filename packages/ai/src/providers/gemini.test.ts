@@ -26,12 +26,12 @@ describe('Gemini credential rotation', () => {
   it('falls forward from an unavailable configured model to stable lightweight models', () => {
     expect(getGeminiModelCandidates('retired-flash-lite')).toEqual([
       'retired-flash-lite',
+      'gemini-3.5-flash-lite',
       'gemini-3.1-flash-lite',
-      'gemini-flash-lite-latest',
     ]);
-    expect(getGeminiModelCandidates('gemini-3.1-flash-lite')).toEqual([
+    expect(getGeminiModelCandidates('gemini-3.5-flash-lite')).toEqual([
+      'gemini-3.5-flash-lite',
       'gemini-3.1-flash-lite',
-      'gemini-flash-lite-latest',
     ]);
   });
 });

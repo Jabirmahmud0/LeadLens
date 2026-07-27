@@ -24,7 +24,9 @@ export async function runAI<T>(
 ): Promise<T> {
   const boundedPrompt = fitPromptToBudget(prompt, options.maxPromptChars);
   let attempt = 0;
-  const maxRetries = options.maxRetries ?? 2;
+  // Each configured provider gets one bounded attempt by default. Retrying
+  // again here multiplies SDK, credential, and model failover delays.
+  const maxRetries = options.maxRetries ?? 0;
   const primaryMaxRetries = options.primaryProvider.managesCredentialRotation ? 0 : maxRetries;
   let primaryFailure: AIProviderError | undefined;
   

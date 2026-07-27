@@ -34,6 +34,8 @@ const workerEnvSchema = commonEnvSchema.extend({
   GEMINI_MODEL: z.string().optional(),
   GROQ_API_KEY: z.string().optional(),
   GROQ_MODEL: z.string().optional(),
+  AI_PRIMARY_PROVIDER: z.enum(['gemini', 'groq']).optional(),
+  AI_REQUEST_TIMEOUT_MS: z.coerce.number().int().min(1000).max(120000).optional(),
   PAGESPEED_API_KEY: z.string().optional(),
   WORKER_POLL_INTERVAL_MS: z.coerce.number().int().positive().optional(),
   WORKER_HEARTBEAT_INTERVAL_MS: z.coerce.number().int().positive().optional(),

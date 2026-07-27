@@ -21,7 +21,7 @@ export async function runStage1FactExtraction(
   options: Omit<RunAIOptions, 'purpose' | 'promptVersion'>
 ): Promise<Stage1Output> {
   const prompt = `
-You are an expert business analyst. Your task is to extract factual information about a company based solely on the provided website text and detected technologies.
+You are an expert business analyst. Extract factual information about a company based solely on the provided website text and detected technologies.
 
 Website Text:
 ${extractedText.substring(0, 9000)}
@@ -29,7 +29,20 @@ ${extractedText.substring(0, 9000)}
 Detected Technologies:
 ${JSON.stringify(technologies)}
 
-Extract only explicitly supported facts. Do not infer or guess. If something is not found, use an empty string or empty array.
+Extract only explicitly supported facts. Do not infer or guess. If a field is not found, use an empty string or empty array.
+
+You MUST return a JSON object with EXACTLY these camelCase keys (no other keys allowed):
+{
+  "companyName": string,
+  "industry": string,
+  "offerings": string[],
+  "audience": string,
+  "businessModel": string,
+  "contactChannels": string[],
+  "socialLinks": string[],
+  "copyrightYear": string,
+  "technologiesUsed": string[]
+}
 `;
 
   return runAI(prompt, Stage1Schema, {

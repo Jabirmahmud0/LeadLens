@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { Stage6Schema } from './prompts/stage6-fit-scoring';
 import { Stage1Schema } from './prompts/stage1-fact-extraction';
+import { MAX_EVIDENCE_EXCERPT_LENGTH, normalizeStage10Output, Stage10Schema } from './prompts/stage10-source-verification';
 
 vi.mock('@leadlens/database', () => ({
   db: {
@@ -106,6 +107,29 @@ describe('AI Zod Schemas Validation', () => {
       
       const result = Stage1Schema.safeParse(invalidData);
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe('Stage10Schema (Source Verification)', () => {
+    it('normalizes an oversized citation instead of rejecting the report', () => {
+      const oversizedExcerpt = 'e'.repeat(MAX_EVIDENCE_EXCERPT_LENGTH + 120);
+      const parsed = Stage10Schema.parse({
+        verifiedFindings: [{
+          findingIndex: 12,
+          citations: [{
+            sourcePageId: '550e8400-e29b-41d4-a716-446655440000',
+            evidenceExcerpt: oversizedExcerpt,
+          }],
+          confidence: 80,
+          isFactOrInference: 'fact',
+        }],
+        limitations: [],
+        unsupportedAreas: [],
+      });
+
+      const normalized = normalizeStage10Output(parsed);
+      expect(normalized.verifiedFindings[0].citations[0].evidenceExcerpt).toHaveLength(MAX_EVIDENCE_EXCERPT_LENGTH);
+      expect(normalized.verifiedFindings[0].citations[0].evidenceExcerpt).toBe(oversizedExcerpt.slice(0, MAX_EVIDENCE_EXCERPT_LENGTH));
     });
   });
 });

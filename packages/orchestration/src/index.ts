@@ -20,6 +20,7 @@ import {
 import { 
   GeminiProvider, 
   GroqProvider,
+  orderAIProviders,
   runStage1FactExtraction,
   runStage2BusinessClassification,
   runStage3IssueClassification,
@@ -236,8 +237,9 @@ export async function runOrchestration(job: any) {
   let stage10Verify: any = null;
 
   // Provider setup
-  const primaryProvider = new GeminiProvider();
-  const fallbackProvider = process.env.GROQ_API_KEY ? new GroqProvider(process.env.GROQ_API_KEY) : undefined;
+  const geminiProvider = new GeminiProvider();
+  const groqProvider = process.env.GROQ_API_KEY ? new GroqProvider(process.env.GROQ_API_KEY) : undefined;
+  const { primaryProvider, fallbackProvider } = orderAIProviders(geminiProvider, groqProvider);
   
   const aiOptions = {
     jobId: job.id,

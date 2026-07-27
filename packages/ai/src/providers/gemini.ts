@@ -1,26 +1,33 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import { AIProvider, AIOptions } from './index';
-import { normalizeAIError } from '../errors';
+import { AIProviderError, normalizeAIError } from '../errors';
 import { DEFAULT_MAX_OUTPUT_TOKENS } from '../prompt-budget';
+
+const DEFAULT_AI_REQUEST_TIMEOUT_MS = 20_000;
 
 export class GeminiProvider implements AIProvider {
   name = 'gemini';
   readonly managesCredentialRotation = true;
-  private readonly clients: GoogleGenerativeAI[];
+  private readonly clients: GoogleGenAI[];
   private readonly modelCandidates: string[];
   private activeModelName: string;
 
   get modelName() { return this.activeModelName; }
 
-  constructor(apiKeys?: string | string[], modelName = process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite') {
+  constructor(apiKeys?: string | string[], modelName = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite') {
     const keys = parseGeminiApiKeys(apiKeys);
     if (keys.length === 0) {
       throw new Error('GEMINI_API_KEYS or GEMINI_API_KEY is not set');
     }
 
-    this.clients = keys.map((key) => new GoogleGenerativeAI(key));
+    const timeout = readPositiveInteger(process.env.AI_REQUEST_TIMEOUT_MS, DEFAULT_AI_REQUEST_TIMEOUT_MS);
+    this.clients = keys.map((key) => new GoogleGenAI({
+      apiKey: key,
+      // LeadLens owns provider failover. A single SDK request must not silently
+      // expand into another retry tree beneath it.
+      httpOptions: { timeout, retryOptions: { attempts: 1 } },
+    }));
     this.modelCandidates = getGeminiModelCandidates(modelName);
     this.activeModelName = this.modelCandidates[0];
   }
@@ -28,20 +35,11 @@ export class GeminiProvider implements AIProvider {
   async generate<T>(prompt: string, schema: z.ZodSchema<T>, options?: AIOptions) {
     const start = Date.now();
     
-    // We must convert Zod schema to Gemini's Schema format
-    // A simplified conversion using zod-to-json-schema (or we can just rely on JSON format instruction + zod parse)
-    // Gemini supports responseSchema since v0.13.0, but passing raw JSON schema from zodToJsonSchema might need mapping.
-    // To keep it robust, we'll ask for JSON and just parse it, or pass the JSON schema directly.
-    const jsonSchema = zodToJsonSchema(schema as any) as object;
-    
-    // As of latest SDK, we can pass responseSchema. But to be safe and simple, we'll instruct JSON and parse.
-    // Actually, passing `responseSchema` is best if the SDK supports it.
-    
-    // Provide the JSON schema in the prompt to guide the model
+    const jsonSchema = z.toJSONSchema(schema);
     const fullPrompt = `${prompt}\n\nYou MUST return ONLY valid JSON matching this schema:\n${JSON.stringify(jsonSchema, null, 2)}`;
 
     const startIndex = nextGeminiStartIndex(this.clients.length);
-    let result: Awaited<ReturnType<ReturnType<GoogleGenerativeAI['getGenerativeModel']>['generateContent']>> | undefined;
+    let result: Awaited<ReturnType<GoogleGenAI['models']['generateContent']>> | undefined;
     let lastError: ReturnType<typeof normalizeAIError> | undefined;
 
     const orderedModels = [this.activeModelName, ...this.modelCandidates.filter((model) => model !== this.activeModelName)];
@@ -49,17 +47,17 @@ export class GeminiProvider implements AIProvider {
       let modelUnavailable = false;
       for (let offset = 0; offset < this.clients.length; offset++) {
         const clientIndex = (startIndex + offset) % this.clients.length;
-        const model = this.clients[clientIndex].getGenerativeModel({
-          model: modelName,
-          generationConfig: {
-            responseMimeType: 'application/json',
-            temperature: options?.temperature ?? 0.2,
-            maxOutputTokens: options?.maxTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
-          }
-        });
+        const client = this.clients[clientIndex];
 
         try {
-          result = await model.generateContent(fullPrompt);
+          result = await client.models.generateContent({
+            model: modelName,
+            contents: fullPrompt,
+            config: {
+              responseMimeType: 'application/json',
+              maxOutputTokens: options?.maxTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
+            }
+          });
           this.activeModelName = modelName;
           break modelLoop;
         } catch (error) {
@@ -70,6 +68,9 @@ export class GeminiProvider implements AIProvider {
             break;
           }
           if (lastError.code === 'AI_INPUT_TOO_LARGE' || lastError.code === 'AI_BAD_REQUEST') throw lastError;
+          // Quota and credential failures can be key-specific. Network, timeout,
+          // and provider 5xx failures are not, so trying every key only stalls.
+          if (lastError.code !== 'AI_RATE_LIMITED' && lastError.code !== 'AI_AUTH_FAILED') throw lastError;
         }
       }
       if (!modelUnavailable && !result) throw lastError;
@@ -79,8 +80,7 @@ export class GeminiProvider implements AIProvider {
       throw lastError || new Error(`Gemini request failed across ${this.clients.length} configured credential slots`);
     }
 
-    const response = result.response;
-    const text = response.text();
+    const text = result.text || '';
     
     const latencyMs = Date.now() - start;
     
@@ -91,14 +91,19 @@ export class GeminiProvider implements AIProvider {
       return {
         data,
         tokens: {
-          input: response.usageMetadata?.promptTokenCount || 0,
-          output: response.usageMetadata?.candidatesTokenCount || 0
+          input: result.usageMetadata?.promptTokenCount || 0,
+          output: result.usageMetadata?.candidatesTokenCount || 0
         },
         latencyMs
       };
     } catch (e: unknown) {
       console.error('Failed to parse Gemini output:', text);
-      throw new Error(`Gemini parse error: ${e instanceof Error ? e.message : 'Invalid structured output'}`);
+      throw new AIProviderError(
+        `Gemini returned output that does not match the expected schema: ${e instanceof Error ? e.message : 'Invalid structured output'}`,
+        'AI_BAD_REQUEST',
+        false,
+        this.name
+      );
     }
   }
 }
@@ -112,7 +117,7 @@ export function parseGeminiApiKeys(apiKeys?: string | string[]): string[] {
 }
 
 export function getGeminiModelCandidates(configuredModel: string): string[] {
-  return [...new Set([configuredModel.trim(), 'gemini-3.1-flash-lite', 'gemini-flash-lite-latest'].filter(Boolean))];
+  return [...new Set([configuredModel.trim(), 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'].filter(Boolean))];
 }
 
 export function nextGeminiStartIndex(poolSize: number): number {
@@ -128,4 +133,9 @@ function safeStatus(error: unknown): string {
   if (typeof error !== 'object' || error === null || !('status' in error)) return '';
   const status = (error as { status?: unknown }).status;
   return typeof status === 'number' || typeof status === 'string' ? ` (status ${status})` : '';
+}
+
+function readPositiveInteger(value: string | undefined, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 }

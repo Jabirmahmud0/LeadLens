@@ -28,7 +28,7 @@ export function normalizeAIError(provider: string, error: unknown): AIProviderEr
   if (status === 413 || normalized.includes('request too large') || normalized.includes('context length')) {
     return new AIProviderError(`${provider} rejected an oversized request.`, 'AI_INPUT_TOO_LARGE', false, provider, status);
   }
-  if (status === 429 || normalized.includes('rate limit') || normalized.includes('resource_exhausted') || normalized.includes('quota')) {
+  if (status === 429 || normalized.includes('rate limit') || normalized.includes('too many requests') || normalized.includes('resource_exhausted') || normalized.includes('quota')) {
     return new AIProviderError(`${provider} is temporarily rate limited.`, 'AI_RATE_LIMITED', true, provider, status);
   }
   if (status === 401 || status === 403 || normalized.includes('api key') || normalized.includes('permission_denied')) {

@@ -40,8 +40,7 @@ export default async function ReportLayout({
   }
 
   return (
-    <ReportLayoutWrapper 
-      agencyName={report.organization.name || undefined} 
+    <ReportLayoutWrapper
       analysisId={id}
       reportId={report.id}
     >

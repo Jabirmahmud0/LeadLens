@@ -16,3 +16,15 @@ export interface AIProvider {
     options?: AIOptions
   ): Promise<{ data: T; tokens: { input: number; output: number }; latencyMs: number }>;
 }
+
+export function orderAIProviders(
+  geminiProvider: AIProvider,
+  groqProvider?: AIProvider,
+  preferredProvider = process.env.AI_PRIMARY_PROVIDER,
+): { primaryProvider: AIProvider; fallbackProvider?: AIProvider } {
+  const preferred = preferredProvider?.trim().toLowerCase();
+  if (preferred === 'groq' && groqProvider) {
+    return { primaryProvider: groqProvider, fallbackProvider: geminiProvider };
+  }
+  return { primaryProvider: geminiProvider, fallbackProvider: groqProvider };
+}

@@ -1,9 +1,10 @@
 import { Groq } from 'groq-sdk';
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import { AIProvider, AIOptions } from './index';
-import { normalizeAIError } from '../errors';
+import { AIProviderError, normalizeAIError } from '../errors';
 import { DEFAULT_MAX_OUTPUT_TOKENS } from '../prompt-budget';
+
+const DEFAULT_AI_REQUEST_TIMEOUT_MS = 20_000;
 
 export class GroqProvider implements AIProvider {
   name = 'groq';
@@ -14,13 +15,17 @@ export class GroqProvider implements AIProvider {
     const key = apiKey || process.env.GROQ_API_KEY;
     if (!key) throw new Error('GROQ_API_KEY is not set');
     
-    this.groq = new Groq({ apiKey: key });
+    const configuredTimeout = Number(process.env.AI_REQUEST_TIMEOUT_MS);
+    const timeout = Number.isInteger(configuredTimeout) && configuredTimeout > 0
+      ? configuredTimeout
+      : DEFAULT_AI_REQUEST_TIMEOUT_MS;
+    this.groq = new Groq({ apiKey: key, timeout, maxRetries: 0 });
     this.modelName = modelName;
   }
 
   async generate<T>(prompt: string, schema: z.ZodSchema<T>, options?: AIOptions) {
     const start = Date.now();
-    const jsonSchema = zodToJsonSchema(schema as any);
+    const jsonSchema = z.toJSONSchema(schema);
     
     const fullPrompt = `${prompt}\n\nYou MUST return ONLY valid JSON matching this schema:\n${JSON.stringify(jsonSchema, null, 2)}`;
     
@@ -55,7 +60,12 @@ export class GroqProvider implements AIProvider {
       };
     } catch (e: unknown) {
       console.error('Failed to parse Groq output:', text);
-      throw new Error(`Groq parse error: ${e instanceof Error ? e.message : 'Invalid structured output'}`);
+      throw new AIProviderError(
+        `Groq returned output that does not match the expected schema: ${e instanceof Error ? e.message : 'Invalid structured output'}`,
+        'AI_BAD_REQUEST',
+        false,
+        this.name
+      );
     }
   }
 }

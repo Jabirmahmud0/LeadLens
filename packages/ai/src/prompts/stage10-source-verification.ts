@@ -1,11 +1,15 @@
 import { z } from 'zod';
 import { runAI, RunAIOptions } from '../run';
 
+export const MAX_EVIDENCE_EXCERPT_LENGTH = 500;
+
 export const Stage10VerifiedFindingSchema = z.object({
   findingIndex: z.number().int().nonnegative().describe('The zero-based index of the finding being verified'),
   citations: z.array(z.object({
     sourcePageId: z.string().uuid(),
-    evidenceExcerpt: z.string().max(500),
+    // Provider output is normalized after parsing. Keeping this field tolerant
+    // prevents one verbose but otherwise valid citation from failing the report.
+    evidenceExcerpt: z.string().describe(`An exact source excerpt of at most ${MAX_EVIDENCE_EXCERPT_LENGTH} characters`),
   })).describe('Evidence selected only from the supplied source page IDs'),
   confidence: z.number().min(0).max(100).describe('Confidence in this finding based on the sources'),
   isFactOrInference: z.enum(['fact', 'inference']).describe('Whether this is a hard fact stated on the site or an inference made by the AI')
@@ -18,6 +22,19 @@ export const Stage10Schema = z.object({
 });
 
 export type Stage10Output = z.infer<typeof Stage10Schema>;
+
+export function normalizeStage10Output(output: Stage10Output): Stage10Output {
+  return {
+    ...output,
+    verifiedFindings: output.verifiedFindings.map((finding) => ({
+      ...finding,
+      citations: finding.citations.map((citation) => ({
+        ...citation,
+        evidenceExcerpt: citation.evidenceExcerpt.slice(0, MAX_EVIDENCE_EXCERPT_LENGTH),
+      })),
+    })),
+  };
+}
 
 export async function runStage10SourceVerification(
   allFindings: any,
@@ -46,13 +63,14 @@ ${JSON.stringify(indexedFindings, null, 2)}
 Source Pages:
 ${JSON.stringify(boundedSources, null, 2)}
 
-Use only the supplied findingIndex and source page id values. Include a short exact evidence excerpt for every citation. Label inferences clearly and identify unsupported claims.
+Use only the supplied findingIndex and source page id values. Include one short exact evidence excerpt for every citation. Each evidenceExcerpt MUST be ${MAX_EVIDENCE_EXCERPT_LENGTH} characters or fewer. Label inferences clearly and identify unsupported claims.
 `;
 
-  return runAI(prompt, Stage10Schema, {
+  const output = await runAI(prompt, Stage10Schema, {
     ...options,
     purpose: 'stage10_source_verification',
     promptVersion: '1.1',
     maxTokens: 1_800,
   });
+  return normalizeStage10Output(output);
 }
