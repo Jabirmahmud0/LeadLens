@@ -81,6 +81,7 @@ export function AgencyDetailsForm({ initialValues, countryOptions, timeZoneOptio
     try {
       await saveAgencyDetails(data);
     } catch (e: unknown) {
+      if (e instanceof Error && e.message === 'NEXT_REDIRECT') throw e;
       setSubmitError(e instanceof Error ? e.message : 'Could not save. Please try again.');
       setIsSubmitting(false);
     }

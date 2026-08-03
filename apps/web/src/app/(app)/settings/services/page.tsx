@@ -4,18 +4,20 @@ import { redirect } from 'next/navigation';
 import { db, schema } from '@leadlens/database';
 import { eq, desc } from 'drizzle-orm';
 import { EmptyState } from '@leadlens/ui';
-import { Plus, Briefcase, MoreHorizontal, CheckCircle2, XCircle } from 'lucide-react';
+import { Plus, Briefcase, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
+import { ServiceTableRow } from './ServiceTableRow';
 
 export const metadata = {
   title: 'Services | Settings | LeadLens',
 };
 
-export default async function ServicesPage() {
+export default async function ServicesPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
   const session = await getSession();
   if (!session || !session.organization) redirect('/login');
   
   const orgId = session.organization.id;
+  const params = await searchParams;
 
   const services = await db.query.agencyServices.findMany({
     where: eq(schema.agencyServices.organizationId, orgId),
@@ -31,6 +33,13 @@ export default async function ServicesPage() {
           Add Service
         </Link>
       </div>
+
+      {params.saved === '1' && (
+        <div className="flex items-center gap-2 rounded-xl border border-emerald-800/50 bg-emerald-950/40 px-4 py-3 text-sm font-medium text-emerald-300">
+          <CheckCircle2 className="w-4 h-4 shrink-0" />
+          Service saved successfully.
+        </div>
+      )}
 
       {services.length === 0 ? (
         <EmptyState
@@ -56,42 +65,15 @@ export default async function ServicesPage() {
             </thead>
             <tbody className="divide-y divide-neutral-800">
               {services.map(service => (
-                <tr key={service.id} className="hover:bg-neutral-800/20 transition-colors group">
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-neutral-800 flex items-center justify-center shrink-0">
-                        <Briefcase className="w-5 h-5 text-neutral-400 group-hover:text-blue-400 transition-colors" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-white">{service.name}</p>
-                        <p className="text-xs text-neutral-500 mt-0.5">{service.priceMinCents ? `$${(service.priceMinCents / 100).toLocaleString()}+` : 'Custom Pricing'}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <p className="text-sm text-neutral-400 line-clamp-2 max-w-sm">
-                      {service.summary || service.problemSolved || 'No description provided.'}
-                    </p>
-                  </td>
-                  <td className="py-4 px-6">
-                    {service.isActive ? (
-                      <div className="flex items-center gap-1.5 text-xs text-green-500 font-medium">
-                        <CheckCircle2 className="w-4 h-4" />
-                        Active
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1.5 text-xs text-neutral-500 font-medium">
-                        <XCircle className="w-4 h-4" />
-                        Inactive
-                      </div>
-                    )}
-                  </td>
-                  <td className="py-4 px-6 text-right">
-                    <Link href="/onboarding/services" aria-label={`Edit ${service.name}`} className="inline-flex p-2 text-neutral-500 hover:text-white rounded-lg hover:bg-neutral-800 transition-colors">
-                      <MoreHorizontal className="w-5 h-5" />
-                    </Link>
-                  </td>
-                </tr>
+                <ServiceTableRow
+                  key={service.id}
+                  id={service.id}
+                  name={service.name}
+                  priceMinCents={service.priceMinCents}
+                  summary={service.summary}
+                  problemSolved={service.problemSolved}
+                  isActive={service.isActive}
+                />
               ))}
             </tbody>
           </table>
