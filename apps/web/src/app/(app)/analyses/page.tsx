@@ -6,6 +6,7 @@ import { eq, desc, asc, and, sql } from 'drizzle-orm';
 import { EmptyState, Badge } from '@leadlens/ui';
 import { Activity, Search, Filter, Play, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { AnalysisRowActions } from './AnalysisRowActions';
+import { AnalysisFilters } from './AnalysisFilters';
 
 export const metadata = {
   title: 'Analyses | LeadLens',
@@ -50,46 +51,7 @@ export default async function AnalysesPage({ searchParams }: { searchParams: Pro
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
-            <form method="get" className="flex flex-1 gap-2 sm:w-auto">
-              <div className="relative flex-1 sm:w-64">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-4 w-4 text-neutral-500" />
-                </div>
-                <input
-                  type="text"
-                  name="q"
-                  defaultValue={query}
-                  className="block h-10 w-full rounded-xl border border-[#d8e5dc] bg-white pl-10 pr-4 text-sm text-[#16352a] placeholder:text-[#8ca096] focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
-                  placeholder="Search activity..."
-                />
-              </div>
-              <select
-                name="status"
-                defaultValue={status}
-                aria-label="Filter analyses by status"
-                className="h-10 rounded-xl border border-[#d8e5dc] bg-white px-3 text-sm text-[#365246]"
-              >
-                <option value="">All statuses</option>
-                <option value="queued">Queued</option>
-                <option value="processing">Processing</option>
-                <option value="completed">Completed</option>
-                <option value="partial">Partial</option>
-                <option value="failed">Failed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-              <select
-                name="sort"
-                defaultValue={sort}
-                aria-label="Sort analyses"
-                className="h-10 rounded-xl border border-[#d8e5dc] bg-white px-3 text-sm text-[#365246]"
-              >
-                <option value="newest">Newest</option>
-                <option value="oldest">Oldest</option>
-              </select>
-              <button type="submit" aria-label="Apply filters" className="grid size-10 place-items-center rounded-xl bg-emerald-700 text-white transition-colors hover:bg-emerald-800">
-                <Filter className="w-4 h-4" />
-              </button>
-            </form>
+            <AnalysisFilters />
           </div>
         </div>
       </div>
