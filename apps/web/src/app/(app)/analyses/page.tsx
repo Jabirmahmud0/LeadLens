@@ -65,24 +65,26 @@ export default async function AnalysesPage({ searchParams }: { searchParams: Pro
               </div>
               <select
                 name="status"
+                defaultValue={status}
                 aria-label="Filter analyses by status"
                 className="h-10 rounded-xl border border-[#d8e5dc] bg-white px-3 text-sm text-[#365246]"
               >
-                <option value="" selected={status === ''}>All statuses</option>
-                <option value="queued" selected={status === 'queued'}>Queued</option>
-                <option value="processing" selected={status === 'processing'}>Processing</option>
-                <option value="completed" selected={status === 'completed'}>Completed</option>
-                <option value="partial" selected={status === 'partial'}>Partial</option>
-                <option value="failed" selected={status === 'failed'}>Failed</option>
-                <option value="cancelled" selected={status === 'cancelled'}>Cancelled</option>
+                <option value="">All statuses</option>
+                <option value="queued">Queued</option>
+                <option value="processing">Processing</option>
+                <option value="completed">Completed</option>
+                <option value="partial">Partial</option>
+                <option value="failed">Failed</option>
+                <option value="cancelled">Cancelled</option>
               </select>
               <select
                 name="sort"
+                defaultValue={sort}
                 aria-label="Sort analyses"
                 className="h-10 rounded-xl border border-[#d8e5dc] bg-white px-3 text-sm text-[#365246]"
               >
-                <option value="newest" selected={sort === 'newest'}>Newest</option>
-                <option value="oldest" selected={sort === 'oldest'}>Oldest</option>
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
               </select>
               <button type="submit" aria-label="Apply filters" className="grid size-10 place-items-center rounded-xl bg-emerald-700 text-white transition-colors hover:bg-emerald-800">
                 <Filter className="w-4 h-4" />
