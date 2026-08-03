@@ -122,7 +122,7 @@ export default async function AnalysesPage({ searchParams }: { searchParams: Pro
                     ) : (
                       <a 
                         href={`/analyses/${a.id}`}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-[#e7f2e9] hover:bg-[#c8ddcd] text-[#16352a] rounded-xl text-[12px] font-bold transition-all shrink-0"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-[#16352a] hover:bg-[#204a3b] text-white rounded-xl text-[12px] font-bold transition-all shadow-sm shrink-0"
                       >
                         View Status
                       </a>
