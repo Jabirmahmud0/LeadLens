@@ -90,7 +90,7 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
             {prospects.map((p) => {
               const report = latestReportByProspect.get(p.id);
               const target = report ? `/analyses/${report.analysisJobId}/report` : '/analyses';
-              return <div key={p.id} className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-[#dce7df] bg-white shadow-[0_18px_48px_-42px_rgba(20,83,45,0.55)] transition-all duration-300 hover:-translate-y-1 hover:border-[#b9d4c0] hover:shadow-[0_28px_60px_-44px_rgba(20,83,45,0.48)]"><ProspectControls id={p.id} pinned={Boolean(p.pinnedAt)} archived={Boolean(p.archivedAt)} /><Link href={target} className="flex h-full flex-col p-6 pr-24">
+              return <div key={p.id} className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-[#dce7df] bg-white shadow-[0_18px_48px_-42px_rgba(20,83,45,0.55)] transition-all duration-300 hover:-translate-y-1 hover:border-[#b9d4c0] hover:shadow-[0_28px_60px_-44px_rgba(20,83,45,0.48)]"><ProspectControls id={p.id} pinned={Boolean(p.pinnedAt)} archived={Boolean(p.archivedAt)} /><Link href={target} className="flex h-full flex-col p-6 pr-32">
                 <div className="flex items-start justify-between mb-4">
                   <div className="min-w-0 flex-1 pr-4">
                     <h3 className="text-lg font-semibold text-white truncate">{p.companyName}</h3>

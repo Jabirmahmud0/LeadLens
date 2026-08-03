@@ -12,3 +12,12 @@ export async function updateProspectState(id: string, action: 'pin' | 'unpin' | 
   await db.insert(schema.auditLogs).values({ organizationId: session.organization.id, userId: session.user.id, action: `prospect_${action}`, details: { prospectId: id } });
   revalidatePath('/prospects');
 }
+
+export async function deleteProspect(id: string) {
+  const session = await requireSession();
+  if (!session.organization) throw new Error('Unauthorized');
+  await db.delete(schema.prospects).where(and(eq(schema.prospects.id, id), eq(schema.prospects.organizationId, session.organization.id)));
+  await db.insert(schema.auditLogs).values({ organizationId: session.organization.id, userId: session.user.id, action: 'prospect_delete', details: { prospectId: id } });
+  revalidatePath('/prospects');
+}
+

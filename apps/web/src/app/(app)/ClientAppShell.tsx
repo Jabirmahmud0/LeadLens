@@ -2,6 +2,7 @@
 
 import { AppShell } from '@leadlens/ui/client';
 import { useCallback, useEffect, useRef } from 'react';
+import { Toaster } from 'sonner';
 
 const SESSION_CHECK_INTERVAL_MS = 20_000;
 
@@ -53,5 +54,11 @@ function SessionEnforcer() {
 }
 
 export function ClientAppShell({ sidebar, children }: { sidebar: React.ReactNode; children: React.ReactNode }) {
-  return <AppShell sidebar={sidebar} tone="light" className="authenticated-light"><SessionEnforcer />{children}</AppShell>;
+  return (
+    <AppShell sidebar={sidebar} tone="light" className="authenticated-light">
+      <SessionEnforcer />
+      {children}
+      <Toaster position="bottom-right" richColors />
+    </AppShell>
+  );
 }
