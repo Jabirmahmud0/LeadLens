@@ -1,17 +1,16 @@
 import Link from 'next/link';
-import { Aperture, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { MobileMenu } from './MobileMenu';
+import { LeadLensLogo } from '@leadlens/ui';
 
 export function Header() {
   return (
     <header className="absolute inset-x-0 top-0 z-50 px-5 py-5 sm:px-8 lg:px-10">
       <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between rounded-2xl border border-slate-200/90 bg-white/95 px-4 shadow-[0_10px_35px_-24px_rgba(15,23,42,0.45)] backdrop-blur-md sm:px-5">
-        <Link href="/" className="flex items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2" aria-label="LeadLens home">
-          <span className="grid size-9 place-items-center rounded-xl bg-[#166534] text-white">
-            <Aperture className="size-5" aria-hidden="true" />
-          </span>
-          <span className="text-base font-semibold tracking-[-0.03em] text-slate-950">LeadLens</span>
+        <Link href="/" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2" aria-label="LeadLens home">
+          <LeadLensLogo variant="full" size={32} theme="light" />
         </Link>
+
 
         <nav className="hidden items-center gap-7 md:flex" aria-label="Primary navigation">
           <Link href="/product" className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-950">Product</Link>

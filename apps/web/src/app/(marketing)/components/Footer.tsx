@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Aperture, ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
+import { LeadLensLogo } from '@leadlens/ui';
 
 const links = [
   ['Product', '/product'],
@@ -16,10 +17,10 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-5 pb-8 pt-16 sm:px-8 sm:pt-20 lg:px-10">
         <div className="grid gap-14 border-b border-[#cfdcd2] pb-14 lg:grid-cols-[1.3fr_0.7fr] lg:items-end">
           <div>
-            <Link href="/" className="inline-flex items-center gap-2.5" aria-label="LeadLens home">
-              <span className="grid size-10 place-items-center rounded-xl bg-[#166534] text-white"><Aperture className="size-5" aria-hidden="true" /></span>
-              <span className="text-base font-semibold tracking-[-0.03em]">LeadLens</span>
+            <Link href="/" aria-label="LeadLens home">
+              <LeadLensLogo variant="full" size={36} theme="light" />
             </Link>
+
             <p className="mt-8 max-w-2xl text-[clamp(2.25rem,5vw,4.75rem)] font-semibold leading-[0.98] tracking-[-0.055em]">Make the first<br />conversation count.</p>
           </div>
 

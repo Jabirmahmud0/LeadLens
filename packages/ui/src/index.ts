@@ -9,3 +9,4 @@ export * from './components/Sidebar';
 export * from './components/ErrorPanel';
 export * from './lib/utils';
 export * from './components/marketing/EvidenceMarquee';  
+export * from './components/LeadLensLogo';

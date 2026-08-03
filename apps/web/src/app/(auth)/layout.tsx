@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { Aperture } from 'lucide-react';
 import styles from './auth.module.css';
+import { LeadLensLogo } from '@leadlens/ui';
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
@@ -9,9 +9,10 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       <div className={styles.grid} />
       <header className="absolute inset-x-0 top-0 z-20 px-5 py-5 sm:px-8">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <Link href="/" className="inline-flex items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2">
-            <span className="grid size-9 place-items-center rounded-xl bg-[#166534] text-white"><Aperture className="size-5" /></span><span className="text-base font-semibold tracking-[-0.03em]">LeadLens</span>
+          <Link href="/" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2">
+            <LeadLensLogo variant="full" size={32} theme="light" />
           </Link>
+
           <Link href="/" className="text-xs font-semibold text-[#60766b] transition-colors hover:text-emerald-800">Back to website</Link>
         </div>
       </header>

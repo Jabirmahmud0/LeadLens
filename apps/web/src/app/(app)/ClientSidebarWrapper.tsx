@@ -1,9 +1,10 @@
 'use client';
 
-import { Sidebar } from '@leadlens/ui';
+import { Sidebar, LeadLensLogo } from '@leadlens/ui';
 import type { SidebarProps } from '@leadlens/ui';
 import { Activity, Building2, CreditCard, LayoutDashboard, ReceiptText, Settings, ShieldCheck, User, Users } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+
 
 interface ClientSidebarWrapperProps {
   agencyName: string;
@@ -62,6 +63,7 @@ export function ClientSidebarWrapper({ agencyName, email, isAdmin }: ClientSideb
   return (
     <Sidebar
       agencyName={agencyName}
+      logo={<LeadLensLogo variant="icon" size={32} theme="light" />}
       navGroups={activeNavGroups}
       tone="light"
       userProfile={
