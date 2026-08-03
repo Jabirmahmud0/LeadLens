@@ -30,43 +30,39 @@ export default async function ReportOutreachPage({
   const activeOutreach = report.outreach[0];
 
   return (
-    <div className="flex flex-col lg:flex-row h-full">
-      {/* Left/Center Editor Column */}
-      <div className="flex-1 p-6 lg:p-10 overflow-y-auto space-y-8">
-        <div>
-          <h1 className="text-3xl font-light text-white tracking-tight mb-2">
+    <div className="flex flex-col h-full bg-[#fafdfa]/30 overflow-y-auto scrollbar-thin scrollbar-thumb-[#c8ddcd] scrollbar-track-transparent">
+      <div className="mx-auto w-full max-w-[1400px] px-6 py-6 lg:px-12 lg:py-8">
+        
+        {/* Header */}
+        <div className="mb-6 border-b border-[#d8e5db]/60 pb-4">
+          <h1 className="text-3xl font-bold tracking-[-0.03em] text-[#10251d] sm:text-4xl mb-2">
             Outreach Studio
           </h1>
-          <p className="text-neutral-400">
+          <p className="text-[16px] leading-relaxed text-[#60766b] max-w-2xl">
             Tailored messaging to break the ice using the verified technical issues found on their site.
           </p>
         </div>
 
+        {/* Content */}
         {report.outreach.length > 0 ? (
-          <div className="space-y-10">{report.outreach.map(outreach => <section key={outreach.id} aria-labelledby={`outreach-${outreach.id}`}><h2 id={`outreach-${outreach.id}`} className="mb-3 text-lg font-medium capitalize text-white">{outreach.channel || 'Message'}</h2><ClientEditor outreach={outreach} /></section>)}</div>
+          <div className="space-y-8">
+            {report.outreach.map(outreach => (
+              <section key={outreach.id} aria-labelledby={`outreach-${outreach.id}`}>
+                <ClientEditor 
+                  outreach={outreach} 
+                  recommendedCta={activeOutreach?.callToAction} 
+                />
+              </section>
+            ))}
+          </div>
         ) : (
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-10 text-center">
-            <p className="text-neutral-500">No outreach templates generated for this report.</p>
+          <div className="rounded-[1.25rem] border border-[#d8e5db]/60 bg-white p-12 text-center shadow-sm">
+            <AlertCircle className="mx-auto mb-4 h-8 w-8 text-[#8ca096]" />
+            <h3 className="mb-2 text-[15px] font-semibold text-[#10251d]">No Outreach Generated</h3>
+            <p className="text-[14px] text-[#60766b]">No outreach templates were generated for this report.</p>
           </div>
         )}
       </div>
-
-      {/* Right Rail: Guidelines & Checklists */}
-      {activeOutreach && (
-        <div className="w-full lg:w-[320px] xl:w-[380px] bg-neutral-900/50 border-l border-neutral-800 p-6 lg:p-8 shrink-0 overflow-y-auto">
-          <div className="space-y-8">
-            
-            {/* CTA Option */}
-            <div>
-              <h3 className="text-sm font-medium text-white mb-2">Recommended CTA</h3>
-              <p className="text-sm text-neutral-400">
-                {activeOutreach.callToAction || "Ask for a quick 10-minute audit review."}
-              </p>
-            </div>
-
-          </div>
-        </div>
-      )}
     </div>
   );
 }

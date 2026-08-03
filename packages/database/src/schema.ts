@@ -7,3 +7,4 @@ export * from './schema/sources';
 export * from './schema/report';
 export * from './schema/ai';
 export * from './schema/platform';
+export * from './schema/billing';

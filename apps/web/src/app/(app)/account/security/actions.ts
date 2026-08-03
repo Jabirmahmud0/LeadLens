@@ -8,15 +8,15 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
 const PasswordSchema = z.object({
-  currentPassword: z.string().min(1),
-  newPassword: z.string().min(12).max(128),
+  currentPassword: z.string().min(1).max(128),
+  newPassword: z.string().min(15).max(128),
 });
 
 export async function changePassword(formData: FormData) {
   const session = await getSession();
   if (!session?.user) throw new Error('Unauthorized');
   const input = PasswordSchema.safeParse(Object.fromEntries(formData));
-  if (!input.success) throw new Error('New password must be at least 12 characters');
+  if (!input.success) throw new Error('New password must be between 15 and 128 characters');
   const valid = await verifyPassword(input.data.currentPassword, session.user.passwordHash);
   if (!valid) throw new Error('Current password is incorrect');
   await db.update(schema.users).set({ passwordHash: await hashPassword(input.data.newPassword), updatedAt: new Date() })

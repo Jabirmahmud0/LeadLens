@@ -49,25 +49,44 @@ export function ClientProposal({ proposal }: ClientProposalProps) {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-neutral-200 text-neutral-900 flex flex-col min-h-[800px] overflow-hidden">
+    <div className="flex flex-col gap-6 h-full min-h-[800px] max-w-5xl mx-auto w-full">
       
-      {/* Toolbar */}
-      <div className="bg-neutral-50 border-b border-neutral-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-        <div>
-          <h2 className="text-lg font-semibold text-neutral-900">Proposal Outline</h2>
-          <p className="text-sm text-neutral-500">Draft document for export</p>
-        </div>
-        <div className="flex gap-2"><button type="button" disabled={saving} onClick={async () => { setSaving(true); const result = await saveProposalContent(proposal.id, content); setSaving(false); if (result.success) toast.success('Proposal saved'); else toast.error(result.error || 'Unable to save'); }} className="flex items-center gap-2 px-4 py-2 border border-neutral-300 hover:bg-neutral-100 text-neutral-900 rounded-lg text-sm font-medium"><Save className="w-4 h-4" />{saving ? 'Saving…' : 'Save'}</button><button
-          onClick={handleCopy}
-          className="flex items-center gap-2 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg text-sm font-medium transition-colors"
+      {/* Toolbar / Actions */}
+      <div className="flex items-center justify-end gap-3">
+        <button 
+          type="button" 
+          disabled={saving} 
+          onClick={async () => { 
+            setSaving(true); 
+            const result = await saveProposalContent(proposal.id, content); 
+            setSaving(false); 
+            if (result.success) toast.success('Proposal saved'); 
+            else toast.error(result.error || 'Unable to save'); 
+          }} 
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#e7f2e9] hover:bg-[#c8ddcd] border border-[#c8ddcd] disabled:opacity-50 text-[#16352a] rounded-xl text-[13px] font-bold transition-all shadow-sm"
         >
-          {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
-          {copied ? 'Copied to Clipboard' : 'Copy as Markdown'}
-        </button></div>
+          {saving ? <Save className="w-4 h-4 text-[#16352a]" /> : <Save className="w-4 h-4 text-[#16352a]" />}
+          {saving ? 'Saving…' : 'Save Draft'}
+        </button>
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#16352a] hover:bg-[#204a3b] text-[#ffffff] rounded-xl text-[13px] font-bold transition-all shadow-sm shadow-[#16352a]/10"
+        >
+          {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+          {copied ? 'Copied!' : 'Copy to Clipboard'}
+        </button>
       </div>
 
-      {/* Document Content */}
-      <div className="p-8 lg:p-12 max-w-4xl mx-auto flex-1 w-full"><textarea aria-label="Proposal markdown" value={content} onChange={event => setContent(event.target.value)} className="min-h-[650px] w-full resize-y rounded-lg border border-neutral-200 bg-white p-4 font-mono text-sm leading-7 text-neutral-900 outline-none focus:border-blue-500" /></div>
+      {/* Document Content (The Paper) */}
+      <div className="flex-1 bg-white rounded-2xl shadow-sm border border-[#d8e5db]/80 overflow-hidden flex flex-col transition-all focus-within:ring-4 focus-within:ring-[#8ca096]/10 focus-within:border-[#8ca096]">
+        <textarea 
+          aria-label="Proposal markdown" 
+          value={content} 
+          onChange={event => setContent(event.target.value)} 
+          className="flex-1 w-full min-h-[700px] resize-none bg-transparent p-10 lg:p-16 font-sans text-[16px] leading-[2] text-[#2a4537] outline-none placeholder:text-[#8ca096]" 
+          placeholder="Start drafting your proposal here..."
+        />
+      </div>
     </div>
   );
 }

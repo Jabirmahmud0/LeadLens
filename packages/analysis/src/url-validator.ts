@@ -78,13 +78,13 @@ export async function validateAndNormalizeUrl(urlString: string): Promise<string
   }
 
   try {
-    const addresses = await dns.promises.resolve(hostname);
-    if (!addresses || addresses.length === 0) {
+    const records = await dns.promises.lookup(hostname, { all: true });
+    if (!records || records.length === 0) {
       throw new UrlValidationError('Could not resolve domain.');
     }
 
-    for (const address of addresses) {
-      if (!isIpSafe(address)) {
+    for (const record of records) {
+      if (!isIpSafe(record.address)) {
         throw new UrlValidationError('Domain resolves to an internal IP address and is forbidden.');
       }
     }

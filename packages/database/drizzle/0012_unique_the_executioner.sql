@@ -1,0 +1,3 @@
+ALTER TABLE "organizations" ADD COLUMN "admin_plan_override" text;--> statement-breakpoint
+ALTER TABLE "organizations" ADD COLUMN "admin_plan_override_expires_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "organizations" ADD CONSTRAINT "organizations_admin_plan_override_valid" CHECK ("organizations"."admin_plan_override" is null or "organizations"."admin_plan_override" in ('free', 'solo', 'agency'));

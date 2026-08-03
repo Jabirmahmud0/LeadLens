@@ -4,16 +4,22 @@ import * as React from 'react';
 import Link from 'next/link';
 import { cn } from '@leadlens/ui';
 import { ArrowRight, Check, CheckCircle2, FileText, Sparkles } from 'lucide-react';
+import { BILLING_PLANS } from '@leadlens/shared';
 import styles from './pricing.module.css';
 
 type PlanTier = 'free' | 'solo' | 'agency' | 'growth';
 
-const PLANS: Array<{ id: PlanTier; name: string; price: string; cadence?: string; description: string; features: string[]; action: string }> = [
-  { id: 'free', name: 'Hobby', price: '$0', cadence: '/ month', description: 'Explore the complete workflow with a small prospect list.', features: ['10 analyses per month', '1 workspace seat', 'Standard web export'], action: 'Start free' },
-  { id: 'solo', name: 'Solo', price: '$49', cadence: '/ month', description: 'For independent consultants with an active sales pipeline.', features: ['50 analyses per month', 'Up to 3 team seats', 'Case-study matching', 'Standard web export'], action: 'Choose Solo' },
-  { id: 'agency', name: 'Agency', price: '$199', cadence: '/ month', description: 'For growing agencies coordinating sales and strategy.', features: ['200 analyses per month', 'Up to 10 team seats', 'White-labeled exports', 'Advanced service matching'], action: 'Choose Agency' },
-  { id: 'growth', name: 'Growth', price: 'Custom', description: 'For larger organizations with higher volume and governance needs.', features: ['Custom analysis volume', 'Custom seat allocation', 'Integration planning', 'Dedicated onboarding'], action: 'Discuss Growth' },
+const PLANS: Array<{ id: PlanTier; name: string; price: string; cadence?: string; description: string; features: readonly string[]; action: string }> = [
+  { id: 'free', ...BILLING_PLANS.free, price: BILLING_PLANS.free.priceLabel, cadence: '/ month', action: 'Start free' },
+  { id: 'solo', ...BILLING_PLANS.solo, price: BILLING_PLANS.solo.priceLabel, cadence: '/ month', action: 'Choose Solo' },
+  { id: 'agency', ...BILLING_PLANS.agency, price: BILLING_PLANS.agency.priceLabel, cadence: '/ month', action: 'Choose Agency' },
+  { id: 'growth', ...BILLING_PLANS.growth, price: BILLING_PLANS.growth.priceLabel, action: 'Discuss Growth' },
 ];
+
+function planHref(plan: PlanTier) {
+  if (plan === 'growth') return 'mailto:leadlens@saevix.dev?subject=LeadLens%20Growth%20plan';
+  return plan === 'free' ? '/register' : `/register?plan=${plan}`;
+}
 
 export function PricingSimulator() {
   const [prospects, setProspects] = React.useState(10);
@@ -54,7 +60,7 @@ export function PricingSimulator() {
 
         <div key={recommendedPlan} className={`${styles.recommendation} flex flex-col justify-between bg-[#16352a] p-6 text-white sm:p-8 lg:p-10`} aria-live="polite">
           <div><div className="flex items-center justify-between"><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-300">Recommended for you</p><Sparkles className="size-5 text-emerald-300" /></div><p className="mt-7 text-5xl font-semibold tracking-[-0.055em]">{recommended.name}</p><div className="mt-3 flex items-end gap-2"><span className="text-2xl font-semibold text-emerald-300">{recommended.price}</span>{recommended.cadence && <span className="pb-1 text-xs text-[#b9d3c3]">{recommended.cadence}</span>}</div><p className="mt-5 max-w-md text-sm leading-6 text-[#b9d3c3]">{recommended.description}</p></div>
-          <div className="mt-12"><p className="text-[10px] font-bold uppercase tracking-wider text-emerald-300">Why this fits</p><ul className="mt-4 space-y-3 text-xs text-white">{[`${prospects || 0} monthly analyses`, `${teamSize} collaborating ${teamSize === 1 ? 'seat' : 'seats'}`, needsExport ? 'White-labeled output required' : 'Standard output works'].map((reason) => <li key={reason} className="flex items-center gap-2"><Check className="size-3.5 text-emerald-300" />{reason}</li>)}</ul><Link href="/register" className="mt-7 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white text-sm font-semibold text-emerald-800 transition-transform hover:-translate-y-0.5">{recommended.action}<ArrowRight className="size-4" /></Link></div>
+          <div className="mt-12"><p className="text-[10px] font-bold uppercase tracking-wider text-emerald-300">Why this fits</p><ul className="mt-4 space-y-3 text-xs text-white">{[`${prospects || 0} monthly analyses`, `${teamSize} collaborating ${teamSize === 1 ? 'seat' : 'seats'}`, needsExport ? 'White-labeled output required' : 'Standard output works'].map((reason) => <li key={reason} className="flex items-center gap-2"><Check className="size-3.5 text-emerald-300" />{reason}</li>)}</ul><Link href={planHref(recommendedPlan)} className="mt-7 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white text-sm font-semibold text-emerald-800 transition-transform hover:-translate-y-0.5">{recommended.action}<ArrowRight className="size-4" /></Link></div>
         </div>
       </div>
 
@@ -68,7 +74,7 @@ export function PricingSimulator() {
                 {active && <span className="absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-[#166534] px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-white"><span className="size-1.5 rounded-full bg-emerald-300" />Best fit</span>}
                 <p className="text-sm font-semibold text-[#16352a]">{plan.name}</p><div className="mt-6 flex items-end gap-1.5"><span className="text-4xl font-semibold tracking-[-0.055em]">{plan.price}</span>{plan.cadence && <span className="pb-1 text-xs text-[#789084]">{plan.cadence}</span>}</div><p className="mt-4 min-h-16 text-sm leading-6 text-[#60766b]">{plan.description}</p>
                 <ul className="mt-7 flex-1 space-y-3 border-t border-[#e0e9e2] pt-6">{plan.features.map((feature) => <li key={feature} className="flex items-start gap-2 text-xs font-medium text-[#365246]"><CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-emerald-600" />{feature}</li>)}</ul>
-                <Link href="/register" className={cn('mt-8 inline-flex h-11 items-center justify-center rounded-xl text-sm font-semibold transition-colors', active ? 'bg-[#166534] text-white hover:bg-[#14532d]' : 'bg-[#edf3ee] text-[#16352a] hover:bg-[#e1ebe4]')}>{plan.action}</Link>
+                <Link href={planHref(plan.id)} className={cn('mt-8 inline-flex h-11 items-center justify-center rounded-xl text-sm font-semibold transition-colors', active ? 'bg-[#166534] text-white hover:bg-[#14532d]' : 'bg-[#edf3ee] text-[#16352a] hover:bg-[#e1ebe4]')}>{plan.action}</Link>
               </article>
             );
           })}

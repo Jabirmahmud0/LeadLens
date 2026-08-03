@@ -9,7 +9,9 @@
     "lint": "eslint apps packages --max-warnings=0",
     "typecheck": "pnpm -r typecheck",
     "test": "vitest run",
-    "db:check": "pnpm --dir packages/database exec drizzle-kit check"
+    "db:check": "pnpm --dir packages/database exec drizzle-kit check",
+    "db:generate": "pnpm --dir packages/database exec drizzle-kit generate",
+    "db:migrate": "pnpm --dir packages/database exec drizzle-kit migrate"
   },
   "devDependencies": {
     "eslint": "^9.39.5",

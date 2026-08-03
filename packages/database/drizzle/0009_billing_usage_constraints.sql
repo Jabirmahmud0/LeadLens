@@ -1,0 +1,2 @@
+ALTER TABLE "organization_usage_periods" ADD CONSTRAINT "organization_usage_periods_limit_positive" CHECK ("organization_usage_periods"."analysis_limit" > 0);--> statement-breakpoint
+ALTER TABLE "organization_usage_periods" ADD CONSTRAINT "organization_usage_periods_used_nonnegative" CHECK ("organization_usage_periods"."analyses_used" >= 0);

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import {
   Activity,
   AlertCircle,
@@ -116,6 +117,7 @@ export default function AnalysisProcessingPage() {
   const [data, setData] = useState<JobProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isActing, setIsActing] = useState(false);
+  const [confirmCancel, setConfirmCancel] = useState(false);
 
   const fetchProgress = useCallback(async (signal?: AbortSignal) => {
     const response = await fetch(`/api/analyses/${params.id}`, { cache: 'no-store', signal });
@@ -238,6 +240,14 @@ export default function AnalysisProcessingPage() {
               </div>
               <h1 className="mt-5 max-w-3xl text-3xl font-semibold leading-[1.05] tracking-[-0.045em] text-[#123b29] sm:text-4xl lg:text-5xl">{copy.title}</h1>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-[#607a6d] sm:text-base">{copy.description}</p>
+              
+              {hasReport && (
+                <div className="mt-8">
+                  <button type="button" onClick={() => router.push(`/analyses/${data.id}/report`)} className="inline-flex h-14 items-center justify-center gap-3 rounded-2xl bg-[#176b43] px-8 text-base font-semibold text-white shadow-[0_14px_35px_rgba(23,107,67,0.22)] transition-all hover:-translate-y-1 hover:shadow-[0_20px_45px_rgba(23,107,67,0.3)] hover:bg-[#115636]">
+                    View full opportunity brief <ArrowRight className="size-5" />
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className={`rounded-2xl border p-5 backdrop-blur-sm ${isActive ? 'border-emerald-200 bg-white shadow-[0_14px_38px_rgba(27,139,87,0.11)]' : 'border-[#dce9df] bg-[#f8fbf8]/90'}`} aria-live="polite">
@@ -325,10 +335,11 @@ export default function AnalysisProcessingPage() {
               </div>
             </section>
 
-            {(data.status === 'queued' || data.status === 'processing') && !data.isStalled && <button type="button" disabled={isActing} onClick={() => { if (window.confirm('Cancel this analysis?')) void performAction('cancel'); }} className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-[#d4e2d8] bg-white text-xs font-semibold text-[#607a6d] transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 disabled:opacity-50"><X className="size-3.5" /> Cancel analysis</button>}
+            {(data.status === 'queued' || data.status === 'processing') && !data.isStalled && <button type="button" disabled={isActing} onClick={() => setConfirmCancel(true)} className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-[#d4e2d8] bg-white text-xs font-semibold text-[#607a6d] transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 disabled:opacity-50"><X className="size-3.5" /> Cancel analysis</button>}
           </div>
         </div>
       </div>
+      <ConfirmDialog open={confirmCancel} title="Cancel this analysis?" description="The worker will stop after its current operation. Evidence already captured will remain available." confirmLabel="Cancel analysis" destructive busy={isActing} onCancel={() => setConfirmCancel(false)} onConfirm={() => { setConfirmCancel(false); void performAction('cancel'); }} />
     </main>
   );
 }

@@ -17,7 +17,7 @@ vi.mock('@leadlens/database', () => ({
   },
   schema: {
     sessions: { userId: 's.userId', tokenHash: 's.tokenHash', expiresAt: 's.expiresAt', id: 's.id' },
-    users: { id: 'u.id' },
+    users: { id: 'u.id', status: 'u.status' },
     organizations: { id: 'o.id' },
     organizationMembers: { role: 'om.role', organizationId: 'om.orgId', userId: 'om.userId' }
   }
@@ -65,11 +65,26 @@ describe('Auth Session Logic', () => {
       // Mock finding a revoked session
       (db.where as any).mockResolvedValueOnce([{
         session: { id: 'sess-123', revokedAt: new Date() },
-        user: { id: 'user-1' }
+        user: { id: 'user-1', status: 'active' }
       }]);
       
       const result = await validateSession('some-token');
       expect(result).toBeNull();
+    });
+
+    it.each(['suspended', 'deleted'])('should reject and revoke a session for a %s user', async (status) => {
+      (db.where as any).mockResolvedValueOnce([{
+        session: { id: 'sess-123', revokedAt: null },
+        user: { id: 'user-1', status },
+      }]);
+      (db.update as any).mockReturnValueOnce({
+        set: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockResolvedValue(true),
+        }),
+      });
+
+      await expect(validateSession('some-token')).resolves.toBeNull();
+      expect(db.update).toHaveBeenCalled();
     });
     
     it('should update lastSeenAt if session is valid', async () => {
@@ -83,7 +98,7 @@ describe('Auth Session Logic', () => {
         // First call is for session validation (returns promise directly)
         .mockResolvedValueOnce([{
           session: validSession,
-          user: { id: 'user-1' }
+          user: { id: 'user-1', status: 'active' }
         }])
         // Second call is for org finding, but it has a limit, so we mock where to return an object with limit
         .mockReturnValueOnce({

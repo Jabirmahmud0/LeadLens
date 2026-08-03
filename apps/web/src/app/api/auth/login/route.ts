@@ -7,13 +7,13 @@ import { setSessionCookie } from '@/lib/auth-cookies';
 import { ensureBootstrapPlatformOwner } from '@/lib/auth/admin';
 
 const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string(),
+  email: z.string().trim().email().max(254).transform((value) => value.toLowerCase()),
+  password: z.string().min(1).max(128),
 });
 
 export async function POST(req: NextRequest) {
   try {
-    const ip = req.headers.get('x-forwarded-for') || '127.0.0.1';
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '127.0.0.1';
     const body = await req.json();
     const parsed = loginSchema.safeParse(body);
 
@@ -30,9 +30,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Find user
-    const [user] = await db.select().from(schema.users).where(eq(schema.users.email, email.toLowerCase()));
+    const [user] = await db.select().from(schema.users).where(eq(schema.users.email, email));
     
-    if (!user) {
+    if (!user || user.status !== 'active') {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 

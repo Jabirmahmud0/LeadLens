@@ -4,10 +4,25 @@ import { Download, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 
 export function DangerActions({ email, canDelete }: { email: string; canDelete: boolean }) {
   const [confirmEmail, setConfirmEmail] = useState('');
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const router = useRouter();
+  const deleteAccount = async () => {
+    setDeleting(true);
+    const response = await fetch('/api/data/account', { method: 'DELETE', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ confirmEmail }) });
+    if (!response.ok) {
+      toast.error('Unable to delete account');
+      setDeleting(false);
+      return;
+    }
+    toast.success('Account deleted');
+    router.push('/');
+    router.refresh();
+  };
   return (
     <div className="space-y-4">
       <a href="/api/data/export" className="inline-flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2 text-sm text-white hover:bg-neutral-700">
@@ -22,18 +37,13 @@ export function DangerActions({ email, canDelete }: { email: string; canDelete: 
             <button
               type="button"
               disabled={confirmEmail.toLowerCase() !== email.toLowerCase()}
-              onClick={async () => {
-                if (!window.confirm('This permanently deletes the workspace, reports, and account. Continue?')) return;
-                const response = await fetch('/api/data/account', { method: 'DELETE', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ confirmEmail }) });
-                if (!response.ok) return toast.error('Unable to delete account');
-                router.push('/');
-                router.refresh();
-              }}
+              onClick={() => setShowDeleteConfirmation(true)}
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
             ><Trash2 className="h-4 w-4" /> Delete permanently</button>
           </div>
         </div>
       )}
+      <ConfirmDialog open={showDeleteConfirmation} title="Permanently delete this workspace?" description="All prospects, analyses, reports, billing references, and account data will be permanently removed. This cannot be undone." confirmLabel="Delete permanently" destructive busy={deleting} onCancel={() => setShowDeleteConfirmation(false)} onConfirm={() => void deleteAccount()} />
     </div>
   );
 }

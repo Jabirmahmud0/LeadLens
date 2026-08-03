@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
     const [user] = await db.select().from(schema.users).where(eq(schema.users.email, email.toLowerCase()));
 
-    if (!user || user.emailVerifiedAt) {
+    if (!user || user.status !== 'active' || user.emailVerifiedAt) {
       // Return success silently
       return NextResponse.json({ success: true });
     }

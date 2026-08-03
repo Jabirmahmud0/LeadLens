@@ -1,0 +1,2 @@
+ALTER TABLE "organizations" ADD COLUMN "pending_billing_plan" text;--> statement-breakpoint
+ALTER TABLE "organizations" ADD CONSTRAINT "organizations_pending_billing_plan_valid" CHECK ("organizations"."pending_billing_plan" is null or "organizations"."pending_billing_plan" in ('solo', 'agency'));

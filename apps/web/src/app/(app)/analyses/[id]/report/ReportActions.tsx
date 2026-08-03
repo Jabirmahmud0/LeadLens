@@ -17,10 +17,13 @@ import {
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 
 export function ReportActions({ reportId, analysisId }: { reportId: string; analysisId: string }) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const runAction = async (path: string, body: object, success: string) => {
     const response = await fetch(`/api/reports/${reportId}/${path}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
     if (!response.ok) return toast.error((await response.json().catch(() => null))?.error || 'Action failed');
@@ -37,7 +40,22 @@ export function ReportActions({ reportId, analysisId }: { reportId: string; anal
     toast.success('Report copied');
   };
 
+  const deleteReport = async () => {
+    setDeleting(true);
+    const response = await fetch(`/api/reports/${reportId}`, { method: 'DELETE' });
+    if (!response.ok) {
+      toast.error('Unable to delete report');
+      setDeleting(false);
+      return;
+    }
+    toast.success('Report deleted');
+    setConfirmDelete(false);
+    router.push('/analyses');
+    router.refresh();
+  };
+
   return (
+    <>
     <div className="flex shrink-0 items-center gap-2">
       <button type="button" onClick={copyReport} className="hidden h-10 items-center gap-2 rounded-xl border border-[#d5e3d8] bg-white/80 px-3 text-xs font-semibold text-[#365246] shadow-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-white hover:text-[#14532d] sm:flex">
         {copied ? <Check className="size-4 text-emerald-700" /> : <Clipboard className="size-4" />}
@@ -70,18 +88,13 @@ export function ReportActions({ reportId, analysisId }: { reportId: string; anal
             icon={Trash2}
             label="Delete report"
             destructive
-            onClick={async () => {
-              if (!window.confirm('Delete this report and its analysis data? This cannot be undone.')) return;
-              const response = await fetch(`/api/reports/${reportId}`, { method: 'DELETE' });
-              if (!response.ok) return toast.error('Unable to delete report');
-              toast.success('Report deleted');
-              router.push('/analyses');
-              router.refresh();
-            }}
+            onClick={() => setConfirmDelete(true)}
           />
         </div>
       </details>
     </div>
+    <ConfirmDialog open={confirmDelete} title="Delete this report?" description="This permanently removes the report and its associated analysis data. This action cannot be undone." confirmLabel="Delete report" destructive busy={deleting} onCancel={() => setConfirmDelete(false)} onConfirm={() => void deleteReport()} />
+    </>
   );
 }
 

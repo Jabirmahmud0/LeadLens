@@ -1,4 +1,5 @@
-import { pgTable, uuid, text, timestamp, unique } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
+import { boolean, check, pgTable, uuid, text, timestamp, unique } from 'drizzle-orm/pg-core';
 import { users } from './auth';
 
 export const organizations = pgTable('organizations', {
@@ -9,11 +10,24 @@ export const organizations = pgTable('organizations', {
   logoUrl: text('logo_url'),
   countryCode: text('country_code'),
   timezone: text('timezone'),
+  pendingBillingPlan: text('pending_billing_plan'),
+  adminPlanOverride: text('admin_plan_override'),
+  adminPlanOverrideExpiresAt: timestamp('admin_plan_override_expires_at', { withTimezone: true }),
+  billingOnboardingCompleted: boolean('billing_onboarding_completed').default(true).notNull(),
   status: text('status').default('active').notNull(),
   createdBy: uuid('created_by').references(() => users.id).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-});
+}, (table) => ({
+  pendingBillingPlanValid: check(
+    'organizations_pending_billing_plan_valid',
+    sql`${table.pendingBillingPlan} is null or ${table.pendingBillingPlan} in ('solo', 'agency')`,
+  ),
+  adminPlanOverrideValid: check(
+    'organizations_admin_plan_override_valid',
+    sql`${table.adminPlanOverride} is null or ${table.adminPlanOverride} in ('free', 'solo', 'agency')`,
+  ),
+}));
 
 export const organizationMembers = pgTable('organization_members', {
   id: uuid('id').primaryKey().defaultRandom(),

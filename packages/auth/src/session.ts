@@ -41,7 +41,7 @@ export async function validateSession(token: string) {
     .where(
       and(
         eq(schema.sessions.tokenHash, hashedToken),
-        gt(schema.sessions.expiresAt, new Date())
+        gt(schema.sessions.expiresAt, new Date()),
       )
     );
 
@@ -55,6 +55,15 @@ export async function validateSession(token: string) {
     return null;
   }
 
+  if (user.status !== 'active') {
+    // Self-heal legacy rows created before admin suspension/deletion revoked
+    // sessions transactionally. The account status is always authoritative.
+    await db.update(schema.sessions)
+      .set({ revokedAt: new Date() })
+      .where(eq(schema.sessions.id, session.id));
+    return null;
+  }
+
   // Find user's active organization (first one for now, or default)
   const orgResult = await db
     .select({
@@ -63,7 +72,11 @@ export async function validateSession(token: string) {
     })
     .from(schema.organizationMembers)
     .innerJoin(schema.organizations, eq(schema.organizationMembers.organizationId, schema.organizations.id))
-    .where(eq(schema.organizationMembers.userId, user.id))
+    .where(and(
+      eq(schema.organizationMembers.userId, user.id),
+      eq(schema.organizationMembers.status, 'active'),
+      eq(schema.organizations.status, 'active'),
+    ))
     .limit(1);
 
   const organization = orgResult.length > 0 ? orgResult[0].organization : null;

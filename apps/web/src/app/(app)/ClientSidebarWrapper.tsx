@@ -2,7 +2,7 @@
 
 import { Sidebar } from '@leadlens/ui';
 import type { SidebarProps } from '@leadlens/ui';
-import { Activity, LayoutDashboard, Settings, ShieldCheck, User, Users } from 'lucide-react';
+import { Activity, Building2, CreditCard, LayoutDashboard, ReceiptText, Settings, ShieldCheck, User, Users } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 interface ClientSidebarWrapperProps {
@@ -33,6 +33,7 @@ export function ClientSidebarWrapper({ agencyName, email, isAdmin }: ClientSideb
       label: 'Account',
       items: [
         { label: 'My Account', href: '/account', icon: User },
+        { label: 'Billing', href: '/billing', icon: CreditCard },
       ],
     },
   ];
@@ -41,7 +42,10 @@ export function ClientSidebarWrapper({ agencyName, email, isAdmin }: ClientSideb
     navGroups.push({
       label: 'Administration',
       items: [
-        { label: 'Admin diagnostics', href: '/admin', icon: ShieldCheck },
+        { label: 'Platform overview', href: '/admin', icon: ShieldCheck },
+        { label: 'Platform users', href: '/admin/users', icon: Users },
+        { label: 'Organizations', href: '/admin/organizations', icon: Building2 },
+        { label: 'Billing operations', href: '/admin/billing', icon: ReceiptText },
       ],
     });
   }
@@ -51,7 +55,7 @@ export function ClientSidebarWrapper({ agencyName, email, isAdmin }: ClientSideb
     ...group,
     items: group.items.map((item) => ({
       ...item,
-      isActive: pathname.startsWith(item.href) && (item.href !== '/' || pathname === '/'),
+      isActive: item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href) && (item.href !== '/' || pathname === '/'),
     }))
   }));
 

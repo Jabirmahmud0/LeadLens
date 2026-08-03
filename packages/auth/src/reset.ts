@@ -9,7 +9,7 @@ export async function createPasswordResetToken(email: string, baseUrl: string) {
   // Find user by email
   const [user] = await db.select().from(schema.users).where(eq(schema.users.email, email.toLowerCase()));
   
-  if (!user) {
+  if (!user || user.status !== 'active') {
     // Silently return to prevent user enumeration
     return;
   }
@@ -48,6 +48,11 @@ export async function resetPassword(token: string, newPassword: string): Promise
   if (!resetTokenRow || resetTokenRow.usedAt) {
     return false;
   }
+
+  const [activeUser] = await db.select({ id: schema.users.id })
+    .from(schema.users)
+    .where(and(eq(schema.users.id, resetTokenRow.userId), eq(schema.users.status, 'active')));
+  if (!activeUser) return false;
 
   const newHash = await hashPassword(newPassword);
 

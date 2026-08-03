@@ -3,14 +3,13 @@ import type { NextRequest } from 'next/server';
 
 export const config = { matcher: ['/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)'] };
 
-const PROTECTED_PAGE_PREFIXES = ['/dashboard','/prospects','/analyses','/new','/settings','/account','/onboarding','/admin'];
+const PROTECTED_PAGE_PREFIXES = ['/dashboard','/prospects','/analyses','/new','/settings','/account','/onboarding','/admin','/billing'];
 const PUBLIC_API_PREFIXES = ['/api/auth/login','/api/auth/register','/api/auth/forgot-password','/api/auth/reset-password','/api/auth/resend-verification','/api/auth/verify-email'];
 const INTERNAL_API_PREFIXES = ['/api/worker','/api/internal'];
 // These machine-to-machine routes perform their own secret verification in the
 // route handler. They must reach that handler without a browser session or CSRF
 // headers, which external schedulers do not send.
-const SELF_AUTHENTICATED_API_PREFIXES = ['/api/cron'];
-const AUTH_PAGES = ['/login','/register','/reset-password','/forgot-password'];
+const SELF_AUTHENTICATED_API_PREFIXES = ['/api/cron','/api/billing/webhook'];
 
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -23,7 +22,11 @@ export function proxy(request: NextRequest) {
 
   if (!sessionToken && isProtectedPage) return NextResponse.redirect(new URL('/login', request.url));
   if (!sessionToken && isApi && !isInternal && !isSelfAuthenticated && !isPublicApi) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  if (sessionToken && AUTH_PAGES.includes(pathname)) return NextResponse.redirect(new URL('/dashboard', request.url));
+  // Do not redirect away from authentication pages based only on cookie
+  // presence. A suspended/deleted user can still have an expired or revoked
+  // browser cookie, and treating that cookie as authenticated creates a
+  // /login <-> /dashboard redirect loop. The server-side session validator is
+  // the source of truth for authenticated access.
 
   const unsafeMethod = !['GET', 'HEAD', 'OPTIONS'].includes(request.method);
   if (isApi && unsafeMethod && !isInternal && !isSelfAuthenticated) {

@@ -16,6 +16,11 @@ export async function POST(req: NextRequest) {
     }
     
     await clearSessionCookie();
+
+    if (req.headers.get('accept')?.includes('text/html')) {
+      return NextResponse.redirect(new URL('/login', req.url), { status: 303 });
+    }
+
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('Logout error:', err);

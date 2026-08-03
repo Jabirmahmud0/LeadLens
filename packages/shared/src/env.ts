@@ -20,7 +20,11 @@ const webEnvSchema = commonEnvSchema.extend({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   SMTP_FROM: z.string().optional(),
-  MONTHLY_ANALYSIS_LIMIT: z.coerce.number().int().positive().optional(),
+  STRIPE_SECRET_KEY: z.string().startsWith('sk_').optional(),
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().startsWith('pk_').optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_').optional(),
+  STRIPE_PRICE_SOLO_MONTHLY: z.string().startsWith('price_').optional(),
+  STRIPE_PRICE_AGENCY_MONTHLY: z.string().startsWith('price_').optional(),
   ADMIN_EMAILS: z.string().refine(
     (value) => value.split(',').every((email) => z.email().safeParse(email.trim()).success),
     'ADMIN_EMAILS must be a comma-separated list of valid email addresses',

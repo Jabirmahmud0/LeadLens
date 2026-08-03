@@ -1,0 +1,1 @@
+ALTER TABLE "organizations" ADD COLUMN "billing_onboarding_completed" boolean DEFAULT true NOT NULL;

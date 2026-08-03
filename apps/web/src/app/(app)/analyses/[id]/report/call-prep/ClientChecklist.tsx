@@ -31,9 +31,9 @@ export function ClientChecklist({ questions }: ClientChecklistProps) {
     <div className="space-y-12">
       {Object.entries(grouped).map(([category, qs]) => (
         <section key={category} className="space-y-4">
-          <h2 className="text-lg font-medium text-white flex items-center gap-2 border-b border-neutral-800 pb-2 capitalize">
+          <h2 className="text-[14px] font-bold text-[#10251d] flex items-center gap-2 border-b border-[#d8e5db]/60 pb-2 capitalize">
             {category} Questions
-            <Badge variant="neutral">{qs.length}</Badge>
+            <Badge variant="neutral" className="bg-[#f4f8f3] text-[#60766b] shadow-none border-[#d8e5db] px-2 py-0.5">{qs.length}</Badge>
           </h2>
 
           <div className="space-y-3">
@@ -71,32 +71,32 @@ function QuestionItem({ question }: { question: Question }) {
   };
 
   return (
-    <div className={`bg-neutral-900 border rounded-xl overflow-hidden transition-colors ${isChecked ? 'border-blue-500/30' : 'border-neutral-800'}`}>
+    <div className={`bg-white border rounded-xl overflow-hidden transition-all shadow-sm ${isChecked ? 'border-[#8ca096] ring-1 ring-[#8ca096]/20 bg-[#fafdfa]/50' : 'border-[#d8e5db]/60'}`}>
       <div className="p-4 flex gap-4">
         <button 
           onClick={toggleCheck}
-          className="mt-0.5 text-neutral-400 hover:text-white transition-colors shrink-0"
+          className="mt-0.5 text-[#8ca096] hover:text-[#16352a] transition-colors shrink-0"
         >
-          {isChecked ? <CheckSquare className="w-5 h-5 text-blue-400" /> : <Square className="w-5 h-5" />}
+          {isChecked ? <CheckSquare className="w-5 h-5 text-emerald-600" /> : <Square className="w-5 h-5" />}
         </button>
         
         <div className="flex-1 space-y-2">
           <div className="flex items-start justify-between gap-4">
-            <h4 className={`text-base font-medium transition-colors ${isChecked ? 'text-neutral-300' : 'text-white'}`}>
+            <h4 className={`text-[14px] font-medium transition-colors ${isChecked ? 'text-[#60766b] line-through' : 'text-[#10251d]'}`}>
               {question.question}
             </h4>
             <button 
               onClick={() => setIsExpanded(!isExpanded)}
-              className="text-neutral-500 hover:text-white flex items-center gap-1 text-xs uppercase tracking-wider shrink-0"
+              className={`flex items-center gap-1 text-[11px] uppercase tracking-wider shrink-0 transition-colors font-bold ${isExpanded ? 'text-[#16352a]' : 'text-[#8ca096] hover:text-[#16352a]'}`}
             >
-              <MessageSquare className="w-4 h-4" />
+              <MessageSquare className="w-3.5 h-3.5" />
               Notes
             </button>
           </div>
           
           {question.rationale && (
-            <p className="text-sm text-neutral-400">
-              <span className="font-semibold text-neutral-500 mr-2">Rationale:</span>
+            <p className="text-[13px] text-[#486257] leading-relaxed">
+              <span className="font-semibold text-[#60766b] mr-2">Rationale:</span>
               {question.rationale}
             </p>
           )}
@@ -104,21 +104,21 @@ function QuestionItem({ question }: { question: Question }) {
       </div>
 
       {isExpanded && (
-        <div className="p-4 border-t border-neutral-800 bg-neutral-950/50">
+        <div className="p-4 border-t border-[#d8e5db]/60 bg-[#fafdfa]">
           <div className="flex gap-2">
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Take notes during the call..."
-              className="flex-1 bg-neutral-900 border border-neutral-800 rounded-lg p-3 text-sm text-neutral-200 resize-none outline-none focus:border-neutral-600 min-h-[80px]"
+              className="flex-1 bg-white border border-[#d8e5db]/60 shadow-inner rounded-lg p-3 text-[14px] text-[#2a4537] resize-none outline-none focus:border-[#8ca096] min-h-[80px]"
             />
             <div className="shrink-0">
               <button 
                 onClick={handleSaveNotes}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-3 py-2 bg-neutral-800 hover:bg-neutral-700 disabled:opacity-50 text-white rounded-lg text-xs font-medium transition-colors h-full"
+                className="flex items-center justify-center w-10 px-0 bg-[#e7f2e9] hover:bg-[#c8ddcd] border border-[#c8ddcd] disabled:opacity-50 text-[#16352a] rounded-lg transition-colors h-full shadow-sm"
               >
-                {saved ? <Check className="w-4 h-4 text-green-400" /> : <Save className="w-4 h-4" />}
+                {saved ? <Check className="w-4 h-4 text-emerald-600" /> : <Save className="w-4 h-4 text-[#16352a]" />}
               </button>
             </div>
           </div>

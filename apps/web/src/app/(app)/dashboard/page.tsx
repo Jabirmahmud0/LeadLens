@@ -1,6 +1,7 @@
 import { getSession } from '@/lib/auth/session';
 import { db, schema } from '@leadlens/database';
-import { and, desc, eq, gte } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
+import { getBillingOverview } from '@/lib/billing/subscriptions';
 import {
   Activity,
   ArrowRight,
@@ -26,11 +27,7 @@ const shortDate = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numer
 const activityDate = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 
 async function getDashboardData(orgId: string) {
-  const monthStart = new Date();
-  monthStart.setUTCDate(1);
-  monthStart.setUTCHours(0, 0, 0, 0);
-
-  const [profile, services, icp, caseStudies, topReports, jobs, monthlyJobs] = await Promise.all([
+  const [profile, services, icp, caseStudies, topReports, jobs, billing] = await Promise.all([
     db.query.agencyProfiles.findFirst({ where: eq(schema.agencyProfiles.organizationId, orgId) }),
     db.query.agencyServices.findMany({ where: eq(schema.agencyServices.organizationId, orgId) }),
     db.query.idealCustomerProfiles.findFirst({ where: eq(schema.idealCustomerProfiles.organizationId, orgId) }),
@@ -47,16 +44,13 @@ async function getDashboardData(orgId: string) {
       limit: 6,
       with: { prospect: true },
     }),
-    db.query.analysisJobs.findMany({
-      columns: { id: true },
-      where: and(eq(schema.analysisJobs.organizationId, orgId), gte(schema.analysisJobs.createdAt, monthStart)),
-    }),
+    getBillingOverview(orgId),
   ]);
 
   const completeness = [profile, services.length > 0, icp, caseStudies.length > 0]
     .filter(Boolean).length * 25;
 
-  return { profile, services, icp, caseStudies, topReports, jobs, monthlyUsage: monthlyJobs.length, completeness };
+  return { profile, services, icp, caseStudies, topReports, jobs, billing, completeness };
 }
 
 function statusTone(status: string) {
@@ -70,8 +64,9 @@ export default async function DashboardPage() {
   const session = await getSession();
   if (!session?.organization) redirect('/login');
 
-  const { profile, completeness, topReports, services, jobs, monthlyUsage, icp, caseStudies } = await getDashboardData(session.organization.id);
-  const monthlyLimit = Math.max(1, Number(process.env.MONTHLY_ANALYSIS_LIMIT ?? 25));
+  const { profile, completeness, topReports, services, jobs, billing, icp, caseStudies } = await getDashboardData(session.organization.id);
+  const monthlyUsage = billing.analysesUsed;
+  const monthlyLimit = billing.analysisLimit;
   const quotaPercent = Math.min(100, Math.round((monthlyUsage / monthlyLimit) * 100));
   const activeJobs = jobs.filter((job) => ['queued', 'processing'].includes(job.status));
   const highPotential = topReports.filter((report) => (report.overallScore ?? 0) >= 75).length;

@@ -3,9 +3,10 @@
 import { getSession } from '@/lib/auth/session';
 import { db, schema } from '@leadlens/database';
 import { validateAndNormalizeUrl } from '@leadlens/analysis';
-import { eq, and, inArray, gte, count } from 'drizzle-orm';
+import { eq, and, inArray, lt, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { dispatchAnalysisJob } from '@/lib/analysis/dispatch';
+import { getOrganizationEntitlement } from '@/lib/billing/subscriptions';
 
 const ComposerSchema = z.object({
   url: z.string().url(),
@@ -43,16 +44,6 @@ export async function submitAnalysis(data: z.infer<typeof ComposerSchema>) {
 
   const { url, force, ...rest } = parsed.data;
   const organizationId = session.organization.id;
-  const periodStart = new Date();
-  periodStart.setUTCDate(1);
-  periodStart.setUTCHours(0, 0, 0, 0);
-  const [{ analysesThisPeriod }] = await db.select({ analysesThisPeriod: count() })
-    .from(schema.analysisJobs)
-    .where(and(eq(schema.analysisJobs.organizationId, organizationId), gte(schema.analysisJobs.createdAt, periodStart)));
-  const monthlyLimit = Number(process.env.MONTHLY_ANALYSIS_LIMIT || 25);
-  if (analysesThisPeriod >= monthlyLimit) {
-    throw new Error(`Monthly analysis limit reached (${monthlyLimit}). Contact support to increase the alpha limit.`);
-  }
 
   const [ownedServices, ownedCaseStudies] = await Promise.all([
     db.select({ id: schema.agencyServices.id })
@@ -111,56 +102,100 @@ export async function submitAnalysis(data: z.infer<typeof ComposerSchema>) {
           ),
           orderBy: (jobs, { desc }) => [desc(jobs.createdAt)],
         });
-        return { isDuplicate: true, existingId: recentProspects[0].id, existingAnalysisId: existingJob?.id };
+        return { isDuplicate: true as const, existingId: recentProspects[0].id, existingAnalysisId: existingJob?.id };
       }
     }
   } catch (e) {
     // If URL parsing fails here, it's invalid anyway
   }
 
-  // 3. Insert Prospect
-  const [prospect] = await db.insert(schema.prospects).values({
-    organizationId: session.organization.id,
-    createdBy: session.user.id,
-    websiteUrl: normalizedUrl,
-    normalizedDomain: new URL(normalizedUrl).hostname,
-    companyName: rest.companyName || new URL(normalizedUrl).hostname,
-    contactName: rest.contactName || null,
-    contactRole: rest.contactRole || null,
-    contactEmail: rest.contactEmail || null,
-    contactProfileUrl: rest.contactProfileUrl || null,
-    notes: [rest.reason, rest.notes].filter(Boolean).join('\n\n') || null,
-    status: 'queued', // Mark as queued to wait for worker
-  }).returning();
+  const normalizedCompetitors = rest.competitors.length > 0
+    ? await Promise.all(rest.competitors.map(validateAndNormalizeUrl))
+    : [];
+  const entitlement = await getOrganizationEntitlement(organizationId);
 
-  // 4. Create Analysis Job
-  if (rest.competitors.length > 0) {
-    const normalizedCompetitors = await Promise.all(rest.competitors.map(validateAndNormalizeUrl));
-    await db.insert(schema.prospectCompetitors).values(normalizedCompetitors.map((competitorUrl) => ({
+  // Reserve allowance and create the prospect/job under the same per-org
+  // transaction. The advisory lock prevents parallel submissions from both
+  // claiming the final available analysis.
+  const created = await db.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${organizationId}, 0))`);
+
+    await tx.insert(schema.organizationUsagePeriods).values({
+      organizationId,
+      periodStart: entitlement.periodStart,
+      periodEnd: entitlement.periodEnd,
+      planKey: entitlement.planKey,
+      analysisLimit: entitlement.analysisLimit,
+      analysesUsed: sql<number>`(
+        select count(*)::int from ${schema.analysisJobs}
+        where ${schema.analysisJobs.organizationId} = ${organizationId}
+          and ${schema.analysisJobs.createdAt} >= ${entitlement.periodStart}
+          and ${schema.analysisJobs.createdAt} < ${entitlement.periodEnd}
+      )`,
+    }).onConflictDoUpdate({
+      target: [schema.organizationUsagePeriods.organizationId, schema.organizationUsagePeriods.periodStart],
+      set: {
+        periodEnd: entitlement.periodEnd,
+        planKey: entitlement.planKey,
+        analysisLimit: entitlement.analysisLimit,
+        updatedAt: new Date(),
+      },
+    });
+
+    const [reservation] = await tx.update(schema.organizationUsagePeriods).set({
+      analysesUsed: sql`${schema.organizationUsagePeriods.analysesUsed} + 1`,
+      updatedAt: new Date(),
+    }).where(and(
+      eq(schema.organizationUsagePeriods.organizationId, organizationId),
+      eq(schema.organizationUsagePeriods.periodStart, entitlement.periodStart),
+      lt(schema.organizationUsagePeriods.analysesUsed, entitlement.analysisLimit),
+    )).returning({ analysesUsed: schema.organizationUsagePeriods.analysesUsed });
+
+    if (!reservation) {
+      throw new Error(`PLAN_LIMIT_REACHED: Your ${entitlement.planKey === 'free' ? 'Hobby' : entitlement.planKey} plan includes ${entitlement.analysisLimit} analyses per billing period.`);
+    }
+
+    const [prospect] = await tx.insert(schema.prospects).values({
+      organizationId,
+      createdBy: session.user.id,
+      websiteUrl: normalizedUrl,
+      normalizedDomain: new URL(normalizedUrl).hostname,
+      companyName: rest.companyName || new URL(normalizedUrl).hostname,
+      contactName: rest.contactName || null,
+      contactRole: rest.contactRole || null,
+      contactEmail: rest.contactEmail || null,
+      contactProfileUrl: rest.contactProfileUrl || null,
+      notes: [rest.reason, rest.notes].filter(Boolean).join('\n\n') || null,
+      status: 'queued',
+    }).returning();
+
+    if (normalizedCompetitors.length > 0) {
+      await tx.insert(schema.prospectCompetitors).values(normalizedCompetitors.map((competitorUrl) => ({
+        prospectId: prospect.id,
+        competitorUrl,
+        normalizedDomain: new URL(competitorUrl).hostname,
+      })));
+    }
+
+    const [job] = await tx.insert(schema.analysisJobs).values({
+      organizationId,
       prospectId: prospect.id,
-      competitorUrl,
-      normalizedDomain: new URL(competitorUrl).hostname,
-    })));
-  }
-
-  const [job] = await db.insert(schema.analysisJobs).values({
-    organizationId: session.organization.id,
-    prospectId: prospect.id,
-    createdBy: session.user.id,
-    status: 'queued',
-    requestedOptions: rest,
-  }).returning({ id: schema.analysisJobs.id });
-  await db.insert(schema.usageEvents).values({
-    organizationId,
-    userId: session.user.id,
-    eventName: 'prospect_submitted',
-    properties: { analysisId: job.id, goal: rest.goal, reportDepth: rest.reportDepth },
+      createdBy: session.user.id,
+      status: 'queued',
+      requestedOptions: rest,
+    }).returning({ id: schema.analysisJobs.id });
+    await tx.insert(schema.usageEvents).values({
+      organizationId,
+      userId: session.user.id,
+      eventName: 'prospect_submitted',
+      properties: { analysisId: job.id, goal: rest.goal, reportDepth: rest.reportDepth, billingPlan: entitlement.planKey },
+    });
+    return { prospectId: prospect.id, analysisId: job.id };
   });
 
-  await dispatchAnalysisJob(job.id).catch((dispatchError) => {
-    console.error(`[submit-analysis] Immediate dispatch failed for ${job.id}:`, dispatchError);
+  await dispatchAnalysisJob(created.analysisId).catch((dispatchError) => {
+    console.error(`[submit-analysis] Immediate dispatch failed for ${created.analysisId}:`, dispatchError);
   });
 
-  // Return success
-  return { success: true, prospectId: prospect.id, analysisId: job.id };
+  return { success: true as const, ...created };
 }

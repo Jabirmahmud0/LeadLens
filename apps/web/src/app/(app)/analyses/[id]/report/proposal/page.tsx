@@ -30,15 +30,15 @@ export default async function ReportProposalPage({
   const proposal = report.proposalStarters[0];
 
   return (
-    <div className="flex-1 p-6 lg:p-10 overflow-y-auto bg-neutral-950">
-      <div className="max-w-5xl mx-auto space-y-10">
+    <div className="flex flex-col h-full bg-[#fafdfa]/30 overflow-y-auto scrollbar-thin scrollbar-thumb-[#c8ddcd] scrollbar-track-transparent">
+      <div className="mx-auto w-full max-w-[1400px] px-6 py-6 lg:px-12 lg:py-8">
         
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-light text-white tracking-tight mb-2">
+        <div className="mb-6 border-b border-[#d8e5db]/60 pb-4">
+          <h1 className="text-3xl font-bold tracking-[-0.03em] text-[#10251d] sm:text-4xl mb-2">
             Proposal Starter Outline
           </h1>
-          <p className="text-neutral-400">
+          <p className="text-[16px] leading-relaxed text-[#60766b] max-w-2xl">
             A generated business proposal synthesizing the identified problems and recommended scope.
           </p>
         </div>
@@ -46,8 +46,8 @@ export default async function ReportProposalPage({
         {proposal ? (
           <ClientProposal proposal={proposal} />
         ) : (
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-10 text-center">
-            <p className="text-neutral-500">No proposal starter generated for this report.</p>
+          <div className="rounded-[1.25rem] border border-[#d8e5db]/60 bg-white p-12 text-center shadow-sm">
+            <p className="text-[14px] text-[#60766b]">No proposal starter generated for this report.</p>
           </div>
         )}
 

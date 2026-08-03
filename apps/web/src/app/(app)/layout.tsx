@@ -3,6 +3,7 @@ import { ClientSidebarWrapper } from './ClientSidebarWrapper';
 import { getSession } from '@/lib/auth/session';
 import { isPlatformAdmin } from '@/lib/auth/admin';
 import { redirect } from 'next/navigation';
+import { PendingPlanRedirect } from './PendingPlanRedirect';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -28,6 +29,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         />
       }
     >
+      <PendingPlanRedirect
+        pendingPlan={session.organization.pendingBillingPlan}
+        completed={session.organization.billingOnboardingCompleted}
+      />
       {children}
     </ClientAppShell>
   );

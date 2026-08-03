@@ -9,7 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, ArrowRight, ShieldCheck } from 'lucide-react';
 
 const resetPasswordSchema = z.object({
-  password: z.string().min(12, 'Password must be at least 12 characters'),
+  password: z.string().min(15, 'Use at least 15 characters').max(128, 'Password must be 128 characters or fewer'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don&apos;t match",
@@ -111,6 +111,8 @@ function ResetPasswordForm() {
             <input
               id="password"
               type="password"
+              minLength={15}
+              maxLength={128}
               placeholder="••••••••"
               className="block w-full appearance-none rounded-xl border border-neutral-800 bg-neutral-950/50 px-4 py-3 text-neutral-100 placeholder-neutral-600 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors sm:text-sm"
               {...register('password')}
@@ -127,6 +129,8 @@ function ResetPasswordForm() {
             <input
               id="confirmPassword"
               type="password"
+              minLength={15}
+              maxLength={128}
               placeholder="••••••••"
               className="block w-full appearance-none rounded-xl border border-neutral-800 bg-neutral-950/50 px-4 py-3 text-neutral-100 placeholder-neutral-600 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors sm:text-sm"
               {...register('confirmPassword')}

@@ -4,8 +4,8 @@ import { db, schema } from '@leadlens/database';
 import { getSession } from '@/lib/auth/session';
 import { isPlatformAdmin, PLATFORM_OWNER_ROLE } from '@/lib/auth/admin';
 import {
-  Activity, AlertTriangle, Building2, CheckCircle2, Gauge,
-  KeyRound, MessageSquareText, ShieldAlert, Sparkles,
+  Activity, AlertTriangle, Building2, CheckCircle2,
+  CreditCard, KeyRound, MessageSquareText, ShieldAlert, Sparkles,
   TrendingUp, UserPlus, Users, Zap
 } from 'lucide-react';
 import Link from 'next/link';
@@ -63,6 +63,17 @@ export default async function AdminPage() {
     { label: 'Provider Failures', value: failedAiRuns.length, icon: Sparkles, color: 'orange', href: '/admin/provider-failures', critical: failedAiRuns.length > 0 },
     { label: 'Security Events', value: securityEvents.length, icon: ShieldAlert, color: 'red', href: '/admin/security-events', critical: false },
     { label: 'Feedback Entries', value: feedback.length, icon: MessageSquareText, color: 'blue', href: '/admin/feedback', critical: false },
+  ];
+
+  const operationLinks = [
+    { label: 'Users', description: 'Suspend, restore, or remove platform accounts.', href: '/admin/users', icon: Users, tone: 'emerald' },
+    { label: 'Organizations', description: 'Review and control workspace access.', href: '/admin/organizations', icon: Building2, tone: 'teal' },
+    { label: 'Billing operations', description: 'Inspect subscriptions and Stripe webhook health.', href: '/admin/billing', icon: CreditCard, tone: 'amber' },
+    { label: 'Security audit', description: 'Trace privileged and account-level activity.', href: '/admin/security-events', icon: ShieldAlert, tone: 'rose' },
+    { label: 'Failed analyses', description: 'Investigate jobs that did not complete.', href: '/admin/failed-jobs', icon: AlertTriangle, tone: 'orange' },
+    { label: 'Provider reliability', description: 'Review AI provider and model failures.', href: '/admin/provider-failures', icon: Sparkles, tone: 'violet' },
+    { label: 'Usage ledger', description: 'Follow platform activity and adoption events.', href: '/admin/usage-events', icon: Activity, tone: 'blue' },
+    { label: 'Product feedback', description: 'Read feedback submitted from reports.', href: '/admin/feedback', icon: MessageSquareText, tone: 'teal' },
   ];
 
   const colorMap: Record<string, { bg: string; text: string; border: string; pill: string; pillText: string }> = {
@@ -203,6 +214,11 @@ export default async function AdminPage() {
         </section>
 
         {/* ── Platform Owners + Grant Access ── */}
+        <section>
+          <div className="mb-3 flex items-end justify-between gap-4"><div><p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#789084]">Operations Console</p><h2 className="mt-1 text-xl font-bold text-[#0f2318]">Platform controls and diagnostics</h2></div><span className="hidden text-xs text-[#91a49a] sm:block">Every privileged mutation is audited</span></div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{operationLinks.map(({ label, description, href, icon: Icon, tone }) => { const c = colorMap[tone]; return <Link key={href} href={href} className="group rounded-2xl border border-white bg-white p-5 shadow-[0_8px_24px_-20px_rgba(20,83,45,.3)] transition-all hover:-translate-y-0.5 hover:border-emerald-100 hover:shadow-[0_14px_34px_-24px_rgba(20,83,45,.45)]"><div className={`grid size-9 place-items-center rounded-xl ${c.bg} ${c.text}`}><Icon className="size-4" /></div><p className="mt-4 text-sm font-bold text-[#16352a]">{label}</p><p className="mt-1 text-xs leading-5 text-[#789084]">{description}</p><span className="mt-4 inline-flex text-[10px] font-bold uppercase tracking-wide text-emerald-700 transition-transform group-hover:translate-x-1">Open →</span></Link>; })}</div>
+        </section>
+
         <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
 
           {/* Platform Owners List */}

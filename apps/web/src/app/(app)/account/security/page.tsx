@@ -21,8 +21,8 @@ export default async function SecurityPage() {
     <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 sm:p-8">
       <div className="mb-6 flex items-center gap-3"><Key className="h-5 w-5 text-neutral-400" /><div><h2 className="text-xl text-white">Password</h2><p className="text-sm text-neutral-400">Changing it signs out every other device.</p></div></div>
       <form action={changePassword} className="max-w-md space-y-4">
-        <label className="block text-sm text-neutral-300">Current password<input name="currentPassword" type="password" autoComplete="current-password" required className="mt-2 w-full rounded-lg border border-neutral-800 bg-neutral-950 px-4 py-2.5 text-white" /></label>
-        <label className="block text-sm text-neutral-300">New password<input name="newPassword" type="password" autoComplete="new-password" minLength={12} required className="mt-2 w-full rounded-lg border border-neutral-800 bg-neutral-950 px-4 py-2.5 text-white" /></label>
+        <label className="block text-sm text-neutral-300">Current password<input name="currentPassword" type="password" autoComplete="current-password" maxLength={128} required className="mt-2 w-full rounded-lg border border-neutral-800 bg-neutral-950 px-4 py-2.5 text-white" /></label>
+        <label className="block text-sm text-neutral-300">New password<input name="newPassword" type="password" autoComplete="new-password" minLength={15} maxLength={128} required className="mt-2 w-full rounded-lg border border-neutral-800 bg-neutral-950 px-4 py-2.5 text-white" /></label>
         <button className="rounded-lg bg-white px-5 py-2.5 text-sm font-medium text-black">Update password</button>
       </form>
     </section>

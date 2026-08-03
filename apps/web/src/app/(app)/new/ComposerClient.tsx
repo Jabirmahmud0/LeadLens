@@ -82,7 +82,7 @@ export function ComposerClient({ services, caseStudies }: { services: { id: stri
         specificPages: formData.specificPages.filter(page => page.trim() !== ''),
         force: true,
       } as Parameters<typeof submitAnalysis>[0]);
-      if (result.success && result.analysisId) {
+      if ('success' in result && result.success && result.analysisId) {
         toast.success('New analysis started');
         router.push(`/analyses/${result.analysisId}`);
       }

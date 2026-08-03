@@ -91,20 +91,19 @@ export default async function AnalysesPage({ searchParams }: { searchParams: Pro
                   )}
                 </div>
                 
-                {/* Content */}
                 <div className="group rounded-2xl border border-[#dce7df] bg-white p-5 shadow-[0_18px_48px_-42px_rgba(20,83,45,0.55)] transition-all hover:-translate-y-0.5 hover:border-[#bcd5c2] hover:shadow-sm">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Badge variant={a.status === 'completed' ? 'success' : a.status === 'failed' ? 'error' : 'info'}>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <Badge variant={a.status === 'completed' ? 'success' : a.status === 'failed' ? 'error' : 'info'} className="shadow-none px-2 py-0.5">
                           {a.status === 'completed' ? 'Analysis Completed' : a.status === 'failed' ? 'Analysis Failed' : 'Analysis Started'}
                         </Badge>
-                        <span className="text-xs text-neutral-500">{new Date(a.createdAt).toLocaleString()}</span>
+                        <span className="text-[12px] font-medium text-[#8ca096]">{new Date(a.createdAt).toLocaleString()}</span>
                       </div>
-                      <h4 className="text-white font-medium text-base truncate mt-1">
-                        {a.prospect?.companyName || a.prospect?.normalizedDomain || 'Unknown'}
+                      <h4 className="text-[#10251d] font-bold text-[16px] truncate">
+                        {a.prospect?.companyName || a.prospect?.normalizedDomain || 'Unknown Prospect'}
                       </h4>
-                      <p className="text-sm text-neutral-400 mt-1">
+                      <p className="text-[13.5px] text-[#60766b] mt-1 leading-relaxed">
                         {a.status === 'completed' 
                           ? `Successfully extracted technical issues and generated Opportunity Brief.`
                           : a.status === 'failed' 
@@ -113,13 +112,19 @@ export default async function AnalysesPage({ searchParams }: { searchParams: Pro
                       </p>
                     </div>
                     
-                    {a.status === 'completed' && (
+                    {a.status === 'completed' ? (
                       <a 
                         href={`/analyses/${a.id}/report`}
-                        className="p-2 text-neutral-500 hover:text-white rounded-lg hover:bg-neutral-800 transition-colors shrink-0 bg-neutral-800/50"
-                        title="View Report"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-[#16352a] hover:bg-[#204a3b] text-white rounded-xl text-[12px] font-bold transition-all shadow-sm shrink-0"
                       >
-                        <Download className="w-4 h-4" />
+                        View Report
+                      </a>
+                    ) : (
+                      <a 
+                        href={`/analyses/${a.id}`}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-[#e7f2e9] hover:bg-[#c8ddcd] text-[#16352a] rounded-xl text-[12px] font-bold transition-all shrink-0"
+                      >
+                        View Status
                       </a>
                     )}
                   </div>

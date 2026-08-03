@@ -57,6 +57,41 @@
       "when": 1785114658867,
       "tag": "0007_platform_roles",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1785344986490,
+      "tag": "0008_subscription_billing",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1785345452323,
+      "tag": "0009_billing_usage_constraints",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1785433818309,
+      "tag": "0010_quiet_magma",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1785434925409,
+      "tag": "0011_worthless_captain_marvel",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1785442572495,
+      "tag": "0012_unique_the_executioner",
+      "breakpoints": true
     }
   ]
 }

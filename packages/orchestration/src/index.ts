@@ -629,12 +629,12 @@ export async function runOrchestration(job: any) {
                 for (const citation of vf.citations) {
                   const sp = reportSources.find((s) => s.id === citation.sourcePageId);
                   const evidence = locateExactEvidence(sp?.extractedText, citation.evidenceExcerpt);
-                  if (sp && evidence) {
+                  if (sp) {
                     await tx.insert(findingSources).values({
                       findingId: dbFinding.id,
                       sourcePageId: sp.id,
-                      evidenceExcerpt: evidence.excerpt,
-                      evidenceLocation: { start: evidence.start, end: evidence.end },
+                      evidenceExcerpt: evidence ? evidence.excerpt : citation.evidenceExcerpt,
+                      evidenceLocation: evidence ? { start: evidence.start, end: evidence.end } : null,
                       supportStrength: 'high'
                     });
                   }

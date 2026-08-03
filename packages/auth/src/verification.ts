@@ -39,6 +39,11 @@ export async function verifyEmailToken(token: string): Promise<boolean> {
     return false;
   }
 
+  const [activeUser] = await db.select({ id: schema.users.id })
+    .from(schema.users)
+    .where(and(eq(schema.users.id, verificationToken.userId), eq(schema.users.status, 'active')));
+  if (!activeUser) return false;
+
   await db.transaction(async (tx) => {
     await tx.update(schema.emailVerificationTokens).set({ usedAt: new Date() }).where(eq(schema.emailVerificationTokens.id, verificationToken.id));
     await tx.update(schema.users).set({ emailVerifiedAt: new Date() }).where(eq(schema.users.id, verificationToken.userId));

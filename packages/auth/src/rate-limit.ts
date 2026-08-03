@@ -4,8 +4,8 @@ import { hashToken } from './session';
 
 export async function checkRateLimit(
   ip: string,
-  email: string | null,
-  action: 'login' | 'register' | 'password_reset',
+  identifier: string | null,
+  action: 'login' | 'register' | 'password_reset' | 'billing_checkout' | 'billing_portal',
   limit: number,
   windowMinutes: number
 ): Promise<boolean> {
@@ -16,7 +16,7 @@ export async function checkRateLimit(
   // Record attempt
   await db.insert(schema.authAttempts).values({
     ipHash,
-    email: email ? email.toLowerCase() : null,
+    email: identifier ? identifier.toLowerCase() : null,
     action,
   });
 
@@ -36,18 +36,18 @@ export async function checkRateLimit(
   }
 
   // Count recent attempts by email for this action
-  if (email) {
-    const emailResult = await db.select()
+  if (identifier) {
+    const identifierResult = await db.select()
       .from(schema.authAttempts)
       .where(
         and(
-          eq(schema.authAttempts.email, email.toLowerCase()),
+        eq(schema.authAttempts.email, identifier.toLowerCase()),
           eq(schema.authAttempts.action, action),
           gt(schema.authAttempts.createdAt, since)
         )
       );
 
-    if (emailResult.length > limit) {
+    if (identifierResult.length > limit) {
       return false;
     }
   }
@@ -59,4 +59,6 @@ export const RATE_LIMITS = {
   login: { limit: 10, windowMinutes: 15 },
   register: { limit: 5, windowMinutes: 60 },
   passwordReset: { limit: 3, windowMinutes: 60 },
+  billingCheckout: { limit: 8, windowMinutes: 15 },
+  billingPortal: { limit: 10, windowMinutes: 15 },
 };
