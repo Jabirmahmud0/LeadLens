@@ -10,6 +10,7 @@ export function SettingsNav() {
 
   const tabs = [
     { label: 'Profile Dossier', href: '/settings' },
+    { label: 'Agency Details', href: '/settings/profile' },
     { label: 'Services', href: '/settings/services' },
     { label: 'Case Studies', href: '/settings/case-studies' },
   ];
