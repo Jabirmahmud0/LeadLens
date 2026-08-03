@@ -76,10 +76,21 @@ export async function saveAgencyServices(data: Array<z.infer<typeof serviceSchem
     }
     const current = await tx.select({ id: schema.agencyServices.id }).from(schema.agencyServices).where(eq(schema.agencyServices.organizationId, orgId));
     const removedIds = current.map(item => item.id).filter(id => !retainedIds.includes(id));
-    if (removedIds.length) await tx.update(schema.agencyServices).set({ isActive: false, updatedAt: new Date() }).where(inArray(schema.agencyServices.id, removedIds));
+    if (removedIds.length) await tx.delete(schema.agencyServices).where(inArray(schema.agencyServices.id, removedIds));
   });
   revalidatePath('/onboarding');
+  revalidatePath('/settings');
   redirect('/onboarding/icp');
+}
+
+export async function deleteAgencyService(slug: string) {
+  const session = await getSession();
+  if (!session || !session.organization) throw new Error('Unauthorized');
+  await db.delete(schema.agencyServices).where(
+    and(eq(schema.agencyServices.organizationId, session.organization.id), eq(schema.agencyServices.slug, slug))
+  );
+  revalidatePath('/onboarding');
+  revalidatePath('/settings');
 }
 
 const icpSchema = z.object({

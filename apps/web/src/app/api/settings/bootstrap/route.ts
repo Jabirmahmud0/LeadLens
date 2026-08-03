@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { db, schema } from '@leadlens/database';
 import { getSession } from '@/lib/auth/session';
 
@@ -8,7 +8,7 @@ export async function GET() {
   if (!session?.organization) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const organizationId = session.organization.id;
   const [services, caseStudies, profile, icp] = await Promise.all([
-    db.query.agencyServices.findMany({ where: eq(schema.agencyServices.organizationId, organizationId) }),
+    db.query.agencyServices.findMany({ where: and(eq(schema.agencyServices.organizationId, organizationId), eq(schema.agencyServices.isActive, true)) }),
     db.query.caseStudies.findMany({ where: eq(schema.caseStudies.organizationId, organizationId) }),
     db.query.agencyProfiles.findFirst({ where: eq(schema.agencyProfiles.organizationId, organizationId) }),
     db.query.idealCustomerProfiles.findFirst({ where: eq(schema.idealCustomerProfiles.organizationId, organizationId) }),

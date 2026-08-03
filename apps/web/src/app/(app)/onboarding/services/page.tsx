@@ -5,7 +5,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Loader2, ArrowRight, Plus, Trash2, GripVertical, Copy, Tag, CheckCircle2 } from 'lucide-react';
-import { saveAgencyServices } from '../actions';
+import { saveAgencyServices, deleteAgencyService } from '../actions';
 
 const serviceSchema = z.object({
   name: z.string().min(2, 'Name is required'),
@@ -74,6 +74,15 @@ export default function ServicesStep() {
     }
   };
 
+  const handleDelete = async (index: number) => {
+    const name = watch(`services.${index}.name` as const) ?? '';
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    remove(index);
+    if (slug) {
+      try { await deleteAgencyService(slug); } catch { /* new service not in DB yet, ignore */ }
+    }
+  };
+
   const handleDuplicate = (index: number) => {
     const currentValues = watch(`services.${index}` as const);
     append({ ...currentValues, name: `${currentValues.name} (Copy)` });
@@ -127,7 +136,7 @@ export default function ServicesStep() {
                     <button type="button" onClick={() => handleDuplicate(index)} className="p-1.5 text-neutral-500 hover:text-white rounded-md hover:bg-neutral-800" title="Duplicate">
                       <Copy className="w-4 h-4" />
                     </button>
-                    <button type="button" onClick={() => remove(index)} className="p-1.5 text-neutral-500 hover:text-red-400 rounded-md hover:bg-neutral-800" title="Delete">
+                    <button type="button" onClick={() => handleDelete(index)} className="p-1.5 text-neutral-500 hover:text-red-400 rounded-md hover:bg-neutral-800" title="Delete">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
