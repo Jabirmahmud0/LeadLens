@@ -1,11 +1,68 @@
+# Dependencies and package-manager caches
 node_modules/
-dist/
-.next/
-.env
-.env.local
-.env.*.local
-coverage/
-.DS_Store
+.pnpm-store/
+.pnp
+.pnp.*
 
-.vercel
+# Local environment and secrets
+.env
+.env.*
 .env*.local
+!.env.example
+.sentryclirc
+
+# Framework and build output
+.next/
+out/
+build/
+dist/
+.turbo/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+
+# Tests and coverage
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+
+# Logs and runtime files
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.pid
+*.pid.lock
+
+# Local development helpers
+dev.bat
+
+# Temporary files and caches
+.cache/
+tmp/
+temp/
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Editor settings
+.idea/
+.vscode/
+*.code-workspace
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Local certificates and keys
+*.pem
+*.key
+*.p12
+*.pfx
