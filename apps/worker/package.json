@@ -4,7 +4,7 @@
   "private": true,
   "main": "dist/index.js",
   "scripts": {
-    "dev": "tsx --env-file=.env watch src/index.ts",
+    "dev": "tsx watch --env-file=.env src/index.ts",
     "build": "tsc --noEmit",
     "start": "tsx --env-file=.env src/index.ts",
     "lint": "eslint \"src/**/*.ts\"",

@@ -4,8 +4,9 @@
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "dev": "pnpm --filter web dev & pnpm --filter worker dev",
+    "dev": "pnpm --filter web --filter worker --parallel dev",
     "build": "pnpm -r build",
+    "start": "pnpm --filter web --filter worker --parallel start",
     "lint": "eslint apps packages --max-warnings=0",
     "typecheck": "pnpm -r typecheck",
     "test": "vitest run",

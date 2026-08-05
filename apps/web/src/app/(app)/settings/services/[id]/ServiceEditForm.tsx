@@ -17,7 +17,8 @@ const schema = z.object({
   isActive: z.boolean().optional(),
 });
 
-type FormValues = z.infer<typeof schema>;
+type FormInput = z.input<typeof schema>;
+type FormValues = z.output<typeof schema>;
 
 export type ServiceFormInitialValues = {
   id: string;
@@ -36,7 +37,7 @@ export function ServiceEditForm({ initial }: { initial: ServiceFormInitialValues
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, formState: { errors } } = useForm<FormInput, unknown, FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: initial.name,
