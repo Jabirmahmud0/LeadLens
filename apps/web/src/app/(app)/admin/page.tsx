@@ -18,8 +18,12 @@ export default async function AdminPage() {
   if (!session?.user || !(await isPlatformAdmin(session.user.id))) notFound();
 
   const [users, organizations, failedJobs, failedAiRuns, usage, feedback, securityEvents, aiTotals, owners] = await Promise.all([
-    db.query.users.findMany({ columns: { id: true, email: true, status: true, createdAt: true }, orderBy: [desc(schema.users.createdAt)], limit: 50 }),
-    db.query.organizations.findMany({ orderBy: [desc(schema.organizations.createdAt)], limit: 50 }),
+    db.selectDistinct({ id: schema.users.id })
+      .from(schema.users)
+      .innerJoin(schema.organizationMembers, eq(schema.organizationMembers.userId, schema.users.id))
+      .innerJoin(schema.organizations, eq(schema.organizationMembers.organizationId, schema.organizations.id))
+      .where(eq(schema.organizations.billingOnboardingCompleted, true)),
+    db.query.organizations.findMany({ where: eq(schema.organizations.billingOnboardingCompleted, true), orderBy: [desc(schema.organizations.createdAt)], limit: 50 }),
     db.query.analysisJobs.findMany({ where: eq(schema.analysisJobs.status, 'failed'), orderBy: [desc(schema.analysisJobs.updatedAt)], limit: 50 }),
     db.query.aiRuns.findMany({ where: eq(schema.aiRuns.status, 'failed'), orderBy: [desc(schema.aiRuns.createdAt)], limit: 50 }),
     db.query.usageEvents.findMany({ orderBy: [desc(schema.usageEvents.createdAt)], limit: 100 }),

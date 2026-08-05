@@ -17,7 +17,7 @@ export default async function AdminUsersPage() {
 
   const [users, memberships] = await Promise.all([
     db.query.users.findMany({
-      columns: { id: true, email: true, fullName: true, status: true, createdAt: true, lastLoginAt: true },
+      columns: { id: true, email: true, emailVerifiedAt: true, fullName: true, status: true, createdAt: true, lastLoginAt: true },
       orderBy: [desc(schema.users.createdAt)],
     }),
     db.select({
@@ -31,6 +31,7 @@ export default async function AdminUsersPage() {
       stripePlanKey: schema.organizationSubscriptions.planKey,
       subscriptionStatus: schema.organizationSubscriptions.status,
       subscriptionPeriodEnd: schema.organizationSubscriptions.currentPeriodEnd,
+      billingOnboardingCompleted: schema.organizations.billingOnboardingCompleted,
     }).from(schema.organizationMembers)
       .innerJoin(schema.organizations, eq(schema.organizationMembers.organizationId, schema.organizations.id))
       .leftJoin(schema.organizationSubscriptions, eq(schema.organizationSubscriptions.organizationId, schema.organizations.id))
@@ -40,6 +41,7 @@ export default async function AdminUsersPage() {
   const firstWorkspaceByUser = new Map<string, (typeof memberships)[number]>();
   const workspaceCountByUser = new Map<string, number>();
   for (const membership of memberships) {
+    if (!membership.billingOnboardingCompleted) continue;
     workspaceCountByUser.set(membership.userId, (workspaceCountByUser.get(membership.userId) ?? 0) + 1);
     if (!firstWorkspaceByUser.has(membership.userId)) firstWorkspaceByUser.set(membership.userId, membership);
   }
@@ -47,7 +49,7 @@ export default async function AdminUsersPage() {
   // This is a server-request snapshot used to resolve expiring entitlements.
   // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
-  const userRows = users.map((user) => {
+  const userRows = users.filter((user) => firstWorkspaceByUser.has(user.id)).map((user) => {
     const workspace = firstWorkspaceByUser.get(user.id);
     const overridePlan = workspace?.adminPlanOverride;
     const overrideActive = (overridePlan === 'free' || overridePlan === 'solo' || overridePlan === 'agency')

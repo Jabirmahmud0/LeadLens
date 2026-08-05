@@ -42,15 +42,39 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Too many registration attempts. Please try again later.' }, { status: 429 });
     }
 
-    // Check if user exists
+    // A registration record is created before email verification. Let an active,
+    // unverified user resume that flow instead of trapping the email as a duplicate.
     const existingUser = await db.select().from(schema.users).where(eq(schema.users.email, email));
     if (existingUser.length > 0) {
+      const user = existingUser[0];
+      if (user.status === 'active' && !user.emailVerifiedAt) {
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const verifyToken = await createVerificationToken(user.id);
+        try {
+          await sendVerificationEmail(user.email, verifyToken, baseUrl);
+        } catch (emailError) {
+          console.error('Registration resumed but verification email failed:', emailError);
+        }
+
+        try {
+          await db.insert(schema.auditLogs).values({
+            userId: user.id,
+            action: 'registration_verification_resent',
+            ipHash: hashToken(ip),
+          });
+        } catch (auditError) {
+          console.error('Unable to write resumed registration audit:', auditError);
+        }
+
+        return NextResponse.json({ success: true });
+      }
+
       try {
         await db.insert(schema.auditLogs).values({
-          userId: existingUser[0].id,
+          userId: user.id,
           action: 'registration_blocked_existing_account',
           ipHash: hashToken(ip),
-          details: { accountStatus: existingUser[0].status },
+          details: { accountStatus: user.status },
         });
       } catch (auditError) {
         console.error('Unable to write blocked registration audit:', auditError);

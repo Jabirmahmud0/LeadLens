@@ -9,6 +9,7 @@ import type { BillingPlanKey } from '@leadlens/shared';
 type User = {
   id: string;
   email: string;
+  emailVerifiedAt: Date | null;
   fullName: string | null;
   status: string;
   createdAt: Date;
@@ -119,11 +120,12 @@ export function UserTable({ users, currentUserId }: { users: User[], currentUser
                 </td>
                 <td className="px-6 py-4">
                   <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${
+                    user.status === 'active' && !user.emailVerifiedAt ? 'bg-sky-50 text-sky-700' :
                     user.status === 'active' ? 'bg-emerald-50 text-emerald-700' :
                     user.status === 'suspended' ? 'bg-amber-50 text-amber-700' :
                     'bg-rose-50 text-rose-700'
                   }`}>
-                    {user.status}
+                    {user.status === 'active' && !user.emailVerifiedAt ? 'Pending verification' : user.status}
                   </span>
                 </td>
                 <td className="min-w-[260px] px-6 py-4">

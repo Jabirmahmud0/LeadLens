@@ -1,4 +1,4 @@
-import { desc } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import { db, schema } from '@leadlens/database';
 import { getSession } from '@/lib/auth/session';
@@ -14,6 +14,7 @@ export default async function AdminOrgsPage() {
   if (!session?.user || !(await isPlatformAdmin(session.user.id))) notFound();
 
   const orgs = await db.query.organizations.findMany({
+    where: eq(schema.organizations.billingOnboardingCompleted, true),
     orderBy: [desc(schema.organizations.createdAt)],
     limit: 100,
   });
